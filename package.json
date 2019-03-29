@@ -2,16 +2,30 @@
   "name": "gosafe-front",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
   "dependencies": {
+    "@material-ui/core": "^3.9.3",
+    "@material-ui/icons": "^3.0.2",
+    "cordova-android": "^8.0.0",
+    "cordova-plugin-badge": "^0.8.8",
+    "cordova-plugin-device": "^2.0.2",
+    "cordova-plugin-local-notification": "^0.9.0-beta.2",
+    "cordova-plugin-whitelist": "1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "2.1.8"
+    "react-router": "^5.0.0",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "2.1.8",
+    "typescript": "^3.3.4000"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "npm run remove:www && react-scripts start",
+    "build": "npm run remove:www && react-scripts build",
+    "build:cordova": "npm run remove:www && react-scripts build && cp -f -d -r build/* www",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "npm run remove:www && react-scripts eject",
+    "remove:www": "if exist www rm -drf www/*",
+    "move": "cp -f -d -r build/* www"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -21,5 +35,13 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {}
+    },
+    "platforms": [
+      "android"
+    ]
+  }
 }
