@@ -1,0 +1,107 @@
+<html>
+<head>
+
+</head>
+<body>
+    
+    <div id='map' style='height:100%'>
+
+    </div>
+
+</body>
+<script>
+
+    var data = {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'properties': {
+                    'crimeRate': 0.0123,
+                    'suburb': 'CAULFIELD EAST',
+                },
+                'geometry': { 'type': 'Polygon', 'coordinates': [[[145.04015202, -37.87510781], [145.04501901, -37.87603308], [145.04656539, -37.87701487], [145.04963157, -37.88102006], [145.04612801, -37.88727403], [145.03815897, -37.88628199], [145.03460303, -37.88139297], [145.03544496, -37.87685503], [145.03940597, -37.87691397], [145.04015202, -37.87510781]]] }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'suburb': 'CAULFIELD',
+                    'crimeRate': 0.0502,
+                },
+                'geometry': { 'type': 'Polygon', 'coordinates': [[[145.01631003, -37.87915702], [145.02983704, -37.88085404], [145.03460303, -37.88139297], [145.03815897, -37.88628199], [145.03765696, -37.88887803], [145.01494298, -37.88603402], [145.01631003, -37.87915702]]] }
+            }
+        ],
+    };
+
+
+    var map
+
+    function displayCrime(map,data){
+        console.log('dixplay crime rate')
+        console.log(map);
+        console.log(data)
+        //This is an example
+        //Write your code here to display data on map
+        map.data.addGeoJson(data)
+        map.data.setStyle(function (feature) {
+            console.log('set style')
+            console.log(feature)
+            console.log(feature.getProperty('crimeRate'))
+            if (feature.getProperty('crimeRate') >= 0.01 && feature.getProperty('crimeRate') <= 0.03) {
+                console.log('set low')
+                return {
+                    strokeOpacity:0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.3
+                }
+            }
+            else if (feature.getProperty('crimeRate') > 0.03) {
+                console.log('set high')
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.9
+                }
+            }
+        });
+
+    };
+
+    function clearCrime(map) {
+        //Clear all crime rate from map
+        //write code here
+    }
+
+    function displayHighCrimeOnly(map, data) {
+        //Display high crime places only
+        //remember clear previous data on map
+        //write code here
+    }
+
+    function displayMediumToHighCrime(map, data) {
+        //Display medium to  high crime places only
+        //remember clear previous data on map
+        //write code here
+    }
+
+
+
+ 
+
+    function initMap(){
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: -37.877177, lng: 145.040730 },
+            zoom: 15
+        });
+        displayCrime(map,data);
+    };
+
+
+
+
+
+</script>
+<script async defer
+        src='https://maps.googleapis.com/maps/api/js?key=AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0&callback=initMap'>
+</script>
+</html>

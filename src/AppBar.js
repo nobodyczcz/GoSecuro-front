@@ -11,20 +11,37 @@ import Menu from '@material-ui/core/Menu';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
+
 
 const styles = theme => ({
-  root: {
-    width: '100%',
-  },
+    root: {
+        position: 'fixed',
+        left: '3%',
+        top: '5%',
+        zIndex: 1100,
+        width: '94%',
+        height:theme.spacing.unit * 6,
+    },
+    toolbarRoot: {
+        paddingTop: theme.spacing.unit * 0.3,
+        minHeight: theme.spacing.unit * 6,
+        [theme.breakpoints.up('sm')]: {
+            minHeight: theme.spacing.unit * 6,
+        },
+    },
   grow: {
     flexGrow: 1,
   },
-  menuButton: {
+    menuButton: {
+        verticalAlign: 'middle',
     marginLeft: -12,
     marginRight: 20,
   },
@@ -41,32 +58,30 @@ const styles = theme => ({
     '&:hover': {
       backgroundColor: fade(theme.palette.common.white, 0.25),
     },
-    marginRight: theme.spacing.unit * 2,
+    marginRight: theme.spacing.unit * 1,
     marginLeft: 0,
     width: '100%',
     [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing.unit * 3,
+      marginLeft: theme.spacing.unit * 1,
       width: 'auto',
     },
   },
   searchIcon: {
-    width: theme.spacing.unit * 9,
+      width: theme.spacing.unit * 5,
     height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+      justifyContent: 'center',
   },
   inputRoot: {
-    color: 'inherit',
+    color: 'secondary',
     width: '100%',
   },
   inputInput: {
     paddingTop: theme.spacing.unit,
     paddingRight: theme.spacing.unit,
     paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
+    paddingLeft: theme.spacing.unit,
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('md')]: {
@@ -76,11 +91,11 @@ const styles = theme => ({
   sectionDesktop: {
     display: 'none',
     [theme.breakpoints.up('md')]: {
-      display: 'flex',
+      display: 'none',
     },
   },
   sectionMobile: {
-    display: 'flex',
+    display: 'none',
     [theme.breakpoints.up('md')]: {
       display: 'none',
     },
@@ -88,16 +103,50 @@ const styles = theme => ({
 });
 
 class MainBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      anchorEl: null,
-      mobileMoreAnchorEl: null,
-    };
-  
-  }
+    constructor(props) {
+        super(props);
+        if (window.cordova) {
+            window.addEventListener('keyboardDidHide', function () {
+                document.getElementById('searchInput').blur();
+            });
+        }
 
+        this.state = {
+            anchorEl: null,
+            mobileMoreAnchorEl: null,
+            displayBack:this.props.displayBack,
+        };
   
+    }
+
+    setupAutoComplete() {
+        var input = document.getElementById('searchInput');
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var geolocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+            var circle = new window.google.maps.Circle(
+                { center: geolocation, radius: position.coords.accuracy });
+            var options = {
+                bounds: circle.getBounds(),
+                types: ['establishment']
+            };
+            var autocomplete = new window.google.maps.places.Autocomplete(input, options);
+        });
+    };
+
+    componentDidMount() {
+        if (window.google) {
+            this.setupAutoComplete();
+        }
+
+    }
+
+
+    removeFocus() {
+        document.getElementById('searchInput').blur();
+    }
   handleProfileMenuOpen = event => {
     this.setState({ anchorEl: event.currentTarget });
   };
@@ -114,6 +163,17 @@ class MainBar extends React.Component {
   handleMobileMenuClose = () => {
     this.setState({ mobileMoreAnchorEl: null });
   };
+
+    handleSearch = () => {
+        var input = document.getElementById('searchInput');
+        var text = input.value;
+        console.log(text);
+        this.props.handleInputSearch(text);
+    }
+
+    handleClickAway = () => {
+        document.getElementById('searchInput').blur();
+    }
 
   render() {
     const { anchorEl, mobileMoreAnchorEl } = this.state;
@@ -167,56 +227,66 @@ class MainBar extends React.Component {
       </Menu>
     );
 
-    return (
-      <div className={classes.root}>
-        <AppBar position="static">
-          <Toolbar>
-            <IconButton className={classes.menuButton} onClick={this.props.toggleDrawer('left', true)} color="inherit" aria-label="Open drawer">
-              <MenuIcon />
-            </IconButton>
-            <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-              Material-UI
-            </Typography>
-            <div className={classes.search}>
-              <div className={classes.searchIcon}>
-                <SearchIcon />
-              </div>
-              <InputBase
-                placeholder="Search…"
-                classes={{
-                  root: classes.inputRoot,
-                  input: classes.inputInput,
-                }}
-              />
-            </div>
-            <div className={classes.grow} />
-            <div className={classes.sectionDesktop}>
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <MailIcon />
-                </Badge>
-              </IconButton>
-              <IconButton color="inherit">
-                <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              <IconButton
-                aria-owns={isMenuOpen ? 'material-appbar' : undefined}
-                aria-haspopup="true"
-                onClick={this.handleProfileMenuOpen}
-                color="inherit"
-              >
-                <AccountCircle />
-              </IconButton>
-            </div>
-            <div className={classes.sectionMobile}>
-              <IconButton aria-haspopup="true" onClick={this.handleMobileMenuOpen} color="inherit">
-                <MoreIcon />
-              </IconButton>
-            </div>
-          </Toolbar>
-        </AppBar>
+      return (
+          <div>
+              <AppBar position="static" className={classes.root}>
+                  <Toolbar className={classes.toolbarRoot}>
+                      {this.state.displayBack ? 
+                          <IconButton className={classes.menuButton} onClick={this.props.handleBack} color="inherit" aria-label="Back">
+                              <ArrowBack />
+                          </IconButton>
+                          :
+                          <IconButton className={classes.menuButton} onClick={this.props.toggleDrawer('left', true)} color="inherit" aria-label="Open drawer">
+                            <MenuIcon />
+                          </IconButton>
+                      }
+                    
+                    <Typography className={classes.title} variant="h6" color="inherit" noWrap>
+                      GoSafe
+                    </Typography>
+                      <div className={classes.search}>
+                          <ClickAwayListener onClickAway={this.handleClickAway.bind(this)}>
+                              <InputBase
+                                  placeholder="Search…"
+                                  id="searchInput"
+                                  classes={{
+                                      root: classes.inputRoot,
+                                      input: classes.inputInput,
+                                  }}
+                              />
+                          </ClickAwayListener>
+                      </div>
+                      <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
+                          <SearchIcon />
+                    </IconButton>
+                    
+                    <div className={classes.sectionDesktop}>
+                      <IconButton color="inherit">
+                        <Badge badgeContent={4} color="secondary">
+                          <MailIcon />
+                        </Badge>
+                      </IconButton>
+                      <IconButton color="inherit">
+                        <Badge badgeContent={17} color="secondary">
+                          <NotificationsIcon />
+                        </Badge>
+                      </IconButton>
+                      <IconButton
+                        aria-owns={isMenuOpen ? 'material-appbar' : undefined}
+                        aria-haspopup="true"
+                        onClick={this.handleProfileMenuOpen}
+                        color="inherit"
+                      >
+                        <AccountCircle />
+                      </IconButton>
+                    </div>
+                    <div className={classes.sectionMobile}>
+                      <IconButton aria-haspopup="true" onClick={this.handleMobileMenuOpen} color="inherit">
+                        <MoreIcon />
+                      </IconButton>
+                    </div>
+                  </Toolbar>
+            </AppBar>
         {renderMenu}
         {renderMobileMenu}
       </div>
