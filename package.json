@@ -24,6 +24,8 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "2.1.8",
+    "react-swipeable-views": "^0.13.1",
+    "react-swipeable-views-utils": "^0.13.1",
     "typescript": "^3.3.4000"
   },
   "scripts": {

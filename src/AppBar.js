@@ -18,6 +18,11 @@ import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import HomeIcon from '@material-ui/icons/Home';
+import MapIcon from '@material-ui/icons/Map';
+import ContactsIcon from '@material-ui/icons/Contacts';
 
 
 
@@ -29,6 +34,19 @@ const styles = theme => ({
         zIndex: 1100,
         width: '94%',
         height:theme.spacing.unit * 6,
+    },
+    tabsRoot: {
+        height: theme.spacing.unit * 1,
+
+    },
+    tabs: {
+        position: 'absolute',
+        left: '3%',
+        top: '5%',
+        zIndex: 1000,
+        width: '94%',
+        backgroundColor: 'secdonary',
+        marginTop: theme.spacing.unit * 6
     },
     toolbarRoot: {
         paddingTop: theme.spacing.unit * 0.3,
@@ -114,10 +132,14 @@ class MainBar extends React.Component {
         this.state = {
             anchorEl: null,
             mobileMoreAnchorEl: null,
-            displayBack:this.props.displayBack,
+            displayBack: this.props.displayBack,
+            tabValue: this.props.tabValue? this.props.tabValue:0,
         };
   
     }
+    handleTabChange = (event, value) => {
+        this.setState({ tabValue:value });
+    };
 
     setupAutoComplete() {
         var input = document.getElementById('searchInput');
@@ -168,6 +190,7 @@ class MainBar extends React.Component {
         var input = document.getElementById('searchInput');
         var text = input.value;
         console.log(text);
+        
         this.props.handleInputSearch(text);
     }
 
@@ -231,7 +254,7 @@ class MainBar extends React.Component {
           <div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
-                      {this.state.displayBack ? 
+                      {this.props.displayBack ? 
                           <IconButton className={classes.menuButton} onClick={this.props.handleBack} color="inherit" aria-label="Back">
                               <ArrowBack />
                           </IconButton>
@@ -286,7 +309,23 @@ class MainBar extends React.Component {
                       </IconButton>
                     </div>
                   </Toolbar>
-            </AppBar>
+              </AppBar>
+              <Tabs
+                  value={this.state.tabValue}
+                  indicatorColor="secondary"
+                  textColor="inherit"
+                  onChange={this.handleTabChange}
+                  className={classes.tabs}
+
+              >
+                  <Tab icon={<HomeIcon />}  onClick={() => {
+                      this.props.history.push('/')
+                  }} />
+                  <Tab icon={<MapIcon />} onClick={() => {
+                      this.props.history.push('/map')
+                  }} />
+                  <Tab icon={<ContactsIcon />}  />
+              </Tabs>
         {renderMenu}
         {renderMobileMenu}
       </div>

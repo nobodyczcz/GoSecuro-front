@@ -11,6 +11,8 @@ import MailIcon from '@material-ui/icons/Mail';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import NavigationIon from '@material-ui/icons/Navigation';
 import ContactsIon from '@material-ui/icons/Contacts';
+import TurnedInIon from '@material-ui/icons/TurnedIn';
+
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
 import { Router, Route, Link } from "react-router-dom";
@@ -24,6 +26,7 @@ import Background from './backgroundPage';
 import { createBrowserHistory, createHashHistory } from 'history';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
+import HomePageStepper from './homePageStepper.js';
 
 var history;
 if (window.cordova) {
@@ -40,7 +43,7 @@ const styles = theme => ({
         width: 250,
     },
     layerContainer: {
-        marginTop: theme.spacing.unit * 12,
+        marginTop: theme.spacing.unit * 19,
         
     },
     layerIcon: {
@@ -110,8 +113,11 @@ class App extends Component {
         this.focusUser = true;
 
         this.markers = null;
+        this.service = null;
 
         this.userLocation = null;
+        this.heading = null;
+        this.userLocationImage = null;
 
         this.apiKey = 'AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0';
         
@@ -145,6 +151,14 @@ class App extends Component {
 
 
         console.log('set state')
+
+        if (document.getElementById('mapdiv').childNodes.length === 0) {
+            console.log('download map scripts')
+            postscribe('#mapdiv', '<script language="javascript" src=' + this.mapurl + '&libraries=places></script>', {
+                done: this.renderMap.bind(this),
+            });
+        }
+
         this.state = {
             left: false,
             currentPage: 'start',
@@ -159,33 +173,30 @@ class App extends Component {
     }
 
     currentLocation() {
+        //set the current location for first time usage.
         console.log('focus current location')
         navigator.geolocation.getCurrentPosition(function (position) {
             var thelat = position.coords.latitude;
             var thelng = position.coords.longitude;
+            if (position.coords.heading) {
+                this.heading = position.coords.heading;
+            }
+            console.log(thelat)
+            console.log(thelng)
+            console.log(this.heading)
             this.userLocation = { lat: thelat, lng: thelng }
             this.map.setCenter({ lat: thelat, lng: thelng })
             this.map.setZoom(15)
             if (!this.userMarker) {
                 console.log('Set up marker');
-                var icon = 'img/baseline-navigation-24px.svg'
-                var image = {
-                    url: icon,
-                    // This marker is 20 pixels wide by 32 pixels high.
-                    scaledSize: new window.google.maps.Size(30, 30),
-                    // The origin for this image is (0, 0).
-                    origin: new window.google.maps.Point(0, 0),
-                    // The anchor for this image is the base of the flagpole at (0, 32).
-                    anchor: new window.google.maps.Point(0, 32),
-                    color:'#ff7504'
-                };
+                this.userLocationImage.rotation = this.heading;
                 // Shapes define the clickable region of the icon. The type defines an HTML
                 // <area> element 'poly' which traces out a polygon as a series of X,Y points.
                 // The final coordinate closes the poly by connecting to the first coordinate.
                 this.userMarker = new window.google.maps.Marker({
                     position: { lat: thelat, lng: thelng },
                     map: this.map,
-                    icon: image,
+                    icon: this.userLocationImage,
                 });
                 this.userMarker.setMap(this.map)
             }
@@ -199,15 +210,33 @@ class App extends Component {
             disableDefaultUI: true,
             scaleControl: true,
         });
+
+        this.userLocationImage = {
+            path: 'M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z',
+            fillColor: '#ff7504',
+            fillOpacity: 1,
+            scaledSize: new window.google.maps.Size(30, 30),
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(15, 15),
+            rotation: this.heading,
+        }
         console.log('render map done');
         this.currentLocation();
         console.log('set current location done')
-        
+        this.service = new window.google.maps.places.PlacesService(this.map);
+
         this.mainBar.current.setupAutoComplete();
         console.log('set auto complete done')
 
         window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
         console.log('set location listener done')
+
+        this.map.addListener('dragstart', function () {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            this.focusUser = false;
+            console.log('focus user off')
+        }.bind(this));
 
         
     };
@@ -235,17 +264,25 @@ class App extends Component {
     };
 
     handleInputSearch = (input) => {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            var currentlocation = new window.google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            console.log(currentlocation);
+        if (this.service) {
+            var currentlocation = this.userLocation;
             var request = {
                 location: currentlocation,
                 radius: '1000',
                 query: input
             };
-            var service = new window.google.maps.places.PlacesService(this.map);
-            service.textSearch(request, this.displaySearchResult.bind(this));
-        }.bind(this));
+            this.service.textSearch(request, this.displaySearchResult.bind(this));
+        }
+        else {
+            this.service = new window.google.maps.places.PlacesService(this.map);
+            var currentlocation = this.userLocation;
+            var request = {
+                location: currentlocation,
+                radius: '1000',
+                query: input
+            };
+            this.service.textSearch(request, this.displaySearchResult.bind(this));
+        }
     };
 
     handleLayer3Click() {
@@ -264,8 +301,9 @@ class App extends Component {
     }
 
     handleMyLocationClick() {
+        console.log('focus user on')
         this.focusUser = true;
-        this.map.setZoom(17);
+        this.map.setZoom(15);
         this.map.setCenter(this.userLocation);
         this.currentLocation();
         console.log('my location clicked')
@@ -275,9 +313,21 @@ class App extends Component {
         console.log('update location triggered')
         var thelat = position.coords.latitude;
         var thelng = position.coords.longitude;
+        if (position.coords.heading) {
+            this.heading = position.coords.heading;
+            
+        }
+        console.log('heading:' + this.heading)
+        
         this.userLocation = { lat: thelat, lng: thelng }
+        
         if (this.userMarker) {
-            console.log('new location')
+            console.log('update user location')
+            
+            this.userLocationImage.rotation =this.heading;
+
+            this.userMarker.setIcon(this.userLocationImage);
+
             this.userMarker.setPosition({lat:thelat,lng:thelng});
         }
         if (this.focusUser) {
@@ -291,6 +341,13 @@ class App extends Component {
     displaySearchResult = (result) => {
         console.log(result)
         this.setState({ searchResponse: result, displayBack: true })
+        console.log(this.markers)
+        if (this.markers) {
+            console.log('clear mark')
+            for (var i; i < this.markers.length; i++) {
+                this.markers[i].setMap(null);
+            }
+        }
         this.markers = []
 
         for (var i = 0; i < result.length;i++) {
@@ -303,11 +360,11 @@ class App extends Component {
             var image = {
                 url: icon,
                 // This marker is 20 pixels wide by 32 pixels high.
-                scaledSize: new window.google.maps.Size(20, 32),
+                scaledSize: new window.google.maps.Size(30, 30),
                 // The origin for this image is (0, 0).
                 origin: new window.google.maps.Point(0,0),
                 // The anchor for this image is the base of the flagpole at (0, 32).
-                anchor: new window.google.maps.Point(0, 0)
+                anchor: new window.google.maps.Point(15,15)
             };
 
             var shape = {
@@ -364,16 +421,36 @@ class App extends Component {
         this.handleMobileMenuClose();
     }
 
+    theBar = () => {
+        return (
+            <MainBar
+            toggleDrawer={this.toggleDrawer}
+            handleInputSearch={this.handleInputSearch.bind(this)}
+            innerRef={this.mainBar}
+            displayBack={this.state.displayBack}
+            handleBack={this.handleBack.bind(this)}
+            history={history}
+            >
+            </MainBar>
+        );
+
+    };
+
     homePage() {
+
+        return (
+            <div>
+                <HomePageStepper />
+            </div>
+            
+            );
+    }
+
+    mapPage() {
         console.log('render home page')
         const { classes } = this.props;
 
-        if (document.getElementById('mapdiv').childNodes.length === 0) {
-            console.log('download map scripts')
-            postscribe('#mapdiv', '<script language="javascript" src=' + this.mapurl + '&libraries=places></script>', {
-                done: this.renderMap.bind(this),
-            });
-        }
+        
 
         const { mobileMoreAnchorEl, layerMenu } = this.state;
         const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -384,15 +461,9 @@ class App extends Component {
             theleft = x.left-125;
         };
         return (
-                <div>
-                <MainBar
-                    toggleDrawer={this.toggleDrawer}
-                    handleInputSearch={this.handleInputSearch.bind(this)}
-                    innerRef={this.mainBar}
-                    displayBack={this.state.displayBack}
-                    handleBack={this.handleBack.bind(this)} >
-                    </MainBar>
+            <div>
                 
+
                     <div className={classes.layerContainer}>
                     
                         <Fab onClick={this.handleMobileMenuOpen} color="primary" size="small" className={classes.layerIcon}>
@@ -437,15 +508,9 @@ class App extends Component {
             <List>
                 <ListItem button key='Navigation'>
                     <ListItemIcon>
-                        <NavigationIon></NavigationIon>
+                        <TurnedInIon></TurnedInIon>
                     </ListItemIcon>
-                    <Link to="/Background">Background</Link>
-                </ListItem>
-                <ListItem button key='Emergency Contacts'>
-                    <ListItemIcon>
-                        <ContactsIon></ContactsIon>
-                    </ListItemIcon>
-                    <ListItemText primary='Emergency Contacts' />
+                    <Link to="/AboutUs">About Us</Link>
                 </ListItem>
             </List>
             <Divider />
@@ -479,7 +544,9 @@ class App extends Component {
                 </SwipeableDrawer>
                 <div className='mapStyle' id='MAP'>
                 </div>
+                {this.theBar()}
                 <Route exact path="/" component={this.homePage.bind(this)} />
+                <Route exact path="/map" component={this.mapPage.bind(this)} />
                 <Route exact path="/Background" component={Background} />
             </Router>  
       </MuiThemeProvider>
