@@ -23,6 +23,11 @@ import Tab from '@material-ui/core/Tab';
 import HomeIcon from '@material-ui/icons/Home';
 import MapIcon from '@material-ui/icons/Map';
 import ContactsIcon from '@material-ui/icons/Contacts';
+import BusIcon from '@material-ui/icons/DirectionsBus';
+import WalkIcon from '@material-ui/icons/DirectionsWalk';
+import DriveIcon from '@material-ui/icons/DriveEta';
+
+
 
 
 
@@ -133,12 +138,16 @@ class MainBar extends React.Component {
             anchorEl: null,
             mobileMoreAnchorEl: null,
             displayBack: this.props.displayBack,
-            tabValue: this.props.tabValue? this.props.tabValue:0,
+            tabValue: this.props.tabValue ? this.props.tabValue : 0,
+            navValue: this.props.navValue ? this.props.navValue:0,
         };
   
     }
     handleTabChange = (event, value) => {
         this.setState({ tabValue:value });
+    };
+    handleNavChange = (event, value) => {
+        this.setState({ navValue: value });
     };
 
     setupAutoComplete() {
@@ -192,13 +201,18 @@ class MainBar extends React.Component {
         console.log(text);
         
         this.props.handleInputSearch(text);
+        if (this.state.tabValue != 1) {
+            document.getElementById('mapIcon').click();
+
+        }
     }
 
     handleClickAway = () => {
         document.getElementById('searchInput').blur();
     }
 
-  render() {
+    render() {
+        this.state.navValue = this.props.navValue;
     const { anchorEl, mobileMoreAnchorEl } = this.state;
     const { classes } = this.props;
     const isMenuOpen = Boolean(anchorEl);
@@ -251,6 +265,7 @@ class MainBar extends React.Component {
     );
 
       return (
+          
           <div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
@@ -310,22 +325,49 @@ class MainBar extends React.Component {
                     </div>
                   </Toolbar>
               </AppBar>
-              <Tabs
-                  value={this.state.tabValue}
-                  indicatorColor="secondary"
-                  textColor="inherit"
-                  onChange={this.handleTabChange}
-                  className={classes.tabs}
+              {this.props.displayNavRoutes ?
+                  <Tabs
+                      variant="fullWidth"
+                      value={this.state.navValue}
+                      indicatorColor="secondary"
+                      textColor="inherit"
+                      onChange={this.handleNavChange}
+                      className={classes.tabs}
+                  >
 
-              >
-                  <Tab icon={<HomeIcon />}  onClick={() => {
-                      this.props.history.push('/')
-                  }} />
-                  <Tab icon={<MapIcon />} onClick={() => {
-                      this.props.history.push('/map')
-                  }} />
-                  <Tab icon={<ContactsIcon />}  />
-              </Tabs>
+                      <Tab icon={<WalkIcon />} onClick={() => {
+                          this.props.setNavMode('walking')
+                      }} />
+                      <Tab icon={<BusIcon />} onClick={() => {
+                          this.props.setNavMode('transit')
+                      }} />
+                      <Tab icon={<DriveIcon />} onClick={() => {
+                          this.props.setNavMode('driving')
+                      }}/>
+                  </Tabs>
+                  :
+                  <Tabs
+                      variant="fullWidth"
+                      value={this.state.tabValue}
+                      indicatorColor="secondary"
+                      textColor="inherit"
+                      onChange={this.handleTabChange}
+                      className={classes.tabs}
+
+                  >
+                      <Tab icon={<HomeIcon />} onClick={() => {
+                          this.props.history.push('/')
+                      }} />
+                      <Tab icon={<MapIcon />} id='mapIcon' onClick={() => {
+                          this.props.history.push('/map')
+                      }} />
+                      <Tab icon={<ContactsIcon />} onClick={() => {
+                          this.props.history.push('/contacts')
+                      }} />
+                  </Tabs>
+              }
+
+              
         {renderMenu}
         {renderMobileMenu}
       </div>

@@ -13,6 +13,10 @@ import ChevronDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import { withStyles } from '@material-ui/core/styles';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
+import NavigationIcon from '@material-ui/icons/Navigation';
+import Fab from '@material-ui/core/Fab';
+
+
 
 
 const drawerWidth = 240;
@@ -54,7 +58,7 @@ const styles = theme => ({
         paddingLeft: '3%',
         paddingRight:'3%',
         overflowX: 'hidden',
-        height: '50%',
+        height: '40%',
         borderRadius: '5px 5px 0px 0px',
         transition: theme.transitions.create('height', {
             easing: theme.transitions.easing.sharp,
@@ -85,6 +89,9 @@ const styles = theme => ({
             backgroundColor: 'rgba(0,0,0,.1)',
             outline: '1px solid slategrey'
         }
+    },
+    navButton: {
+        marginTop:60,
     }
 });
 
@@ -106,8 +113,17 @@ class ResultCard extends Component {
     handleDrawerChange = () => {
         this.setState({ open: !this.state.open });
     }
+    handleCardClick = (index) => {
+        console.log(index)
+        var location = this.props.results[index].geometry.location;
+        this.props.map.setCenter(location);
+    };
+    handleNavClick = (index) => {
+        this.props.navigateTo(this.props.results[index].geometry.location);
+    }
     
     render() {
+        console.log('render result: ',this.props.currentRoute);
         const { classes, theme } = this.props;
         return (
             <Drawer
@@ -131,45 +147,84 @@ class ResultCard extends Component {
                         Search Result
                     </IconButton>
                 </div>
-                {this.props.results.map(function (item, i) {
-                    var photo = "img/no-image.png"
-                    var imgLink = photo
-                    if (item.photos) {
-                        imgLink = item.photos[0].getUrl();
-                        //imgLink = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&key=" + this.props.apiKey + "&photoreference=" + photo;
-                    }
+                {
+                    this.props.currentRoute ?
+                        this.props.currentRoute.routes[0].legs.map(function (leg, i) {
+                            return (
+                                <div key={i}>
+                                    {
+                                        leg.steps.map(function (step, x) {
 
-                    var name = item.name;
-                    var icon = item.icon;
-                    var address = item.formatted_address;
-                    var location = item.geometry.location;
-                    
-                    return (
-                        <Card className={classes.contentCard} key={i} >
-                            <CardMedia
-                                component="img"
-                                alt={photo}
-                                className={classes.media}
-                                image={imgLink}
-                                title="result photo"
-                            />
-                            <div>
+                                            return (
+                                                <Card className={classes.contentCard} key={i.toString() + x.toString()} >
+                                                    <CardContent>
+                                                        <Typography variant="subtitle2">
+                                                            {step.distance.text} {step.duration.text}
+                                                        </Typography>
+                                                        <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
 
-                            </div>
-                            <div className={classes.cardContent}>
-                                <CardContent>
-                                    <Typography variant="h6">
-                                        {name}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {address}
-                                    </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                                );
+                                        })
+                                    }
+                                </div>
+                            );
+                        })
+                        :
+                        this.props.results.map(function (item, i) {
+                            var photo = "img/no-image.png"
+                            var imgLink = photo
+                            if (item.photos) {
+                                imgLink = item.photos[0].getUrl();
+                                //imgLink = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&key=" + this.props.apiKey + "&photoreference=" + photo;
+                            }
 
-                                </CardContent>
-                            </div>
-                        </Card>
-                    )
-                }.bind(this))}
+                            var name = item.name;
+                            var icon = item.icon;
+                            var address = item.formatted_address;
+                            var location = item.geometry.location;
+
+                            return (
+                                <Card className={classes.contentCard} key={i} >
+
+                                    <CardMedia
+                                        component="img"
+                                        alt={photo}
+                                        className={classes.media}
+                                        image={imgLink}
+                                        title="result photo"
+                                        onClick={() => this.handleCardClick(i)}
+                                    />
+                                    <div
+                                        className={classes.cardContent}
+                                        onClick={() => this.handleCardClick(i)}
+                                    >
+                                        <CardContent>
+                                            <Typography variant="h6">
+                                                {name}
+                                            </Typography>
+                                            <Typography variant="body2">
+                                                {address}
+                                            </Typography>
+
+                                        </CardContent>
+                                    </div>
+                                    <Fab
+                                        variant="extended"
+                                        size="small"
+                                        color="primary"
+                                        aria-label="Add"
+                                        className={classes.navButton}
+                                        onClick={() => { this.handleNavClick(i) }}
+                                    >
+                                        <NavigationIcon className={classes.extendedIcon} />
+                                    </Fab>
+                                </Card>
+                            )
+                        }.bind(this))
+                }
+                
             </Drawer>
         )
     };

@@ -27,6 +27,7 @@ import { createBrowserHistory, createHashHistory } from 'history';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
+import ContactsPage from './contactsPage.js'
 
 var history;
 if (window.cordova) {
@@ -55,7 +56,7 @@ const styles = theme => ({
     myPositionIcon: {
         position: 'absolute',
         left: 'calc(100% - 60px)',
-        top:'calc(100% - 100px)',
+        top:'calc(100% - 120px)',
         display: 'flex',
         zIndex: 1100,
     },
@@ -86,7 +87,7 @@ const theme2 = createMuiTheme({
     },
     secondary: {
       light: '#b26500',
-      main: '#ff9100',
+        main: '#ff7504',
       dark: '#ffa733',
       contrastText: '#000',
     },
@@ -109,6 +110,8 @@ class App extends Component {
         };
 
         this.userMarker = null;
+        this.directionsService = null;
+        this.directionsDisplay = null;
 
         this.focusUser = true;
 
@@ -117,7 +120,16 @@ class App extends Component {
 
         this.userLocation = null;
         this.heading = null;
+        this.basicHeading = 122;
         this.userLocationImage = null;
+        this.navRoutes = {
+            driving: null,
+            walking: null,
+            transit: null
+
+        };
+
+        this.navValue = 0;
 
         this.apiKey = 'AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0';
         
@@ -161,12 +173,15 @@ class App extends Component {
 
         this.state = {
             left: false,
-            currentPage: 'start',
+            currentPage: 0,
             mobileMoreAnchorEl: null,
             focusUser: false,
             layerMenu: false,
             searchResponse: null,
-            displayBack:false,
+            displayBack: false,
+            displayNavRoutes: false,
+            navigating: false,
+            currentRoute: null,
         };
         console.log('initiate done')
 
@@ -212,18 +227,24 @@ class App extends Component {
         });
 
         this.userLocationImage = {
-            path: 'M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z',
+            path: 'm4.875098,16.605717c-0.029873,-2.433882 0.634361,-4.022277 1.627162,-5.678671c0.992793,-1.656386 2.932073,-3.720554 4.74924,-4.408087c1.81716,-0.687541 3.921607,-1.167871 6.000649,-0.805492c2.079049,0.36238 5.338262,2.391187 6.88208,4.50682c1.54381,2.115634 3.648258,6.518236 3.552675,8.990873c-0.095591,2.472637 -0.470363,4.422155 -1.946421,6.460716c-1.476058,2.03856 -3.891329,3.333441 -5.87534,3.882768c-1.984019,0.549335 -4.916731,0.058456 -7.001448,-0.884383c-2.084724,-0.942847 -7.953368,-4.693612 -8.669499,-10.903462c-0.716131,-6.209842 -5.777823,8.471585 -4.537555,10.492192c1.240268,2.020599 16.396471,3.800382 11.481619,0.594933c-4.914845,-3.205448 -6.233289,-9.814326 -6.263162,-12.248208z',
             fillColor: '#ff7504',
             fillOpacity: 1,
-            scaledSize: new window.google.maps.Size(30, 30),
+            strokeWeight: 3,
+            strokeColor:'#ffffff',
+            strokeOpacity:1,
+            size: new window.google.maps.Size(30, 30),
             origin: new window.google.maps.Point(0, 0),
-            anchor: new window.google.maps.Point(15, 15),
-            rotation: this.heading,
+            anchor: new window.google.maps.Point(14, 14),
+            rotation: this.basicHeading+this.heading,
         }
         console.log('render map done');
         this.currentLocation();
         console.log('set current location done')
         this.service = new window.google.maps.places.PlacesService(this.map);
+
+        this.directionsService = new window.google.maps.DirectionsService();
+        this.directionsDisplay = new window.google.maps.DirectionsRenderer();
 
         this.mainBar.current.setupAutoComplete();
         console.log('set auto complete done')
@@ -264,6 +285,7 @@ class App extends Component {
     };
 
     handleInputSearch = (input) => {
+
         if (this.service) {
             var currentlocation = this.userLocation;
             var request = {
@@ -297,16 +319,40 @@ class App extends Component {
 
     handleBack() {
         console.log('handle back trigered');
-        this.setState({ searchResponse: null, displayBack:false })
+        if (this.state.displayNavRoutes) {
+            console.log('cancel navi')
+            this.setState({ displayNavRoutes: false, currentRoute:null,currentPage:1 });
+            this.navRoutes = {
+                driving: null,
+                walking: null,
+                transit: null
+            }
+            this.directionsDisplay.setMap(null);
+        }
+        else {
+            this.setState({ searchResponse: null, displayBack: false,currentPage:1 });
+            this.clearAllMarkers();
+        }
+        
     }
 
     handleMyLocationClick() {
-        console.log('focus user on')
-        this.focusUser = true;
-        this.map.setZoom(15);
-        this.map.setCenter(this.userLocation);
-        this.currentLocation();
         console.log('my location clicked')
+        if (!this.userLocation) {
+
+        }
+        else if (this.focusUser) {
+            this.map.setZoom(18);
+        }
+        else {
+            this.focusUser = true;
+            this.map.setZoom(15);
+            this.map.setCenter(this.userLocation);
+            this.currentLocation();
+            console.log('focus user on')
+
+        }
+        
     }
 
     onUpdateLocation(position) {
@@ -324,7 +370,7 @@ class App extends Component {
         if (this.userMarker) {
             console.log('update user location')
             
-            this.userLocationImage.rotation =this.heading;
+            this.userLocationImage.rotation = this.basicHeading + this.heading;
 
             this.userMarker.setIcon(this.userLocationImage);
 
@@ -338,23 +384,34 @@ class App extends Component {
         console.log(err)
     }
 
+    clearAllMarkers = () => {
+        console.log('clear mark')
+        for (var i=0; i < this.markers.length; i++) {
+            this.markers[i].setMap(null);
+        }
+    };
+
     displaySearchResult = (result) => {
         console.log(result)
         this.setState({ searchResponse: result, displayBack: true })
         console.log(this.markers)
         if (this.markers) {
-            console.log('clear mark')
-            for (var i; i < this.markers.length; i++) {
-                this.markers[i].setMap(null);
-            }
+            this.clearAllMarkers();
         }
-        this.markers = []
+        else {
+            this.markers = [];
+        }
+        
 
         for (var i = 0; i < result.length;i++) {
             var name = result[i].name;
             var icon = result[i].icon;
             var address = result[i].formatted_address;
             var location = result[i].geometry.location;
+
+            if (i === 0) {
+                this.map.setCenter(location);
+            }
 
             //var image = icon;
             var image = {
@@ -386,8 +443,99 @@ class App extends Component {
 
     };
 
+    navigateTo(location) {
+
+        this.setState({ displayNavRoutes: false });
+
+        var drivingRequest = {
+            origin: this.userLocation,
+            destination: location,
+            travelMode: 'DRIVING',
+            transitOptions: {
+                departureTime: new Date(Date.now())
+            },
+        };        
+        
+        this.directionsService.route(drivingRequest, function (result, status) {
+            console.log('get driving: ' + status)
+            if (status == 'OK') {
+                this.navRoutes.driving = result
+                if (!this.state.displayNavRoutes) {
+                    this.setState({ displayNavRoutes: true });
+                    this.setNavMode('driving');
+                }
+            }
+        }.bind(this));
+
+        var walkRequest = {
+            origin: this.userLocation,
+            destination: location,
+            travelMode: 'WALKING',
+            transitOptions: {
+                departureTime: new Date(Date.now())
+            },
+        };
+
+        this.directionsService.route(walkRequest, function (result, status) {
+            console.log('get walking: ' + status)
+            if (status == 'OK') {
+                
+                this.navRoutes.walking = result
+                if (!this.state.displayNavRoutes) {
+                    this.setState({ displayNavRoutes: true });
+                    this.setNavMode('walking');
+                }
+            }
+        }.bind(this));
+
+        var transitRequest = {
+            origin: this.userLocation,
+            destination: location,
+            travelMode: 'TRANSIT',
+            transitOptions: {
+                departureTime: new Date(Date.now())
+            },
+        };
+        this.directionsService.route(transitRequest, function (result, status) {
+            console.log('get transit: '+status)
+            if (status == 'OK') {
+                
+                this.navRoutes.transit = result
+                if (!this.state.displayNavRoutes) {
+                    this.setState({ displayNavRoutes: true });
+                    this.setNavMode('transit');
+                }
+            }
+        }.bind(this));
+    };
+
+    setNavMode(mode) {
+        console.log('set transit mode: '+ mode)
+        this.directionsDisplay.setMap(this.map);
+        if (mode === 'walking') {
+            console.log(this.navRoutes.walking);
+            this.navValue=0
+            this.setState({ currentRoute: this.navRoutes.walking }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+        }
+        else if (mode === 'transit') {
+            console.log(this.navRoutes.transit)
+            this.navValue = 1
+
+            this.setState({ currentRoute: this.navRoutes.transit }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+        }
+        else if (mode === 'driving') {
+            console.log(this.navRoutes.driving)
+            this.navValue = 2
+
+            this.setState({ currentRoute: this.navRoutes.driving }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+        }
+        
+        
+
+    };
+
     displayCrime(map, data) {
-        console.log('dixplay crime rate')
+        console.log('display crime rate')
         console.log(map);
         console.log(data)
         //This is an example
@@ -424,12 +572,16 @@ class App extends Component {
     theBar = () => {
         return (
             <MainBar
-            toggleDrawer={this.toggleDrawer}
-            handleInputSearch={this.handleInputSearch.bind(this)}
-            innerRef={this.mainBar}
-            displayBack={this.state.displayBack}
-            handleBack={this.handleBack.bind(this)}
-            history={history}
+                toggleDrawer={this.toggleDrawer}
+                handleInputSearch={this.handleInputSearch.bind(this)}
+                innerRef={this.mainBar}
+                displayBack={this.state.displayBack}
+                handleBack={this.handleBack.bind(this)}
+                history={history}
+                displayNavRoutes={this.state.displayNavRoutes}
+                setNavMode={this.setNavMode.bind(this)}
+                tabValue={this.state.currentPage}
+                navValue={this.navValue}
             >
             </MainBar>
         );
@@ -492,8 +644,8 @@ class App extends Component {
                 <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
                     <MyLocationIcon />
                 </Fab>
-                    {this.state.searchResponse ? (
-                        <ResultCard apiKey={this.apiKey} results={this.state.searchResponse}></ResultCard>
+                {this.state.searchResponse ? (
+                    <ResultCard apiKey={this.apiKey} map={this.map} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                         ) : null}
                 </div>
             );
@@ -547,7 +699,7 @@ class App extends Component {
                 {this.theBar()}
                 <Route exact path="/" component={this.homePage.bind(this)} />
                 <Route exact path="/map" component={this.mapPage.bind(this)} />
-                <Route exact path="/Background" component={Background} />
+                <Route exact path="/contacts" component={ContactsPage} />
             </Router>  
       </MuiThemeProvider>
     );
