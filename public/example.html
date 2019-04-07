@@ -3,7 +3,7 @@
 
 </head>
 <body>
-    
+
     <div id='map' style='height:100%'>
 
     </div>
@@ -26,9 +26,17 @@
                 'type': 'Feature',
                 'properties': {
                     'suburb': 'CAULFIELD',
-                    'crimeRate': 0.0502,
+                    'crimeRate': 0.0509,
                 },
                 'geometry': { 'type': 'Polygon', 'coordinates': [[[145.01631003, -37.87915702], [145.02983704, -37.88085404], [145.03460303, -37.88139297], [145.03815897, -37.88628199], [145.03765696, -37.88887803], [145.01494298, -37.88603402], [145.01631003, -37.87915702]]] }
+            },
+            {
+                'type': 'Feature',
+                'properties': {
+                    'suburb': 'CARNEGIE',
+                    'crimeRate': 15,
+                },
+                'geometry': { 'type': 'Polygon', 'coordinates': [[[145.06035102, -37.90649896], [145.05419696, -37.90573899], [145.05468696, -37.90173398], [145.04468999, -37.90052402], [145.04514795, -37.89820104], [145.04612801, -37.88727403], [145.04963157, -37.88102006], [145.05371815, -37.88333843], [145.067459, -37.88464523], [145.06353966, -37.90247866], [145.06035102, -37.90649896]]] }
             }
         ],
     };
@@ -36,64 +44,165 @@
 
     var map
 
-    function displayCrime(map,data){
-        console.log('dixplay crime rate')
-        console.log(map);
+    function clearMap() {
+        //Clear all crime rate from map
+        map.data.forEach(function (feature) {
+            // filter...
+            map.data.remove(feature);
+        });
+    }
+
+    function displayAllCrime(map, data) {
+        clearMap()
+        displayColor(map, data)
+    };
+
+
+
+    function displayHighCrimeOnly(map, data) {
+        //clear previous data on map
+        clearMap()
+
+        //Display high crime places only
+        var newdata = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
         console.log(data)
-        //This is an example
-        //Write your code here to display data on map
+        for (var i = 0; i < data.features.length; i++) {
+            if (data.features[i].properties.crimeRate > 0.0769) {
+                newdata.features.push(data.features[i]);
+            }
+        }
+        console.log(newdata)
+
+        map.data.addGeoJson(newdata)
+        displayColor(map, newdata)
+    }
+
+    function displayMediumToHighCrime(map, data) {
+
+        //clear previous data on map
+        clearMap()
+
+        //Display high crime places only
+        var newdata = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+        console.log(data)
+        for (var i = 0; i < data.features.length; i++) {
+            if (data.features[i].properties.crimeRate > 0.0506) {
+                newdata.features.push(data.features[i]);
+            }
+        }
+        console.log(newdata)
+
+        map.data.addGeoJson(newdata)
+        displayColor(map, newdata)
+    }
+
+    function displayColor(map, data) {
+
         map.data.addGeoJson(data)
         map.data.setStyle(function (feature) {
-            console.log('set style')
-            console.log(feature)
-            console.log(feature.getProperty('crimeRate'))
-            if (feature.getProperty('crimeRate') >= 0.01 && feature.getProperty('crimeRate') <= 0.03) {
-                console.log('set low')
+            // 1st quantile data cr=[0,0.01526)
+            if (feature.getProperty('crimeRate') >= 0 && feature.getProperty('crimeRate') <= 0.01526) {
                 return {
-                    strokeOpacity:0,
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.05
+                }
+            }
+
+            // 2nd quantile data cr=[0.01526,0.02344)
+            if (feature.getProperty('crimeRate') >= 0.01526 && feature.getProperty('crimeRate') <= 0.02344) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.1
+                }
+            }
+
+            // 3rd quantile data cr=[0.02344,0.0323)
+            if (feature.getProperty('crimeRate') >= 0.02344 && feature.getProperty('crimeRate') <= 0.0323) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.15
+                }
+            }
+            // 4th quantile data cr=[0.0323,0.0405)
+            if (feature.getProperty('crimeRate') >= 0.0323 && feature.getProperty('crimeRate') <= 0.0405) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.2
+                }
+            }
+            // 5th quantile data cr=[0.0405,0.0506)
+            if (feature.getProperty('crimeRate') >= 0.0405 && feature.getProperty('crimeRate') <= 0.0506) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.25
+                }
+            }
+            // 6th quantile data cr=[0.0506,0.0625)
+            if (feature.getProperty('crimeRate') >= 0.0506 && feature.getProperty('crimeRate') <= 0.0625) {
+                return {
+                    strokeOpacity: 0,
                     fillColor: "#ff2600",
                     fillOpacity: 0.3
                 }
             }
-            else if (feature.getProperty('crimeRate') > 0.03) {
-                console.log('set high')
+            // 7th quantile data cr=[0.0625,0.0769)
+            if (feature.getProperty('crimeRate') >= 0.0625 && feature.getProperty('crimeRate') <= 0.0769) {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.9
+                    fillOpacity: 0.35
                 }
             }
-        });
+            // 8th quantile data cr=[0.0769,0.10208)
+            if (feature.getProperty('crimeRate') >= 0.0769 && feature.getProperty('crimeRate') <= 0.10208) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.4
+                }
+            }
+            // 9th quantile data cr=[0.10208,0.1529)
+            if (feature.getProperty('crimeRate') >= 0.10208 && feature.getProperty('crimeRate') <= 0.1529) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.45
+                }
+            }
+            // 10th quantile data cr=[0.1529,15.5714)
+            if (feature.getProperty('crimeRate') >= 0.1529 && feature.getProperty('crimeRate') <= 15.5714) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.5
+                }
+            }
+        })
 
-    };
-
-    function clearCrime(map) {
-        //Clear all crime rate from map
-        //write code here
     }
 
-    function displayHighCrimeOnly(map, data) {
-        //Display high crime places only
-        //remember clear previous data on map
-        //write code here
-    }
-
-    function displayMediumToHighCrime(map, data) {
-        //Display medium to  high crime places only
-        //remember clear previous data on map
-        //write code here
-    }
 
 
-
- 
-
-    function initMap(){
+    function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: -37.877177, lng: 145.040730 },
             zoom: 15
         });
-        displayCrime(map,data);
+        //displayColor(map,data)
+        //displayHighCrimeOnly(map,data)
+        //displayMediumToHighCrime(map,data)
+
     };
 
 

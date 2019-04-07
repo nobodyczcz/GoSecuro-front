@@ -71,6 +71,14 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       "clobbers": [
         "window.Keyboard"
       ]
+    },
+    {
+      "id": "cordova-sms-plugin.Sms",
+      "file": "plugins/cordova-sms-plugin/www/sms.js",
+      "pluginId": "cordova-sms-plugin",
+      "clobbers": [
+        "window.sms"
+      ]
     }
   ];
   module.exports.metadata = {
@@ -80,6 +88,7 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
     "cordova-plugin-local-notification": "0.9.0-beta.2",
     "cordova-plugin-statusbar": "2.4.2",
     "cordova-plugin-geolocation": "4.0.1",
-    "cordova-plugin-ionic-keyboard": "2.1.3"
+    "cordova-plugin-ionic-keyboard": "2.1.3",
+    "cordova-sms-plugin": "1.0.0"
   };
 });

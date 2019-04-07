@@ -16,4 +16,5 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <preference name="StatusBarBackgroundColor" value="#b23c17" />
+    <preference name="KeyboardResizeMode" value="false" />
 </widget>

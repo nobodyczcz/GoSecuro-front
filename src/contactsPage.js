@@ -30,12 +30,16 @@ const styles = theme => ({
     content: {
         marginTop: theme.spacing.unit * 17,
         height: '100%',
-        padding: '3%'
+        padding: '3%',
+        overflow:'auto'
 
     },
     contacts: {
         height: '100%',
-        padding: '3%'
+    },
+    contCard: {
+        width: '100%',
+        marginBottom:theme.spacing.unit * 2,
     },
     cont: {
         width: '49%'
@@ -100,6 +104,14 @@ class ContactsPage extends React.Component {
         
     }
 
+    handleDelete(index) {
+        var list = JSON.parse(localStorage.contactList)
+        list.splice(index, 1);
+        localStorage.contactList = JSON.stringify(list);
+        this.updateContactList();
+
+    }
+
 
     render() {
         const { classes } = this.props;
@@ -150,25 +162,30 @@ class ContactsPage extends React.Component {
                         </Typography>
                         {this.state.contactList.map(function (item, i) {
                             return (
-                                <Card>
+                                <Card className={classes.contCard} key={i}>
                                     <CardContent >
-                                        <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                            Name  {item.name}
+                                        <Typography className={classes.cont} gutterBottom align='left' variant="h6">
+                                          {item.name}
                                         </Typography>
 
                                         <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                            Mobile  {item.mobile}
+                                            Mobile:  {item.mobile}
                                         </Typography>
 
 
-                                        <Button variant="contained" color="secondary" className={classes.button}>
+                                        <Button
+                                            variant="contained"
+                                            color="secondary"
+                                            className={classes.button}
+                                            onClick={() => { this.handleDelete(i) }}
+                                    >
                                             <DeleteIcon className={classes.rightIcon} />
                                             Delete
                                         </Button>
                                     </CardContent>
                                 </Card>
                                         );
-                        })}
+                        }.bind(this))}
                         
                     </div>
                 </div>

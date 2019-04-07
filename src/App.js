@@ -28,6 +28,11 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
 import ContactsPage from './contactsPage.js'
+import PanicButton from './panicButton.js';
+import suburbNames from './suburb.json';
+import inerSuburbNames from './innerSuburb.json';
+
+
 
 var history;
 if (window.cordova) {
@@ -74,7 +79,7 @@ const styles = theme => ({
     }
 });
 
-const theme2 = createMuiTheme({
+const theme = createMuiTheme({
     typography: {
         useNextVariants: true,
     },
@@ -86,11 +91,15 @@ const theme2 = createMuiTheme({
         contrastText: '#ff7504',
     },
     secondary: {
-      light: '#b26500',
+        light: '#ff8a65',
         main: '#ff7504',
       dark: '#ffa733',
       contrastText: '#000',
-    },
+      },
+    error: {
+        main: '#ff8a65',
+        contrastText: '#000',
+    }
   },
 });
 
@@ -117,6 +126,7 @@ class App extends Component {
 
         this.markers = null;
         this.service = null;
+        this.suburbSet = new Set();
 
         this.userLocation = null;
         this.heading = null;
@@ -130,6 +140,7 @@ class App extends Component {
         };
 
         this.navValue = 0;
+        this.api = null;
 
         this.apiKey = 'AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0';
         
@@ -142,22 +153,7 @@ class App extends Component {
         this.crimeData = {
             'type': 'FeatureCollection',
             'features': [
-                {
-                    'type': 'Feature',
-                    'properties': {
-                        'crimeRate': 0.0123,
-                        'suburb': 'CAULFIELD EAST',
-                    },
-                    'geometry': { 'type': 'Polygon', 'coordinates': [[[145.04015202, -37.87510781], [145.04501901, -37.87603308], [145.04656539, -37.87701487], [145.04963157, -37.88102006], [145.04612801, -37.88727403], [145.03815897, -37.88628199], [145.03460303, -37.88139297], [145.03544496, -37.87685503], [145.03940597, -37.87691397], [145.04015202, -37.87510781]]] }
-                },
-                {
-                    'type': 'Feature',
-                    'properties': {
-                        'suburb': 'CAULFIELD',
-                        'crimeRate': 0.0502,
-                    },
-                    'geometry': { 'type': 'Polygon', 'coordinates': [[[145.01631003, -37.87915702], [145.02983704, -37.88085404], [145.03460303, -37.88139297], [145.03815897, -37.88628199], [145.03765696, -37.88887803], [145.01494298, -37.88603402], [145.01631003, -37.87915702]]] }
-                }
+                
             ],
         };
 
@@ -170,6 +166,8 @@ class App extends Component {
                 done: this.renderMap.bind(this),
             });
         }
+
+        
 
         this.state = {
             left: false,
@@ -184,6 +182,222 @@ class App extends Component {
             currentRoute: null,
         };
         console.log('initiate done')
+
+    }
+
+    componentDidMount() {
+        //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
+        var suburbs = inerSuburbNames;
+        var data = [];
+  
+
+        for (var i in suburbs) {
+            if (!this.suburbSet.has(suburbs[i])) {
+                data.push(suburbs[i])
+                this.suburbSet.add(suburbs[i])
+            }
+
+            if (data.length > 30) {
+                this.requestCrime(JSON.stringify(data));
+                data = []
+            }
+            
+        }
+        if (data.length > 0) {
+            this.requestCrime(JSON.stringify(data));
+        }        
+
+    }
+    requestCrime(jsonData) {
+        console.log('sendData: ', jsonData);
+        fetch('https://gosafe-back20190407071339.azurewebsites.net/Suburbs/Details/', {
+            method: 'POST',
+            body: jsonData,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(res => res.json())
+            .then(response => {
+                console.log(response);
+                response = JSON.parse(response);
+                for (var i in response) {
+                    var crime = {
+                            'type': 'Feature',
+                            'properties': {
+                                'crimeRate': 0,
+                                'suburb': '',
+                                },
+                            'geometry': {}
+                    }
+                    crime.properties.suburb = response[i].suburbname;
+                    crime.properties.crimeRate = response[i].crimeRate
+                    crime.geometry = JSON.parse(response[i].boundary.replace(/'/g, '"'));
+                    this.crimeData.features.push(crime);
+                }
+                this.handleAllCrime();
+
+            })
+            .catch(error => {
+                console.log('error')
+                console.error('Error:', error)
+            });
+    }
+
+    handleAllCrime() {
+        this.displayAllCrime(this.map, this.crimeData);
+        this.handleMobileMenuClose();
+        this.handleMobileMenuClose();
+    }
+    handleHighCrime() {
+        this.displayHighCrimeOnly(this.map, this.crimeData);
+        this.handleMobileMenuClose();
+        this.handleMobileMenuClose();
+    }
+    handleCrimeOff() {
+        this.clearMap(this.map);
+        this.handleMobileMenuClose();
+    }
+
+    clearMap(map) {
+        //Clear all crime rate from map
+        map.data.forEach(function (feature) {
+            // filter...
+            map.data.remove(feature);
+        });
+    }
+
+    displayAllCrime(map, data) {
+        //this.clearMap(map)
+        //this.displayColor(map, data)
+        //clear previous data on map
+        this.clearMap(map)
+
+        //Display high crime places only
+        var newdata = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+        console.log(data)
+        for (var i = 0; i < data.features.length; i++) {
+            if (data.features[i].properties.crimeRate > 0) {
+                newdata.features.push(data.features[i]);
+            }
+        }
+        console.log(newdata)
+
+        map.data.addGeoJson(newdata)
+        this.displayColor(map, newdata)
+
+    };
+
+    displayHighCrimeOnly(map, data) {
+        //clear previous data on map
+        this.clearMap(map)
+
+        //Display high crime places only
+        var newdata = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+        console.log(data)
+        for (var i = 0; i < data.features.length; i++) {
+            if (data.features[i].properties.crimeRate > 0.0769) {
+                newdata.features.push(data.features[i]);
+            }
+        }
+        console.log(newdata)
+
+        map.data.addGeoJson(newdata)
+        this.displayColor(map, newdata)
+    }
+
+    displayColor(map, data) {
+
+        map.data.addGeoJson(data)
+        map.data.setStyle(function (feature) {
+            // 1st quantile data cr=[0,0.01526)
+            if (feature.getProperty('crimeRate') >= 0 && feature.getProperty('crimeRate') <= 0.02526) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.002
+                }
+            }
+
+            // 2nd quantile data cr=[0.01526,0.02344)
+            if (feature.getProperty('crimeRate') >= 0.02526 && feature.getProperty('crimeRate') <= 0.03344) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.05
+                }
+            }
+
+            // 3rd quantile data cr=[0.02344,0.0323)
+            if (feature.getProperty('crimeRate') >= 0.03344 && feature.getProperty('crimeRate') <= 0.0423) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.08
+                }
+            }
+            // 4th quantile data cr=[0.0323,0.0405)
+            if (feature.getProperty('crimeRate') >= 0.0423 && feature.getProperty('crimeRate') <= 0.0505) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.12
+                }
+            }
+            // 5th quantile data cr=[0.0405,0.0506)
+            if (feature.getProperty('crimeRate') >= 0.0505 && feature.getProperty('crimeRate') <= 0.0606) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.16
+                }
+            }
+            // 6th quantile data cr=[0.0506,0.0625)
+            if (feature.getProperty('crimeRate') >= 0.0606 && feature.getProperty('crimeRate') <= 0.0825) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.20
+                }
+            }
+            // 7th quantile data cr=[0.0625,0.0769)
+            if (feature.getProperty('crimeRate') >= 0.0825 && feature.getProperty('crimeRate') <= 0.0969) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.22
+                }
+            }
+            // 8th quantile data cr=[0.0769,0.10208)
+            if (feature.getProperty('crimeRate') >= 0.0969 && feature.getProperty('crimeRate') <= 0.12208) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.25
+                }
+            }
+            // 9th quantile data cr=[0.10208,0.1529)
+            if (feature.getProperty('crimeRate') >= 0.12208 && feature.getProperty('crimeRate') <= 0.1529) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.27
+                }
+            }
+            // 10th quantile data cr=[0.1529,15.5714)
+            if (feature.getProperty('crimeRate') >= 0.1529 && feature.getProperty('crimeRate') <= 15.5714) {
+                return {
+                    strokeOpacity: 0,
+                    fillColor: "#ff2600",
+                    fillOpacity: 0.3
+                }
+            }
+        })
 
     }
 
@@ -284,6 +498,10 @@ class App extends Component {
         this.setState({ layerMenu: false });
     };
 
+    getLocation() {
+        return this.userLocation;
+    }
+
     handleInputSearch = (input) => {
 
         if (this.service) {
@@ -307,9 +525,7 @@ class App extends Component {
         }
     };
 
-    handleLayer3Click() {
-        this.showCrimeRate();
-    }
+
 
     handleClickAway() {
         if (this.state.layerMenu) {
@@ -383,6 +599,8 @@ class App extends Component {
     onLocationErr(err) {
         console.log(err)
     }
+
+    
 
     clearAllMarkers = () => {
         console.log('clear mark')
@@ -534,40 +752,8 @@ class App extends Component {
 
     };
 
-    displayCrime(map, data) {
-        console.log('display crime rate')
-        console.log(map);
-        console.log(data)
-        //This is an example
-        //Write your code here to display data on map
-        map.data.addGeoJson(data)
-        map.data.setStyle(function (feature) {
-            console.log('set style')
-            console.log(feature)
-            console.log(feature.getProperty('crimeRate'))
-            if (feature.getProperty('crimeRate') >= 0.01 && feature.getProperty('crimeRate') <= 0.03) {
-                console.log('set low')
-                return {
-                    strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.3
-                }
-            }
-            else if (feature.getProperty('crimeRate') > 0.03) {
-                console.log('set high')
-                return {
-                    strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.9
-                }
-            }
-        });
-    };
 
-    showCrimeRate = () => {
-        this.displayCrime(this.map, this.crimeData);
-        this.handleMobileMenuClose();
-    }
+
 
     theBar = () => {
         return (
@@ -624,18 +810,16 @@ class App extends Component {
                         
                         {layerMenu ? (
                             <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} onTouchEnd={this.handleClickAway.bind(this)}>
-                                <Paper className={classes.layerMenu} style={{ left: theleft, zIndex: 1100 }}>
-                                    <MenuItem onClick={this.handleMobileMenuClose} onTouchEnd={this.handleMobileMenuClose}>
+                            <Paper className={classes.layerMenu} style={{ left: theleft, zIndex: 1100 }}>
+                                <MenuItem onClick={this.handleCrimeOff.bind(this)} onTouchEnd={this.handleCrimeOff.bind(this)}>
                                         <p>Heatmap OFF</p>
                                     </MenuItem>
-                                    <MenuItem onClick={this.handleMobileMenuClose} onTouchEnd={this.handleMobileMenuClose}>
-                                        <p>Layer1</p>
+                                <MenuItem onClick={this.handleAllCrime.bind(this)} onTouchEnd={this.handleAllCrime.bind(this)}>
+                                        <p>Full Heatmap</p>
                                     </MenuItem>
-                                    <MenuItem onClick={this.handleMobileMenuClose} onTouchEnd={this.handleMobileMenuClose}>
-                                        <p>Layer2</p>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleLayer3Click.bind(this)} onTouchEnd={this.handleLayer3Click.bind(this)}>
-                                        <p>Layer3</p>
+    
+                                <MenuItem onClick={this.handleHighCrime.bind(this)} onTouchEnd={this.handleHighCrime.bind(this)}>
+                                        <p>High Crime Only</p>
                                     </MenuItem>
                                 </Paper>
                             </ClickAwayListener>
@@ -678,7 +862,7 @@ class App extends Component {
     );
 
     return (
-        <MuiThemeProvider theme={theme2}>
+        <MuiThemeProvider theme={theme}>
             <Router history={history}>
                 <SwipeableDrawer
                     open={this.state.left}
@@ -697,6 +881,7 @@ class App extends Component {
                 <div className='mapStyle' id='MAP'>
                 </div>
                 {this.theBar()}
+                <PanicButton getLocation={this.getLocation.bind(this)}/>
                 <Route exact path="/" component={this.homePage.bind(this)} />
                 <Route exact path="/map" component={this.mapPage.bind(this)} />
                 <Route exact path="/contacts" component={ContactsPage} />
