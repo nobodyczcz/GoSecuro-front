@@ -8,6 +8,7 @@ import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import { autoPlay } from 'react-swipeable-views-utils';
 import Paper from '@material-ui/core/Paper';
+import { Grid } from '@material-ui/core';
 
 
 
@@ -32,6 +33,7 @@ const styles = theme => ({
     },
     body: {
         height: '70%',
+        
     },
     header: {
         display: 'flex',
@@ -44,6 +46,10 @@ const styles = theme => ({
         alignItem: 'center',
         backgroundColor: theme.palette.background.paper,
     },
+    mainText:{
+        color:'#FF7504',
+        justifyContent: 'center',
+    }
 
 });
 
@@ -78,6 +84,7 @@ class HomePageStepper extends Component {
 
         return (
             <Paper className={classes.root}>
+                <img src="img/background.jpg" className="threepages"/>
                 <div className={classes.content}>
                     <AutoPlaySwipeableViews
                         className={classes.body}
@@ -87,13 +94,27 @@ class HomePageStepper extends Component {
                         enableMouseEvents
                     >
                         <div key='1'>
-                            Page one
+                            <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
+                                Top 5 Suburbs with Highest Crime Rate
+                            </Typography>
+                            <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' width ='100%' height='70%' align='center'/>
                         </div>
+
                         <div key='2'>
-                            Page two
+                            <div id="previewsecondLevel" className={classes.mainText}>Location of Criminal Incidents</div>
+                            <div class='picture'>
+                                <img src="img/LocationCrime.png" className="CrimePic" />
+                            </div>
+                            <br/>
+                            <div class='chartPicture'>
+                                <img src='img/statisticsChart.png' className='statisticsImage'/>
+                            </div>
                         </div>
-                        <div key='3'>
-                            Page three
+
+                        <div  key='3'>
+                            <div class='screenPicture'>
+                                <img src='img/screen3v3.png' className='screen3'/>  
+                            </div>  
                         </div>
  
                     </AutoPlaySwipeableViews>
