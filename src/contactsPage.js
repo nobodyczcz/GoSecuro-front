@@ -3,6 +3,13 @@ import Card from '@material-ui/core/Card';
 import Paper from '@material-ui/core/Paper';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
+import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Button from '@material-ui/core/Button';
+
+
+
+
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
@@ -23,19 +30,76 @@ const styles = theme => ({
     content: {
         marginTop: theme.spacing.unit * 17,
         height: '100%',
-        padding:'3%'
+        padding: '3%'
+
+    },
+    contacts: {
+        height: '100%',
+        padding: '3%'
+    },
+    cont: {
+        width: '49%'
     },
     body: {
         height: '70%',
+    },
+    header: {
+        height: theme.spacing.unit * 17,
+        width:'100%',
+    },
+    textField: {
+        marginTop: 0,
+        marginRight:'1%',
+        width:'49%'
     },
 });
 class ContactsPage extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            name: '',
+            mobile: '',
+            contactList:[]
         };
 
     }
+    componentDidMount() {
+        this.updateContactList()
+    }
+    handleChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+    handleAddNew = () => {
+        if (!localStorage.contactList) {
+            console.log('create new contact list')
+            var list = JSON.stringify([]);
+            localStorage.setItem('contactList', list);
+        };
+        console.log(localStorage['contactList'])
+
+        var list = JSON.parse(localStorage.contactList)
+        list.push({
+            name: this.state.name,
+            mobile: this.state.mobile
+        });
+
+        localStorage.contactList = JSON.stringify(list)
+        this.updateContactList()
+        this.setState({ name: '', mobile: '' });
+    };
+
+    updateContactList() {
+        
+        if (localStorage.getItem('contactList')) {
+            console.log(localStorage.getItem('contactList'));
+            this.setState({ contactList: JSON.parse(localStorage.contactList) })
+        }
+        else {
+            this.setState({ contactList: [] })
+        }
+        
+    }
+
 
     render() {
         const { classes } = this.props;
@@ -44,27 +108,69 @@ class ContactsPage extends React.Component {
                 <div className={classes.content}>
                     <Card>
                         <CardContent>
-                        <Typography gutterBottom variant="h6">
-                        Name
-                        </Typography>
-                        <Typography gutterBottom variant="h6">
-                                Mobile
-                        </Typography>
+                            <Typography gutterBottom align='center' variant="h6">
+                                New Emergency Contact
+                            </Typography>
+                            
+                            <TextField
+                                id="cantactName"
+                                label="Name"
+                                className={classes.textField}
+                                value={this.state.name}
+                                onChange={this.handleChange('name')}
+                                margin="normal"
+                            />
+                            <TextField
+                                id="cantactMobile"
+                                label="Mobile"
+                                className={classes.textField}
+                                value={this.state.mobile}
+                                onChange={this.handleChange('mobile')}
+                                margin="normal"
+                            />
 
                         </CardContent>
-                        <CardContent>
+                        <CardContent style={{paddingTop:0}}>
                             <Fab
                                 variant="extended"
                                 size="medium"
                                 color="secondary"
                                 aria-label="Add"
                                 className={classes.margin}
+                                onClick={this.handleAddNew}
                             >
                                 <AddIcon className={classes.extendedIcon} />
                                 Add New
                                 </Fab>
                         </CardContent>
                     </Card>
+                    <div className={classes.contacts}>
+                        <Typography gutterBottom align='center' variant="h6">
+                            Emergency Contacts
+                        </Typography>
+                        {this.state.contactList.map(function (item, i) {
+                            return (
+                                <Card>
+                                    <CardContent >
+                                        <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
+                                            Name  {item.name}
+                                        </Typography>
+
+                                        <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
+                                            Mobile  {item.mobile}
+                                        </Typography>
+
+
+                                        <Button variant="contained" color="secondary" className={classes.button}>
+                                            <DeleteIcon className={classes.rightIcon} />
+                                            Delete
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                                        );
+                        })}
+                        
+                    </div>
                 </div>
                 
             </Paper>
