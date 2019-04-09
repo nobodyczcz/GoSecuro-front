@@ -70,13 +70,21 @@ const styles = theme => ({
         zindex:1100,
     },
     layerMenu: {
-        position: 'absolute',
-        top: theme.spacing.unit * 12,
-        width: theme.spacing.unit * 15,
+        position: 'fixed',
+        top: theme.spacing.unit * 18,
+        left: 'calc( 100% - 150px)',
+        width: theme.spacing.unit * 17,
+        zIndex:1300
     },
     fullList: {
     width: 'auto',
-    }
+    },
+    panicPosition: {
+        position: 'fixed',
+        top: 'calc( 100% - 150px)',
+        left: 'calc( 50% - 50px)',
+        zIndex:1200,
+    },
 });
 
 const theme = createMuiTheme({
@@ -118,33 +126,42 @@ class App extends Component {
             console.log('Not using cordova: initiate app')
         };
 
-        this.userMarker = null;
+
+        /*
+        Map related attributes:
+        */
+
+        this.userMarker = null; //current user location marker
         this.directionsService = null;
         this.directionsDisplay = null;
 
         this.focusUser = true;
 
         this.markers = null;
-        this.service = null;
+        this.service = null; // google map places services
         this.suburbSet = new Set();
 
         this.userLocation = null;
-        this.heading = null;
-        this.basicHeading = 122;
-        this.userLocationImage = null;
+        this.heading = null; // direction of user heading
+        this.basicHeading = 122; //The small triangle on user marker do not point north on default, we use this to fix the initial direction of the triangle.
+        this.userLocationImage = null;  //The svg image of user location marker
         this.navRoutes = {
             driving: null,
             walking: null,
             transit: null
 
-        };
+        }; //Store navigation route at here
 
-        this.navValue = 0;
+        this.navValue = 0; //dicide which tag (walking driving and publictransport) is activated when jump to navigate page, 
         this.api = null;
 
         this.apiKey = 'AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0';
         
         this.mapurl = "https://maps.googleapis.com/maps/api/js?key=" + this.apiKey;
+
+        /*
+        Map related attributes finish
+        */
 
         console.log('create ref')
         this.mainBar = React.createRef();
@@ -160,16 +177,18 @@ class App extends Component {
 
         console.log('set state')
 
+        
         if (document.getElementById('mapdiv').childNodes.length === 0) {
+            //load map script from server. and render map when script is loaded
             console.log('download map scripts')
             postscribe('#mapdiv', '<script language="javascript" src=' + this.mapurl + '&libraries=places></script>', {
                 done: this.renderMap.bind(this),
             });
-        }
+        }  
 
         
-
-        this.state = {
+        
+        this.state = {  // state of react component
             left: false,
             currentPage: 0,
             mobileMoreAnchorEl: null,
@@ -180,16 +199,24 @@ class App extends Component {
             displayNavRoutes: false,
             navigating: false,
             currentRoute: null,
+            mapLayer:'all',
         };
         console.log('initiate done')
 
     }
 
-    componentDidMount() {
+    
+
+    /*Map and crime rate visiualization related functions
+     * 
+     * 
+     */
+
+    componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         var suburbs = inerSuburbNames;
         var data = [];
-  
+
 
         for (var i in suburbs) {
             if (!this.suburbSet.has(suburbs[i])) {
@@ -201,14 +228,16 @@ class App extends Component {
                 this.requestCrime(JSON.stringify(data));
                 data = []
             }
-            
+
         }
         if (data.length > 0) {
             this.requestCrime(JSON.stringify(data));
-        }        
+        }
 
     }
+
     requestCrime(jsonData) {
+        //load crime data from server. Display the data one loaded 
         console.log('sendData: ', jsonData);
         fetch('https://gosafe-back20190407071339.azurewebsites.net/Suburbs/Details/', {
             method: 'POST',
@@ -220,6 +249,12 @@ class App extends Component {
             .then(response => {
                 console.log(response);
                 response = JSON.parse(response);
+                var newRateData = {
+                    'type': 'FeatureCollection',
+                    'features': [
+
+                    ],
+                };
                 for (var i in response) {
                     var crime = {
                             'type': 'Feature',
@@ -233,8 +268,16 @@ class App extends Component {
                     crime.properties.crimeRate = response[i].crimeRate
                     crime.geometry = JSON.parse(response[i].boundary.replace(/'/g, '"'));
                     this.crimeData.features.push(crime);
+                    newRateData.features.push(crime)
                 }
-                this.handleAllCrime();
+                if (this.state.mapLayer === 'all') {
+                    this.displayAllCrime(this.map, newRateData);
+                }
+                else if (this.state.mapLayer === 'high') {
+                    this.displayHighCrimeOnly(this.map, newRateData);
+                }
+
+                
 
             })
             .catch(error => {
@@ -243,19 +286,32 @@ class App extends Component {
             });
     }
 
+    
     handleAllCrime() {
+        //Whe user click full heatmap in layer meun. Display all crime rate data on map.
+        this.clearMap(this.map)
+
         this.displayAllCrime(this.map, this.crimeData);
         this.handleMobileMenuClose();
         this.handleMobileMenuClose();
+        this.setState({ mapLayer: 'all' });
     }
     handleHighCrime() {
+        //When user click high crime only on layer meun clear map and display all crime data on the map
+        this.clearMap(this.map)
+
         this.displayHighCrimeOnly(this.map, this.crimeData);
         this.handleMobileMenuClose();
         this.handleMobileMenuClose();
+        this.setState({ mapLayer: 'high' });
+
     }
     handleCrimeOff() {
+        //When user click crime rate off on layer meun. clear map 
         this.clearMap(this.map);
         this.handleMobileMenuClose();
+        this.setState({ mapLayer: 'off' });
+
     }
 
     clearMap(map) {
@@ -270,7 +326,9 @@ class App extends Component {
         //this.clearMap(map)
         //this.displayColor(map, data)
         //clear previous data on map
-        this.clearMap(map)
+
+        //I deleted clear data part. As we need to keep adding new data to map. 
+        //It doesn't need to clear previous data.
 
         //Display high crime places only
         var newdata = {
@@ -292,7 +350,9 @@ class App extends Component {
 
     displayHighCrimeOnly(map, data) {
         //clear previous data on map
-        this.clearMap(map)
+
+        //I deleted clear data part. As we need to keep adding new data to map. 
+        //It doesn't need to clear previous data. Clear will be done by when user switch diaplay mode.
 
         //Display high crime places only
         var newdata = {
@@ -301,7 +361,7 @@ class App extends Component {
         };
         console.log(data)
         for (var i = 0; i < data.features.length; i++) {
-            if (data.features[i].properties.crimeRate > 0.0769) {
+            if (data.features[i].properties.crimeRate > 0.6) {
                 newdata.features.push(data.features[i]);
             }
         }
@@ -316,77 +376,77 @@ class App extends Component {
         map.data.addGeoJson(data)
         map.data.setStyle(function (feature) {
             // 1st quantile data cr=[0,0.01526)
-            if (feature.getProperty('crimeRate') >= 0 && feature.getProperty('crimeRate') <= 0.02526) {
+            if (feature.getProperty('crimeRate') >= 0 && feature.getProperty('crimeRate') <= 0.01526) {
                 return {
                     strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.002
+                    fillColor: "#00FF00",
+                    fillOpacity: 0.5
                 }
             }
 
             // 2nd quantile data cr=[0.01526,0.02344)
-            if (feature.getProperty('crimeRate') >= 0.02526 && feature.getProperty('crimeRate') <= 0.03344) {
+            if (feature.getProperty('crimeRate') >= 0.01526 && feature.getProperty('crimeRate') <= 0.02344) {
                 return {
                     strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.05
+                    fillColor: "#00FF00",
+                    fillOpacity: 0.4
                 }
             }
 
             // 3rd quantile data cr=[0.02344,0.0323)
-            if (feature.getProperty('crimeRate') >= 0.03344 && feature.getProperty('crimeRate') <= 0.0423) {
+            if (feature.getProperty('crimeRate') >= 0.02344 && feature.getProperty('crimeRate') <= 0.0323) {
                 return {
                     strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.08
+                    fillColor: "#00FF00",
+                    fillOpacity: 0.3
                 }
             }
             // 4th quantile data cr=[0.0323,0.0405)
-            if (feature.getProperty('crimeRate') >= 0.0423 && feature.getProperty('crimeRate') <= 0.0505) {
+            if (feature.getProperty('crimeRate') >= 0.0323 && feature.getProperty('crimeRate') <= 0.0405) {
                 return {
                     strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.12
+                    fillColor: "#00FF00",
+                    fillOpacity: 0.2
                 }
             }
             // 5th quantile data cr=[0.0405,0.0506)
-            if (feature.getProperty('crimeRate') >= 0.0505 && feature.getProperty('crimeRate') <= 0.0606) {
+            if (feature.getProperty('crimeRate') >= 0.0405 && feature.getProperty('crimeRate') <= 0.0506) {
                 return {
                     strokeOpacity: 0,
-                    fillColor: "#ff2600",
-                    fillOpacity: 0.16
+                    fillColor: "#00FF00",
+                    fillOpacity: 0.1
                 }
             }
             // 6th quantile data cr=[0.0506,0.0625)
-            if (feature.getProperty('crimeRate') >= 0.0606 && feature.getProperty('crimeRate') <= 0.0825) {
+            if (feature.getProperty('crimeRate') >= 0.0506 && feature.getProperty('crimeRate') <= 0.0625) {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.20
+                    fillOpacity: 0.1
                 }
             }
             // 7th quantile data cr=[0.0625,0.0769)
-            if (feature.getProperty('crimeRate') >= 0.0825 && feature.getProperty('crimeRate') <= 0.0969) {
+            if (feature.getProperty('crimeRate') >= 0.0625 && feature.getProperty('crimeRate') <= 0.0769) {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.22
+                    fillOpacity: 0.2
                 }
             }
             // 8th quantile data cr=[0.0769,0.10208)
-            if (feature.getProperty('crimeRate') >= 0.0969 && feature.getProperty('crimeRate') <= 0.12208) {
+            if (feature.getProperty('crimeRate') >= 0.0769 && feature.getProperty('crimeRate') <= 0.10208) {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.25
+                    fillOpacity: 0.3
                 }
             }
             // 9th quantile data cr=[0.10208,0.1529)
-            if (feature.getProperty('crimeRate') >= 0.12208 && feature.getProperty('crimeRate') <= 0.1529) {
+            if (feature.getProperty('crimeRate') >= 0.10208 && feature.getProperty('crimeRate') <= 0.1529) {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.27
+                    fillOpacity: 0.4
                 }
             }
             // 10th quantile data cr=[0.1529,15.5714)
@@ -394,15 +454,78 @@ class App extends Component {
                 return {
                     strokeOpacity: 0,
                     fillColor: "#ff2600",
-                    fillOpacity: 0.3
+                    fillOpacity: 0.5
                 }
             }
         })
 
     }
 
+    /*Map and crime rate visiualization related functions
+     * 
+     * Finish
+     */
+
+
+    /*Map initialization and user location related functions
+     * 
+     * 
+     */
+
+
+    
+    renderMap() {
+        const google = window.google
+        this.map = new google.maps.Map(document.getElementById('MAP'), {
+            center: { lat: -34.397, lng: 150.644 },
+            zoom: 8,
+            disableDefaultUI: true,
+            scaleControl: true,
+        });
+
+        this.userLocationImage = {
+            path: 'm4.875098,16.605717c-0.029873,-2.433882 0.634361,-4.022277 1.627162,-5.678671c0.992793,-1.656386 2.932073,-3.720554 4.74924,-4.408087c1.81716,-0.687541 3.921607,-1.167871 6.000649,-0.805492c2.079049,0.36238 5.338262,2.391187 6.88208,4.50682c1.54381,2.115634 3.648258,6.518236 3.552675,8.990873c-0.095591,2.472637 -0.470363,4.422155 -1.946421,6.460716c-1.476058,2.03856 -3.891329,3.333441 -5.87534,3.882768c-1.984019,0.549335 -4.916731,0.058456 -7.001448,-0.884383c-2.084724,-0.942847 -7.953368,-4.693612 -8.669499,-10.903462c-0.716131,-6.209842 -5.777823,8.471585 -4.537555,10.492192c1.240268,2.020599 16.396471,3.800382 11.481619,0.594933c-4.914845,-3.205448 -6.233289,-9.814326 -6.263162,-12.248208z',
+            fillColor: '#ff7504',
+            fillOpacity: 1,
+            strokeWeight: 3,
+            strokeColor:'#ffffff',
+            strokeOpacity:1,
+            size: new window.google.maps.Size(30, 30),
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(14, 14),
+            rotation: this.basicHeading+this.heading,
+        }
+        console.log('render map done');
+        this.currentLocation(); //Set user location marker and initial location when map loaded.
+        console.log('set current location done')
+
+        //initialize places service
+        this.service = new window.google.maps.places.PlacesService(this.map);
+
+        //initialize direction service
+        this.directionsService = new window.google.maps.DirectionsService();
+        this.directionsDisplay = new window.google.maps.DirectionsRenderer();
+
+        this.mainBar.current.setupAutoComplete();
+        console.log('set auto complete done')
+
+        window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
+        console.log('set location listener done')
+
+        this.map.addListener('dragstart', function () {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            this.focusUser = false;
+            console.log('focus user off')
+            document.getElementById('searchInput').blur();
+
+        }.bind(this));
+
+        
+    };
+
     currentLocation() {
-        //set the current location for first time usage.
+        //set the current location and user marker after user open the app.
         console.log('focus current location')
         navigator.geolocation.getCurrentPosition(function (position) {
             var thelat = position.coords.latitude;
@@ -431,77 +554,72 @@ class App extends Component {
             }
         }.bind(this));
     }
-    renderMap() {
-        const google = window.google
-        this.map = new google.maps.Map(document.getElementById('MAP'), {
-            center: { lat: -34.397, lng: 150.644 },
-            zoom: 8,
-            disableDefaultUI: true,
-            scaleControl: true,
-        });
-
-        this.userLocationImage = {
-            path: 'm4.875098,16.605717c-0.029873,-2.433882 0.634361,-4.022277 1.627162,-5.678671c0.992793,-1.656386 2.932073,-3.720554 4.74924,-4.408087c1.81716,-0.687541 3.921607,-1.167871 6.000649,-0.805492c2.079049,0.36238 5.338262,2.391187 6.88208,4.50682c1.54381,2.115634 3.648258,6.518236 3.552675,8.990873c-0.095591,2.472637 -0.470363,4.422155 -1.946421,6.460716c-1.476058,2.03856 -3.891329,3.333441 -5.87534,3.882768c-1.984019,0.549335 -4.916731,0.058456 -7.001448,-0.884383c-2.084724,-0.942847 -7.953368,-4.693612 -8.669499,-10.903462c-0.716131,-6.209842 -5.777823,8.471585 -4.537555,10.492192c1.240268,2.020599 16.396471,3.800382 11.481619,0.594933c-4.914845,-3.205448 -6.233289,-9.814326 -6.263162,-12.248208z',
-            fillColor: '#ff7504',
-            fillOpacity: 1,
-            strokeWeight: 3,
-            strokeColor:'#ffffff',
-            strokeOpacity:1,
-            size: new window.google.maps.Size(30, 30),
-            origin: new window.google.maps.Point(0, 0),
-            anchor: new window.google.maps.Point(14, 14),
-            rotation: this.basicHeading+this.heading,
-        }
-        console.log('render map done');
-        this.currentLocation();
-        console.log('set current location done')
-        this.service = new window.google.maps.places.PlacesService(this.map);
-
-        this.directionsService = new window.google.maps.DirectionsService();
-        this.directionsDisplay = new window.google.maps.DirectionsRenderer();
-
-        this.mainBar.current.setupAutoComplete();
-        console.log('set auto complete done')
-
-        window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
-        console.log('set location listener done')
-
-        this.map.addListener('dragstart', function () {
-            // 3 seconds after the center of the map has changed, pan back to the
-            // marker.
-            this.focusUser = false;
-            console.log('focus user off')
-        }.bind(this));
-
-        
-    };
-
-
-    toggleDrawer = (side, open) => () => {
-    this.setState({
-        [side]: open,
-    });
-        
-    };
-
-    handleScriptLoad() {
-        
-    }
-
-    handleMobileMenuOpen = event => {
-        this.setState({ mobileMoreAnchorEl: event.currentTarget });
-        this.setState({ layerMenu: !this.state.layerMenu });
-    };
-
-    handleMobileMenuClose = () => {
-        this.setState({ mobileMoreAnchorEl: null });
-        this.setState({ layerMenu: false });
-    };
 
     getLocation() {
+        //return user's current location when required
         return this.userLocation;
     }
 
+    handleMyLocationClick() {
+        console.log('my location clicked')
+        if (!this.userLocation) {
+
+        }
+        else if (this.focusUser) {
+            this.map.setZoom(18);
+        }
+        else {
+            this.focusUser = true;
+            this.map.setZoom(15);
+            this.map.setCenter(this.userLocation);
+            this.currentLocation();
+            console.log('focus user on')
+
+        }
+
+    }
+
+    onUpdateLocation(position) {
+        //update user location and heading direction.
+        console.log('update location triggered')
+        var thelat = position.coords.latitude;
+        var thelng = position.coords.longitude;
+        if (position.coords.heading) {
+            this.heading = position.coords.heading;
+
+        }
+        console.log('heading:' + this.heading)
+
+        this.userLocation = { lat: thelat, lng: thelng }
+
+        if (this.userMarker) {
+            console.log('update user location')
+
+            this.userLocationImage.rotation = this.basicHeading + this.heading;
+
+            this.userMarker.setIcon(this.userLocationImage);
+
+            this.userMarker.setPosition({ lat: thelat, lng: thelng });
+        }
+        if (this.focusUser) {
+            this.map.setCenter({ lat: thelat, lng: thelng })
+        }
+    }
+    onLocationErr(err) {
+        console.log(err)
+    }
+
+    
+
+    /*Map initialization and user location related functions
+     * 
+     * Finish
+     */
+
+    /*Map search related functions
+     * 
+     * 
+     */
     handleInputSearch = (input) => {
 
         if (this.service) {
@@ -525,86 +643,9 @@ class App extends Component {
         }
     };
 
-
-
-    handleClickAway() {
-        if (this.state.layerMenu) {
-            this.handleMobileMenuClose();
-        }        
-    }
-
-    handleBack() {
-        console.log('handle back trigered');
-        if (this.state.displayNavRoutes) {
-            console.log('cancel navi')
-            this.setState({ displayNavRoutes: false, currentRoute:null,currentPage:1 });
-            this.navRoutes = {
-                driving: null,
-                walking: null,
-                transit: null
-            }
-            this.directionsDisplay.setMap(null);
-        }
-        else {
-            this.setState({ searchResponse: null, displayBack: false,currentPage:1 });
-            this.clearAllMarkers();
-        }
-        
-    }
-
-    handleMyLocationClick() {
-        console.log('my location clicked')
-        if (!this.userLocation) {
-
-        }
-        else if (this.focusUser) {
-            this.map.setZoom(18);
-        }
-        else {
-            this.focusUser = true;
-            this.map.setZoom(15);
-            this.map.setCenter(this.userLocation);
-            this.currentLocation();
-            console.log('focus user on')
-
-        }
-        
-    }
-
-    onUpdateLocation(position) {
-        console.log('update location triggered')
-        var thelat = position.coords.latitude;
-        var thelng = position.coords.longitude;
-        if (position.coords.heading) {
-            this.heading = position.coords.heading;
-            
-        }
-        console.log('heading:' + this.heading)
-        
-        this.userLocation = { lat: thelat, lng: thelng }
-        
-        if (this.userMarker) {
-            console.log('update user location')
-            
-            this.userLocationImage.rotation = this.basicHeading + this.heading;
-
-            this.userMarker.setIcon(this.userLocationImage);
-
-            this.userMarker.setPosition({lat:thelat,lng:thelng});
-        }
-        if (this.focusUser) {
-            this.map.setCenter({ lat: thelat, lng: thelng })
-        }
-    }
-    onLocationErr(err) {
-        console.log(err)
-    }
-
-    
-
     clearAllMarkers = () => {
         console.log('clear mark')
-        for (var i=0; i < this.markers.length; i++) {
+        for (var i = 0; i < this.markers.length; i++) {
             this.markers[i].setMap(null);
         }
     };
@@ -619,9 +660,9 @@ class App extends Component {
         else {
             this.markers = [];
         }
-        
 
-        for (var i = 0; i < result.length;i++) {
+
+        for (var i = 0; i < result.length; i++) {
             var name = result[i].name;
             var icon = result[i].icon;
             var address = result[i].formatted_address;
@@ -637,9 +678,9 @@ class App extends Component {
                 // This marker is 20 pixels wide by 32 pixels high.
                 scaledSize: new window.google.maps.Size(30, 30),
                 // The origin for this image is (0, 0).
-                origin: new window.google.maps.Point(0,0),
+                origin: new window.google.maps.Point(0, 0),
                 // The anchor for this image is the base of the flagpole at (0, 32).
-                anchor: new window.google.maps.Point(15,15)
+                anchor: new window.google.maps.Point(15, 15)
             };
 
             var shape = {
@@ -648,18 +689,28 @@ class App extends Component {
             };
 
             var marker = new window.google.maps.Marker({
-                position: {lat:location.lat(),lng:location.lng()},
+                position: { lat: location.lat(), lng: location.lng() },
                 map: this.map,
                 icon: image,
                 shape: shape,
                 title: name,
-                zIndex:1100,
+                zIndex: 1100,
             });
             marker.setMap(this.map)
             this.markers.push(marker);
         }
 
     };
+
+    /*Map search related functions
+     * 
+     * finish
+     */
+
+    /*Map navigation related functions
+     * 
+     * 
+     */
 
     navigateTo(location) {
 
@@ -672,8 +723,8 @@ class App extends Component {
             transitOptions: {
                 departureTime: new Date(Date.now())
             },
-        };        
-        
+        };
+
         this.directionsService.route(drivingRequest, function (result, status) {
             console.log('get driving: ' + status)
             if (status == 'OK') {
@@ -697,7 +748,7 @@ class App extends Component {
         this.directionsService.route(walkRequest, function (result, status) {
             console.log('get walking: ' + status)
             if (status == 'OK') {
-                
+
                 this.navRoutes.walking = result
                 if (!this.state.displayNavRoutes) {
                     this.setState({ displayNavRoutes: true });
@@ -715,9 +766,9 @@ class App extends Component {
             },
         };
         this.directionsService.route(transitRequest, function (result, status) {
-            console.log('get transit: '+status)
+            console.log('get transit: ' + status)
             if (status == 'OK') {
-                
+
                 this.navRoutes.transit = result
                 if (!this.state.displayNavRoutes) {
                     this.setState({ displayNavRoutes: true });
@@ -728,11 +779,11 @@ class App extends Component {
     };
 
     setNavMode(mode) {
-        console.log('set transit mode: '+ mode)
+        console.log('set transit mode: ' + mode)
         this.directionsDisplay.setMap(this.map);
         if (mode === 'walking') {
             console.log(this.navRoutes.walking);
-            this.navValue=0
+            this.navValue = 0
             this.setState({ currentRoute: this.navRoutes.walking }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
         }
         else if (mode === 'transit') {
@@ -747,15 +798,136 @@ class App extends Component {
 
             this.setState({ currentRoute: this.navRoutes.driving }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
         }
-        
-        
+
+
 
     };
 
+    /*Map search related functions
+     * 
+     * finish
+     */
+
+    /* The buttons and icons on map page
+     * 
+     * 
+     */ 
+    mapPage() {
+        //define the appearance of map 
+        console.log('render home page')
+        const { classes } = this.props;
+
+
+
+        const { mobileMoreAnchorEl, layerMenu } = this.state;
+        const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+        var theleft;
+        var thetop;
+        if (isMobileMenuOpen) {
+            var x = mobileMoreAnchorEl.getBoundingClientRect();
+            theleft = x.left - 125;
+        };
+        return (
+            <div>
+
+
+                <div className={classes.layerContainer}>
+
+                    <Fab onClick={this.handleMobileMenuOpen} color="primary" size="small" className={classes.layerIcon}>
+                        <LayerIcon />
+                    </Fab>
+
+                    {this.state.layerMenu ? (
+                        <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} onTouchEnd={this.handleClickAway.bind(this)}>
+                            <Paper className={classes.layerMenu}>
+                                <MenuItem onClick={this.handleCrimeOff.bind(this)} onTouchEnd={this.handleCrimeOff.bind(this)}>
+                                    <p>Heatmap OFF</p>
+                                </MenuItem>
+                                <MenuItem onClick={this.handleAllCrime.bind(this)} onTouchEnd={this.handleAllCrime.bind(this)}>
+                                    <p>Full Heatmap</p>
+                                </MenuItem>
+
+                                <MenuItem onClick={this.handleHighCrime.bind(this)} onTouchEnd={this.handleHighCrime.bind(this)}>
+                                    <p>High Crime Only</p>
+                                </MenuItem>
+                            </Paper>
+                        </ClickAwayListener>
+                    ) : null}
+                </div>
+                <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
+                    <MyLocationIcon />
+                </Fab>
+                {!this.state.searchResponse ? (
+                    <div className={classes.panicPosition}>
+                        <PanicButton getLocation={this.getLocation.bind(this)} />
+
+                    </div>
+                ) : null
+                }
+
+                {this.state.searchResponse ? (
+                    <ResultCard apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                ) : null}
+            </div>
+        );
+    }
+
+    handleMobileMenuClose = () => {
+        this.setState({ mobileMoreAnchorEl: null, layerMenu: false });
+    };
+
+    handleClickAway() {
+        if (this.state.layerMenu) {
+            this.handleMobileMenuClose();
+        }
+    }
+
+    handleMobileMenuOpen = event => {
+        console.log(this.state.layerMenu)
+        if (this.state.layerMenu) {
+            console.log("close")
+            this.handleMobileMenuClose();
+        }
+        else {
+            this.setState({ mobileMoreAnchorEl: event.currentTarget, layerMenu: true });
+        }
+    };
+    /* The buttons and icons on map page
+     * 
+     * finish
+     */
+
+
+    toggleDrawer = (side, open) => () => {
+    this.setState({
+        [side]: open,
+    });
+        
+    };
+
+    handleBack() {
+        console.log('handle back trigered');
+        if (this.state.displayNavRoutes) {
+            console.log('cancel navi')
+            this.setState({ displayNavRoutes: false, currentRoute:null,currentPage:1 });
+            this.navRoutes = {
+                driving: null,
+                walking: null,
+                transit: null
+            }
+            this.directionsDisplay.setMap(null);
+        }
+        else {
+            this.setState({ searchResponse: null, displayBack: false,currentPage:1 });
+            this.clearAllMarkers();
+        }
+        
+    }
 
 
 
     theBar = () => {
+        // search and navigate bar
         return (
             <MainBar
                 toggleDrawer={this.toggleDrawer}
@@ -784,111 +956,62 @@ class App extends Component {
             );
     }
 
-    mapPage() {
-        console.log('render home page')
-        const { classes } = this.props;
-
-        
-
-        const { mobileMoreAnchorEl, layerMenu } = this.state;
-        const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
-        var theleft;
-        var thetop;
-        if (isMobileMenuOpen) {
-            var x = mobileMoreAnchorEl.getBoundingClientRect();
-            theleft = x.left-125;
-        };
-        return (
-            <div>
-                
-
-                    <div className={classes.layerContainer}>
-                    
-                        <Fab onClick={this.handleMobileMenuOpen} color="primary" size="small" className={classes.layerIcon}>
-                            <LayerIcon />
-                        </Fab>
-                        
-                        {layerMenu ? (
-                            <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} onTouchEnd={this.handleClickAway.bind(this)}>
-                            <Paper className={classes.layerMenu} style={{ left: theleft, zIndex: 1100 }}>
-                                <MenuItem onClick={this.handleCrimeOff.bind(this)} onTouchEnd={this.handleCrimeOff.bind(this)}>
-                                        <p>Heatmap OFF</p>
-                                    </MenuItem>
-                                <MenuItem onClick={this.handleAllCrime.bind(this)} onTouchEnd={this.handleAllCrime.bind(this)}>
-                                        <p>Full Heatmap</p>
-                                    </MenuItem>
     
-                                <MenuItem onClick={this.handleHighCrime.bind(this)} onTouchEnd={this.handleHighCrime.bind(this)}>
-                                        <p>High Crime Only</p>
-                                    </MenuItem>
-                                </Paper>
-                            </ClickAwayListener>
-                            ) : null}
-                </div>
-                <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
-                    <MyLocationIcon />
-                </Fab>
-                {this.state.searchResponse ? (
-                    <ResultCard apiKey={this.apiKey} map={this.map} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
-                        ) : null}
-                </div>
-            );
-    }
 
     render() {
-    console.log('reander basic app')
-    const { classes } = this.props;
+        //Basic structure of the whole app
+        console.log('reander basic app')
+        const { classes } = this.props;
 
-    const sideList = (
-        <div>
-            <List>
-                <ListItem button key='Navigation'>
-                    <ListItemIcon>
-                        <TurnedInIon></TurnedInIon>
-                    </ListItemIcon>
-                    <Link to="/AboutUs">About Us</Link>
-                </ListItem>
-            </List>
-            <Divider />
-            <List>
-                {['Tracking'].map((text, index) => (
-                <ListItem button key={text}>
-                    <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                    <ListItemText primary={text} />
-                </ListItem>
-                ))}
-            </List>
-        </div>
-    );
+        const sideList = (
+            <div>
+                <List>
+                    <ListItem button key='Navigation'>
+                        <ListItemIcon>
+                            <TurnedInIon></TurnedInIon>
+                        </ListItemIcon>
+                        <Link to="/AboutUs">About Us</Link>
+                    </ListItem>
+                </List>
+                <Divider />
+                <List>
+                    {['Tracking'].map((text, index) => (
+                    <ListItem button key={text}>
+                        <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
+                        <ListItemText primary={text} />
+                    </ListItem>
+                    ))}
+                </List>
+            </div>
+        );
 
-    return (
-        <MuiThemeProvider theme={theme}>
-            <Router history={history}>
-                <SwipeableDrawer
-                    open={this.state.left}
-                    onClose={this.toggleDrawer('left', false)}
-                    onOpen={this.toggleDrawer('left', true)}
-                >
-                    <div
-                        tabIndex={0}
-                        role="button"
-                        onClick={this.toggleDrawer('left', false)}
-                        onKeyDown={this.toggleDrawer('left', false)}
+        return (
+            <MuiThemeProvider theme={theme}>
+                <Router history={history}>
+                    <SwipeableDrawer
+                        open={this.state.left}
+                        onClose={this.toggleDrawer('left', false)}
+                        onOpen={this.toggleDrawer('left', true)}
                     >
-                        {sideList}
+                        <div
+                            tabIndex={0}
+                            role="button"
+                            onClick={this.toggleDrawer('left', false)}
+                            onKeyDown={this.toggleDrawer('left', false)}
+                        >
+                            {sideList}
+                        </div>
+                    </SwipeableDrawer>
+                    <div className='mapStyle' id='MAP'>
                     </div>
-                </SwipeableDrawer>
-                <div className='mapStyle' id='MAP'>
-                </div>
-                {this.theBar()}
-                <PanicButton getLocation={this.getLocation.bind(this)}/>
-                <Route exact path="/" component={this.homePage.bind(this)} />
-                <Route exact path="/map" component={this.mapPage.bind(this)} />
-                <Route exact path="/contacts" component={ContactsPage} />
-            </Router>  
-      </MuiThemeProvider>
-    );
-  }
+                    {this.theBar()}
+                    <Route exact path="/" component={this.homePage.bind(this)} />
+                    <Route exact path="/map" component={this.mapPage.bind(this)} />
+                    <Route exact path="/contacts" component={ContactsPage} />
+                </Router>  
+          </MuiThemeProvider>
+        );
+    }
 }
 
 export default withStyles(styles)(App);

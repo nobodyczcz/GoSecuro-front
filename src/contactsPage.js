@@ -63,15 +63,27 @@ class ContactsPage extends React.Component {
         this.state = {
             name: '',
             mobile: '',
+            userName:'',
             contactList:[]
         };
 
     }
     componentDidMount() {
         this.updateContactList()
+        if (localStorage.userName) {
+            this.setState({ userName: localStorage.userName })
+        }
+        else {
+            localStorage.setItem('userName','')
+        }
+        
     }
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
+    };
+    handleUserNameChange = event => {
+        this.setState({ userName: event.target.value });
+        localStorage.userName = event.target.value
     };
     handleAddNew = () => {
         if (!localStorage.contactList) {
@@ -118,6 +130,14 @@ class ContactsPage extends React.Component {
         return (
             <Paper className={classes.paper}>
                 <div className={classes.content}>
+                    <TextField
+                        id="userName"
+                        label="Your Name"
+                        className={classes.textField}
+                        value={this.state.userName}
+                        onChange={this.handleUserNameChange}
+                        margin="normal"
+                    />
                     <Card>
                         <CardContent>
                             <Typography gutterBottom align='center' variant="h6">

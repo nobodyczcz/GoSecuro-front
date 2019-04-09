@@ -15,6 +15,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import Fab from '@material-ui/core/Fab';
+import PanicButton from './panicButton.js';
+
 
 
 
@@ -92,7 +94,31 @@ const styles = theme => ({
     },
     navButton: {
         marginTop:60,
-    }
+    },
+
+    panicOpen: {
+        position: 'fixed',
+        zIndex: 1300,
+        top: 'calc( 75% - 150px)',
+        left: 'calc( 50% - 50px)',
+        transition: theme.transitions.create('height', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+
+    },
+    panicClose: {
+        zIndex: 1300,
+
+        position: 'fixed',
+        top: 'calc( 100% - 120px)',
+        left: 'calc( 50% - 50px)',
+        transition: theme.transitions.create('height', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+
+    },
 });
 
 class ResultCard extends Component {
@@ -126,6 +152,12 @@ class ResultCard extends Component {
         console.log('render result: ',this.props.currentRoute);
         const { classes, theme } = this.props;
         return (
+            <div>
+                <div className={
+                    this.state.open ? classes.panicOpen : classes.panicClose
+                }>
+                    <PanicButton getLocation={this.props.getLocation} />
+                </div>
             <Drawer
                 anchor="bottom"
                 variant="permanent"
@@ -141,6 +173,9 @@ class ResultCard extends Component {
                 }}
                 open={this.state.open}
             >
+                
+                
+                
                 <div className={classes.toolbar}>
                     <IconButton onClick={this.handleDrawerChange}>
                         {this.state.open ? <ChevronDownIcon /> : <ChevronUpIcon />}
@@ -225,7 +260,8 @@ class ResultCard extends Component {
                         }.bind(this))
                 }
                 
-            </Drawer>
+                </Drawer>
+                </div>
         )
     };
 }

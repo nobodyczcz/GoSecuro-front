@@ -9,6 +9,7 @@ import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 import { autoPlay } from 'react-swipeable-views-utils';
 import Paper from '@material-ui/core/Paper';
 import { Grid } from '@material-ui/core';
+import Card from '@material-ui/core/Card';
 
 
 
@@ -28,11 +29,12 @@ const styles = theme => ({
         height:'100%',
     },
     content: {
+        backgroundImage: 'img/background.jpg',
         marginTop: theme.spacing.unit * 15,
-        height:'100%'
+        height:'73%'
     },
     body: {
-        height: '70%',
+        height: '100%',
         
     },
     header: {
@@ -84,8 +86,8 @@ class HomePageStepper extends Component {
 
         return (
             <Paper className={classes.root}>
-                <img src="img/background.jpg" className="threepages"/>
-                <div className={classes.content}>
+                <Card className={classes.content}>
+                    <img src="img/background.jpg" className="threepages" />
                     <AutoPlaySwipeableViews
                         className={classes.body}
                         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
@@ -118,25 +120,27 @@ class HomePageStepper extends Component {
                         </div>
  
                     </AutoPlaySwipeableViews>
-                    <MobileStepper
-                        steps={maxSteps}
-                        position="static"
-                        activeStep={activeStep}
-                        className={classes.mobileStepper}
-                        nextButton={
-                          <Button size="small" onClick={this.handleNext} disabled={activeStep === maxSteps}>
-                              Next
+                    
+                </Card>
+                <MobileStepper
+                    steps={maxSteps}
+                    position="static"
+                    activeStep={activeStep}
+                    className={classes.mobileStepper}
+                    color='secondary'
+                    nextButton={
+                        <Button size="small" onClick={this.handleNext} disabled={activeStep === maxSteps - 1}>
+                            Next
                               {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                        </Button>
+                    }
+                    backButton={
+                        <Button size="small" onClick={this.handleBack} disabled={activeStep === 0}>
+                            {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                            Back
                           </Button>
-                        }
-                        backButton={
-                          <Button size="small" onClick={this.handleBack} disabled={activeStep === 0}>
-                              {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-                              Back
-                          </Button>
-                        }
-                    />
-                </div>
+                    }
+                />
             </Paper>
         );
     }

@@ -17,7 +17,6 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import HomeIcon from '@material-ui/icons/Home';
@@ -283,7 +282,6 @@ class MainBar extends React.Component {
                       GoSafe
                     </Typography>
                       <div className={classes.search}>
-                          <ClickAwayListener onClickAway={this.handleClickAway.bind(this)}>
                               <InputBase
                                   placeholder="Search…"
                                   id="searchInput"
@@ -292,7 +290,6 @@ class MainBar extends React.Component {
                                       input: classes.inputInput,
                                   }}
                               />
-                          </ClickAwayListener>
                       </div>
                       <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />

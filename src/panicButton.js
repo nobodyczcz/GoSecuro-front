@@ -1,17 +1,15 @@
 import React, { Component } from 'react';
 import Fab from '@material-ui/core/Fab';
 
-
-
-
 import { withStyles } from '@material-ui/core/styles';
+
+
+
 
 const styles = theme => ({
     panic: {
-        position: 'absolute',
-        top: '70%',
-        left: 'calc( 50% - 50px)',
-        zIndex: 1200,
+        posotion: 'flex',
+        zIndex: 1300,
         width: 100,
         height: 100,
         
@@ -47,29 +45,27 @@ class PanicButton extends React.Component {
                     console.log('send Message to ',contList[i].name)
                     var name = contList[i].name;
                     var googleLink = 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng
-                    var string = "Hi" + name + ", \nI'm in trouble at the moment. \nThis is my current location " + googleLink + " . I need your help. \nThanks."
-                    console.log(parseInt(contList[i].mobile));
-                    var data = {
-                        'to': contList[i].mobile,
-                        'body':string
-                    }
-                    console.log(data);
-                    window.sendSMSRequest.to = contList[i].mobile;
-                    window.sendSMSRequest.body = string;
-                    console.log('set request done: ', window.sendSMSRequest);
-                    console.log('auth ', window.auth.accessToken);
-                    var result = function (error, data, response) {
-                        if (error) {
-                            console.log('failed')
-                            console.error(error);
-                        } else {
-                            console.log('API called successfully. Returned data: ' + data);
+                    var string = "Hi " + name + ", \nYour friend " + localStorage.userName + " is in trouble at the moment.\nThis is their last current location " + googleLink + ".\nYou might want to get in touch with them to make sure they are alright..\nThanks. \n(Sent automatically by GoSafe) ";
+                    var data = [contList[i].mobile, string] 
+                    var jsonData = JSON.stringify(data)
+                    fetch('https://gosafe-back20190407071339.azurewebsites.net/Suburbs/Message/', {
+                        method: 'POST',
+                        body: jsonData,
+                        headers: {
+                            'Content-Type': 'application/json'
                         }
-                    };
+                    }).then(res => res.json())
+                        .then(response => {
+                            console.log(response);
 
-                    window.apiInstance.sendSMS(JSON.stringify(data), result);
+                        })
+                        .catch(error => {
+                            console.log('error')
+                            console.error('Error:', error)
+                        });
+            }
+            alert('Emergency trigerd! Emergency message and your location sened!')
 
-                }
 
 
         }

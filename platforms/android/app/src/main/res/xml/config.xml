@@ -39,6 +39,7 @@
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
     <allow-intent href="market:*" />
+    <icon src="public/img/icon.png" />
     <preference name="loglevel" value="DEBUG" />
     <preference name="StatusBarBackgroundColor" value="#b23c17" />
     <preference name="KeyboardResizeMode" value="false" />
