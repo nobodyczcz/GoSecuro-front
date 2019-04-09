@@ -32,7 +32,7 @@
     "typescript": "^3.3.4000"
   },
   "scripts": {
-    "start": "npm run remove:www && react-scripts start",
+    "start": "react-scripts start",
     "build": "npm run remove:www && react-scripts build",
     "build:cordova": "npm run remove:www && react-scripts build && cp -f -d -r build/* www",
     "test": "react-scripts test",
