@@ -1,8 +1,11 @@
 {
   "ExpandedNodes": [
     "",
-    "\\src"
+    "\\public",
+    "\\public\\img",
+    "\\src",
+    "\\src\\img"
   ],
-  "SelectedNode": "\\src\\AppBar.js",
+  "SelectedNode": "\\src\\index.css",
   "PreviewInSolutionExplorer": false
 }

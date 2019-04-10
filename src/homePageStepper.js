@@ -51,6 +51,9 @@ const styles = theme => ({
     mainText:{
         color:'#FF7504',
         justifyContent: 'center',
+    },
+    pages: {
+        overflow:'hidden',
     }
 
 });
@@ -60,6 +63,7 @@ class HomePageStepper extends Component {
         super(props);
         this.state = {
             activeStep: 0,
+            autoPlay:true,
         };
     };
 
@@ -79,6 +83,11 @@ class HomePageStepper extends Component {
         this.setState({ activeStep });
     };
 
+    handleTouchPage=()=> {
+        this.setState({ autoPlay: false });
+        console.log('autoplay false')
+    }
+
     render() {
         const { classes, theme } = this.props;
         const { activeStep } = this.state;
@@ -86,35 +95,41 @@ class HomePageStepper extends Component {
 
         return (
             <Paper className={classes.root}>
-                <Card className={classes.content}>
+                <Card
+                    className={classes.content}
+                    onTouchStart={this.handleTouchPage}
+                >
                     <img src="img/background.jpg" className="threepages" />
                     <AutoPlaySwipeableViews
+                        autoplay={this.state.autoPlay}
+                        interval='5000'
                         className={classes.body}
                         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
                         index={activeStep}
                         onChangeIndex={this.handleStepChange}
                         enableMouseEvents
+                        
                     >
-                        <div key='1'>
+                        <div key='1' className={classes.pages}>
                             <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
                                 Top 5 Suburbs with Highest Crime Rate
                             </Typography>
                             <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' width ='100%' height='70%' align='center'/>
                         </div>
 
-                        <div key='2'>
+                        <div key='2' className={classes.pages}>
                             <div id="previewsecondLevel" className={classes.mainText}>Location of Criminal Incidents</div>
-                            <div class='picture'>
+                            <div className='picture'>
                                 <img src="img/LocationCrime.png" className="CrimePic" />
                             </div>
                             <br/>
-                            <div class='chartPicture'>
+                            <div className='chartPicture'>
                                 <img src='img/statisticsChart.png' className='statisticsImage'/>
                             </div>
                         </div>
 
-                        <div  key='3'>
-                            <div class='screenPicture'>
+                        <div key='3' className={classes.pages}>
+                            <div className='screenPicture'>
                                 <img src='img/screen3v3.png' className='screen3'/>  
                             </div>  
                         </div>
