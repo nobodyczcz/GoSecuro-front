@@ -163,7 +163,7 @@ class MainBar extends React.Component {
                 lng: position.coords.longitude
             };
             var circle = new window.google.maps.Circle(
-                { center: geolocation, radius: position.coords.accuracy });
+                { center: geolocation, radius: '1000' });
             var options = {
                 bounds: circle.getBounds(),
                 types: ['establishment']
@@ -297,7 +297,8 @@ class MainBar extends React.Component {
                       <div className={classes.search}>
                               <InputBase
                                 placeholder={this.state.searchPlaceHolder}
-                                  id="searchInput"
+                                inputProps={{ maxlength: "10" }}
+                                id="searchInput"
                                   classes={{
                                       root: classes.inputRoot,
                                       input: classes.inputInput,

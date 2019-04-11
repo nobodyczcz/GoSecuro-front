@@ -103,7 +103,7 @@ class HomePageStepper extends Component {
                 >
                     <AutoPlaySwipeableViews
                         autoplay={this.state.autoPlay}
-                        interval='5000'
+                        interval={5000}
                         className={classes.body}
                         axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
                         index={activeStep}

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import Fab from '@material-ui/core/Fab';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 
 
 
@@ -14,6 +15,11 @@ const styles = theme => ({
         height: 100,
         
     },
+    progress: {
+        position:"fixed",
+        zIndex: 1300,
+        
+    },
     siren: {
         width: 70,
     }
@@ -24,15 +30,34 @@ class PanicButton extends React.Component {
         this.start = 0;
         this.end = 0;
         this.state = {
-
+            showProgress:false,
+            completed: 0,
+            progressCoord: [0, 0],
+            disabled: JSON.parse(localStorage.contactList).length === 0 ? true:false,
         };
 
     }
 
-    handleTouchStart() {
-        this.start = Date.now()/1000
+    progress = () => {
+        const { completed } = this.state;
+        this.setState({ completed: completed >= 100 ? completed : completed + 5 });
+    };
+
+    handleTouchStart = event => {
+        var position = event.currentTarget.getBoundingClientRect()
+
+        this.start = Date.now() / 1000;
+        this.setState({ completed: 0, progressCoord: [position.left, position.top], showProgress: true });
+        this.timer = setInterval(this.progress, 100);
     }
+
     handleTouchEnd() {
+        clearInterval(this.timer);
+        this.setState({
+            completed: 0,
+            showProgress: false
+        });
+
         if ((Date.now() / 1000 - this.start) > 2) {
             console.log('Emergency triggerd')
 
@@ -64,7 +89,7 @@ class PanicButton extends React.Component {
                             console.error('Error:', error)
                         });
             }
-            alert('Emergency trigerd! Emergency message and your location sened!')
+            alert('Panic Button trigerd! Emergency messages and your location have been sent to your Emergency contacts!')
 
 
 
@@ -75,8 +100,25 @@ class PanicButton extends React.Component {
         
         const { classes } = this.props;
         return (
-            <Fab color='primary' onTouchStart={this.handleTouchStart.bind(this)} onTouchEnd={this.handleTouchEnd.bind(this)} aria-label="panic" className={classes.panic}>
-                <img className={classes.siren} src='img/siren.png'></img>
+            <Fab color='primary' onTouchStart={this.handleTouchStart.bind(this)} onTouchEnd={this.handleTouchEnd.bind(this)} aria-label="panic" className={classes.panic} disabled = {this.state.disabled}>
+                {this.state.showProgress ?
+                    <CircularProgress
+                        style={{ left: this.state.progressCoord[0], top: this.state.progressCoord[1] }}
+                        className={classes.progress}
+                        variant="static"
+                        value={this.state.completed}
+                        color="secondary"
+                        size={100}
+                    />
+                    : null}
+                {this.state.disabled ?
+                    <Typography variant="subtitle2">
+                        No emergency contacts.
+                        Panic button disabled
+                    </Typography>
+                    :
+                    <img className={classes.siren} src='img/siren.png'></img>}
+                
             </Fab>
 
         );
