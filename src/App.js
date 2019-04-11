@@ -685,8 +685,8 @@ class App extends Component {
         var theleft;
         var thetop;
         if (isMobileMenuOpen) {
-            var x = mobileMoreAnchorEl.getBoundingClientRect();
-            theleft = x.left - 125;
+            var position = mobileMoreAnchorEl.getBoundingClientRect();
+            theleft = position.left - 125;
         };
         return (
             <div>
