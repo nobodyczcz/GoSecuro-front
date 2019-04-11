@@ -74,13 +74,25 @@ class ContactsPage extends React.Component {
         
     }
     handleChange = name => event => {
-        this.setState({ [name]: event.target.value });
+        if (name == "mobile" && event.target.value.length > 10) {
+            console.log("max reach")
+        }
+        else {
+            this.setState({ [name]: event.target.value });
+
+        }
+
+
     };
     handleUserNameChange = event => {
         this.setState({ userName: event.target.value });
         localStorage.userName = event.target.value
     };
     handleAddNew = () => {
+        if (this.state.name.length === 0 || this.state.mobile.length === 0) {
+            console.log("enpty")
+            return
+        }
         if (!localStorage.contactList) {
             console.log('create new contact list')
             var list = JSON.stringify([]);
@@ -158,7 +170,7 @@ class ContactsPage extends React.Component {
                                 value={this.state.mobile}
                                 onChange={this.handleChange('mobile')}
                                 type='number'
-                                inputProps={{maxlength:'13'}}
+                                inputProps={{ maxlength:'10'}}
                                 margin="normal"
                             />
 

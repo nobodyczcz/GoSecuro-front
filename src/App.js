@@ -86,6 +86,19 @@ const styles = theme => ({
         left: 'calc( 50% - 50px)',
         zIndex:1200,
     },
+    sideContent: {
+        marginTop: theme.spacing.unit * 5, 
+    },
+    legend: {
+        position: "absolute",
+        top: 'calc( 100% - 100px)',
+        width: "30%",
+        left:"2%",
+        zIndex: 1300,
+        borderRadius: "5px",
+        opacity:0.8
+
+    },
 });
 
 const theme = createMuiTheme({
@@ -697,6 +710,7 @@ class App extends Component {
                     <Fab onClick={this.handleMobileMenuOpen} color="primary" size="small" className={classes.layerIcon}>
                         <LayerIcon />
                     </Fab>
+                    {this.state.mapLayer === "off" ? null : <img src="img/legend.png" className={classes.legend}></img>}
 
                     {this.state.layerMenu ? (
                         <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} onTouchEnd={this.handleClickAway.bind(this)}>
@@ -826,22 +840,13 @@ class App extends Component {
 
         const sideList = (
             <div>
-                <List>
+                <List className={classes.sideContent}>
                     <ListItem button key='Navigation'>
                         <ListItemIcon>
                             <TurnedInIon></TurnedInIon>
                         </ListItemIcon>
                         <Link to="/AboutUs">About Us</Link>
                     </ListItem>
-                </List>
-                <Divider />
-                <List>
-                    {['Tracking'].map((text, index) => (
-                    <ListItem button key={text}>
-                        <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                        <ListItemText primary={text} />
-                    </ListItem>
-                    ))}
                 </List>
             </div>
         );
