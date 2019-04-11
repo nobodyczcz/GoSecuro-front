@@ -112,27 +112,28 @@ class HomePageStepper extends Component {
                         
                     >
                         <div key='1' className={classes.pages}>
-                            <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
-                                Top 5 Suburbs with Highest Crime Rate
-                            </Typography>
-                            <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' width ='100%' height='70%' align='center'/>
+                            <div className='screenPicture'>
+                                <img src='img/screen3v3.png' alt='Background' className='screen3'/>  
+                            </div>                            
                         </div>
 
                         <div key='2' className={classes.pages}>
-                            <div id="previewsecondLevel" className={classes.mainText}>Location of Criminal Incidents</div>
-                            <div className='picture'>
-                                <img src="img/LocationCrime.png" className="CrimePic" />
-                            </div>
-                            <br/>
-                            <div className='chartPicture'>
-                                <img src='img/statisticsChart.png' className='statisticsImage'/>
-                            </div>
+                            <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
+                                Top 5 Suburbs with Highest Crime Rate
+                            </Typography> 
+                            <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' alt='Top 5 Suburbs with High Crime rate' width ='100%' height='70%' align='center'/>
+                                                       
                         </div>
 
                         <div key='3' className={classes.pages}>
-                            <div className='screenPicture'>
-                                <img src='img/screen3v3.png' className='screen3'/>  
-                            </div>  
+                            <div id="previewsecondLevel" className={classes.mainText}>Location of Criminal Incidents</div>
+                            <div className='picture'>
+                                <img src="img/LocationCrime.png" alt='Location of Criminal Incidents' className="CrimePic" />
+                            </div>
+                            <br/>
+                            <div className='chartPicture'>
+                                <img src='img/statisticsChart.png' alt='Statistics based on Survey with 400 Women' className='statisticsImage'/>
+                            </div>
                         </div>
  
                     </AutoPlaySwipeableViews>
