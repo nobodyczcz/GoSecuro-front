@@ -9,8 +9,6 @@ import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 
 
-
-
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
@@ -89,7 +87,7 @@ class ContactsPage extends React.Component {
             localStorage.setItem('contactList', list);
         };
         console.log(localStorage['contactList'])
-
+        
         var list = JSON.parse(localStorage.contactList)
         list.push({
             name: this.state.name,
@@ -133,6 +131,8 @@ class ContactsPage extends React.Component {
                         className={classes.textField}
                         value={this.state.userName}
                         onChange={this.handleUserNameChange}
+                        type='text'
+                        inputProps={{maxlength:'10'}}
                         margin="normal"
                     />
                     <Card>
@@ -147,6 +147,8 @@ class ContactsPage extends React.Component {
                                 className={classes.textField}
                                 value={this.state.name}
                                 onChange={this.handleChange('name')}
+                                type='text'
+                                inputProps={{maxlength:'10'}}
                                 margin="normal"
                             />
                             <TextField
@@ -155,6 +157,8 @@ class ContactsPage extends React.Component {
                                 className={classes.textField}
                                 value={this.state.mobile}
                                 onChange={this.handleChange('mobile')}
+                                type='number'
+                                inputProps={{maxlength:'13'}}
                                 margin="normal"
                             />
 
