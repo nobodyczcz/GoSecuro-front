@@ -25,7 +25,6 @@ code {
 .threepages {
     border-radius:5px;
   position:fixed;
-  height:73%;
   width:90%;
   opacity:0.1;
 }

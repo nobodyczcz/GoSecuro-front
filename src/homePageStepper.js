@@ -29,9 +29,11 @@ const styles = theme => ({
         height:'100%',
     },
     content: {
-        backgroundImage: 'img/background.jpg',
+        backgroundImage: "url('img/background1.jpg')",
+        backgroundSize: "cover",
         marginTop: theme.spacing.unit * 15,
-        height:'73%'
+        height: '73%',
+        overflow:"hidden"
     },
     body: {
         height: '100%',
@@ -99,7 +101,6 @@ class HomePageStepper extends Component {
                     className={classes.content}
                     onTouchStart={this.handleTouchPage}
                 >
-                    <img src="img/background.jpg" className="threepages" />
                     <AutoPlaySwipeableViews
                         autoplay={this.state.autoPlay}
                         interval='5000'

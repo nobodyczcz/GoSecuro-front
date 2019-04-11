@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 
 
 
@@ -28,28 +29,24 @@ const styles = theme => ({
         zIndex: 900,
     },
     content: {
-        marginTop: theme.spacing.unit * 17,
-        height: '100%',
+        marginTop: "140px",
         padding: '3%',
-        overflow:'auto'
-
     },
     contacts: {
-        height: '100%',
+        height:"100%",
+        overflow: "scroll",
+        paddingLeft: '3%',
+        paddingRight: '3%',
+
+
     },
     contCard: {
         width: '100%',
+        height:"140px",
         marginBottom:theme.spacing.unit * 2,
     },
     cont: {
-        width: '49%'
-    },
-    body: {
-        height: '70%',
-    },
-    header: {
-        height: theme.spacing.unit * 17,
-        width:'100%',
+        width: '100%'
     },
     textField: {
         marginTop: 0,
@@ -176,39 +173,50 @@ class ContactsPage extends React.Component {
                                 </Fab>
                         </CardContent>
                     </Card>
-                    <div className={classes.contacts}>
-                        <Typography gutterBottom align='center' variant="h6">
-                            Emergency Contacts
-                        </Typography>
+                    <Typography gutterBottom align='center' variant="h6">
+                        Emergency Contacts
+                    </Typography>
+                </div>
+                <div className={classes.contacts}>
+                        
+                    <Grid
+                        container
+                        direction="row"
+                        justify="flex-start"
+                        alignItems="center"
+                        spacing={8}
+                    >
                         {this.state.contactList.map(function (item, i) {
                             return (
-                                <Card className={classes.contCard} key={i}>
-                                    <CardContent >
-                                        <Typography className={classes.cont} gutterBottom align='left' variant="h6">
-                                          {item.name}
-                                        </Typography>
+                                <Grid key={i} item xs={12} md={6} lg={3}>
+                                    <Card className={classes.contCard} >
+                                        <CardContent >
+                                            <Typography className={classes.cont} gutterBottom align='left' variant="h6">
+                                                Name: {item.name}
+                                            </Typography>
 
-                                        <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                            Mobile:  {item.mobile}
-                                        </Typography>
+                                            <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
+                                                Mobile:  {item.mobile}
+                                            </Typography>
 
 
-                                        <Button
-                                            variant="contained"
-                                            color="secondary"
-                                            className={classes.button}
-                                            onClick={() => { this.handleDelete(i) }}
-                                    >
-                                            <DeleteIcon className={classes.rightIcon} />
-                                            Delete
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                className={classes.button}
+                                                onClick={() => { this.handleDelete(i) }}
+                                        >
+                                                <DeleteIcon className={classes.rightIcon} />
+                                                Delete
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
                                         );
                         }.bind(this))}
-                        
-                    </div>
+                    </Grid>
                 </div>
+                
                 
             </Paper>
 

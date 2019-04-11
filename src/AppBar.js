@@ -25,6 +25,7 @@ import ContactsIcon from '@material-ui/icons/Contacts';
 import BusIcon from '@material-ui/icons/DirectionsBus';
 import WalkIcon from '@material-ui/icons/DirectionsWalk';
 import DriveIcon from '@material-ui/icons/DriveEta';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 
@@ -89,12 +90,14 @@ const styles = theme => ({
     },
   },
   searchIcon: {
-      width: theme.spacing.unit * 5,
+    width: theme.spacing.unit * 5,
     height: '100%',
     display: 'flex',
     alignItems: 'center',
-      justifyContent: 'center',
-  },
+    },
+    progress: {
+        position: 'fixed',
+    },
   inputRoot: {
     color: 'secondary',
     width: '100%',
@@ -138,7 +141,10 @@ class MainBar extends React.Component {
             mobileMoreAnchorEl: null,
             displayBack: this.props.displayBack,
             tabValue: this.props.tabValue ? this.props.tabValue : 0,
-            navValue: this.props.navValue ? this.props.navValue:0,
+            navValue: this.props.navValue ? this.props.navValue : 0,
+            searching: null,
+            searchCoord: [0, 0],
+            searchPlaceHolder:"Search a location..."
         };
   
     }
@@ -177,33 +183,40 @@ class MainBar extends React.Component {
     removeFocus() {
         document.getElementById('searchInput').blur();
     }
-  handleProfileMenuOpen = event => {
+    handleProfileMenuOpen = event => {
     this.setState({ anchorEl: event.currentTarget });
-  };
+    };
 
-  handleMenuClose = () => {
+    handleMenuClose = () => {
     this.setState({ anchorEl: null });
     this.handleMobileMenuClose();
-  };
+    };
 
-  handleMobileMenuOpen = event => {
+    handleMobileMenuOpen = event => {
     this.setState({ mobileMoreAnchorEl: event.currentTarget });
-  };
+    };
 
-  handleMobileMenuClose = () => {
+    handleMobileMenuClose = () => {
     this.setState({ mobileMoreAnchorEl: null });
-  };
+    };
 
-    handleSearch = () => {
+    handleSearch = event => {
         var input = document.getElementById('searchInput');
         var text = input.value;
         console.log(text);
-        
-        this.props.handleInputSearch(text);
-        if (this.state.tabValue != 1) {
-            document.getElementById('mapIcon').click();
+        if (text) {
+            var searchIconPosition = event.currentTarget.getBoundingClientRect()
+            this.props.handleInputSearch(text);
+            this.setState({ searching: true, searchCoord: [searchIconPosition.left, searchIconPosition.top] });
+            if (this.state.tabValue != 1) {
+                document.getElementById('mapIcon').click();
 
+            }
         }
+        else {
+            this.setState({searchPlaceHolder:"You must input something for search..."})
+        }
+
     }
 
     handleClickAway = () => {
@@ -263,7 +276,7 @@ class MainBar extends React.Component {
       </Menu>
     );
 
-      return (
+        return (
           
           <div>
               <AppBar position="static" className={classes.root}>
@@ -283,14 +296,16 @@ class MainBar extends React.Component {
                     </Typography>
                       <div className={classes.search}>
                               <InputBase
-                                  placeholder="Search…"
+                                placeholder={this.state.searchPlaceHolder}
                                   id="searchInput"
                                   classes={{
                                       root: classes.inputRoot,
                                       input: classes.inputInput,
                                   }}
-                              />
+                          />
+                         
                       </div>
+                        {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
                       <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />
                     </IconButton>

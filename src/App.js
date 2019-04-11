@@ -511,6 +511,7 @@ class App extends Component {
     };
 
     displaySearchResult = (result) => {
+        this.mainBar.current.setState({ searching: false });
         console.log(result)
         this.setState({ searchResponse: result, displayBack: true })
         console.log(this.markers)
