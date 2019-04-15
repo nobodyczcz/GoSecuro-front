@@ -77,6 +77,9 @@ class ContactsPage extends React.Component {
         if (name == "mobile" && event.target.value.length > 10) {
             console.log("max reach")
         }
+        else if(name == "name" && event.target.value.length > 10){
+
+        }
         else {
             this.setState({ [name]: event.target.value });
 
