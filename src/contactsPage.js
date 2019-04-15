@@ -75,10 +75,10 @@ class ContactsPage extends React.Component {
     }
     handleChange = name => event => {
         if (name == "mobile" && event.target.value.length > 10) {
-            console.log("max reach")
+            console.log("Mobile number: Max limit 10 reached")
         }
         else if(name == "name" && event.target.value.length > 10){
-
+            console.log("Contact Name: Max limit 10 reached")
         }
         else {
             this.setState({ [name]: event.target.value });
