@@ -29,8 +29,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 
-
-
 const styles = theme => ({
     root: {
         position: 'fixed',
@@ -50,7 +48,7 @@ const styles = theme => ({
         top: '5%',
         zIndex: 1000,
         width: '94%',
-        backgroundColor: 'secdonary',
+        backgroundColor: 'secondary',
         marginTop: theme.spacing.unit * 6
     },
     toolbarRoot: {
@@ -127,7 +125,7 @@ const styles = theme => ({
   },
 });
 
-class MainBar extends React.Component {
+class MainBar extends React.Component {  
     constructor(props) {
         super(props);
         if (window.cordova) {
@@ -148,6 +146,7 @@ class MainBar extends React.Component {
         };
   
     }
+    
     handleTabChange = (event, value) => {
         this.setState({ tabValue:value });
     };
@@ -224,13 +223,14 @@ class MainBar extends React.Component {
     }
 
     render() {
-        this.state.navValue = this.props.navValue;
-    const { anchorEl, mobileMoreAnchorEl } = this.state;
-    const { classes } = this.props;
-    const isMenuOpen = Boolean(anchorEl);
-    const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-    const renderMenu = (
+      this.state.navValue = this.props.navValue;
+      const { anchorEl, mobileMoreAnchorEl } = this.state;
+      const { classes } = this.props;
+      const isMenuOpen = Boolean(anchorEl);
+      const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+      const renderMenu = (
       <Menu
         anchorEl={anchorEl}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -294,18 +294,18 @@ class MainBar extends React.Component {
                     <Typography className={classes.title} variant="h6" color="inherit" noWrap>
                       GoSafe
                     </Typography>
-                      <div className={classes.search}>
-                              <InputBase
-                                placeholder={this.state.searchPlaceHolder}
-                                inputProps={{ maxlength: "10" }}
-                                id="searchInput"
-                                  classes={{
-                                      root: classes.inputRoot,
-                                      input: classes.inputInput,
-                                  }}
-                          />
-                         
-                      </div>
+                    <div className={classes.search}>
+                            <InputBase
+                              placeholder={this.state.searchPlaceHolder}
+                              inputProps={{ maxlength: "10" }}
+                              id="searchInput"
+                                classes={{
+                                    root: classes.inputRoot,
+                                    input: classes.inputInput,
+                                }}
+                        />
+                        
+                    </div>
                         {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
                       <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />
@@ -391,5 +391,6 @@ class MainBar extends React.Component {
 MainBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
+
 
 export default withStyles(styles)(MainBar);

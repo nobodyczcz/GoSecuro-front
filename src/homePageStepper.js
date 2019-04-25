@@ -121,8 +121,13 @@ class HomePageStepper extends Component {
                             <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
                                 Top 5 Suburbs with Highest Crime Rate
                             </Typography> 
-                            <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' alt='Top 5 Suburbs with High Crime rate' width ='100%' height='70%' align='center'/>
-                                                       
+                            <img id='highCrimeRateChart' src='img/crimeStatistics-transparent.png' alt='Top 5 Suburbs with High Crime rate' width ='100%' height='70%' align='center'/>
+                            <Typography className={classes.mainText} variant='h6'>
+                                <br/>
+                                Your safe journey Home is important.
+                                <br/>
+                                Find your safe way home.
+                            </Typography>                           
                         </div>
 
                         <div key='3' className={classes.pages}>
