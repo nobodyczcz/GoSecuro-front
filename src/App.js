@@ -2,15 +2,9 @@ import React, { Component } from 'react';
 import MainBar from './AppBar';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import NavigationIon from '@material-ui/icons/Navigation';
-import ContactsIon from '@material-ui/icons/Contacts';
 import TurnedInIon from '@material-ui/icons/TurnedIn';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -32,6 +26,8 @@ import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
 import MapController from './mapController.js'
+
+import RegisterPage from './registerPage.js'
 
 
 
@@ -137,7 +133,7 @@ const theme = createMuiTheme({
         light: '#ff8a65',
         main: '#ff7504',
       dark: '#ffa733',
-      contrastText: '#000',
+      contrastText: '#fff',
       },
     error: {
         main: '#ff8a65',
@@ -290,7 +286,7 @@ class App extends Component {
     requestCrime(jsonData) {
         //load crime data from server. Display the data one loaded 
         console.log('sendData: ', jsonData);
-        fetch('https://gosafe-back20190407071339.azurewebsites.net/Suburbs/Details/', {
+        fetch(window.serverUrl + 'api/Suburbs/Details/', {
             method: 'POST',
             body: jsonData,
             headers: {
@@ -917,6 +913,7 @@ class App extends Component {
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
+                    <Route exact path="/register" component={RegisterPage} />
                 </Router>  
           </MuiThemeProvider>
         );
