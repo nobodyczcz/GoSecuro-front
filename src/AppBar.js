@@ -238,8 +238,8 @@ class MainBar extends React.Component {
         open={isMenuOpen}
         onClose={this.handleMenuClose}
       >
-        <MenuItem onClick={this.handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={this.handleMenuClose}>My account</MenuItem>
+        <MenuItem onTouchEnd={this.handleMenuClose}>Profile</MenuItem>
+        <MenuItem onTouchEnd={this.handleMenuClose}>My account</MenuItem>
       </Menu>
     );
 
@@ -251,7 +251,7 @@ class MainBar extends React.Component {
         open={isMobileMenuOpen}
         onClose={this.handleMenuClose}
       >
-        <MenuItem onClick={this.handleMobileMenuClose}>
+        <MenuItem onTouchEnd={this.handleMobileMenuClose}>
           <IconButton color="inherit">
             <Badge badgeContent={4} color="secondary">
               <MailIcon />
@@ -259,7 +259,7 @@ class MainBar extends React.Component {
           </IconButton>
           <p>Messages</p>
         </MenuItem>
-        <MenuItem onClick={this.handleMobileMenuClose}>
+        <MenuItem onTouchEnd={this.handleMobileMenuClose}>
           <IconButton color="inherit">
             <Badge badgeContent={11} color="secondary">
               <NotificationsIcon />
@@ -267,7 +267,7 @@ class MainBar extends React.Component {
           </IconButton>
           <p>Notifications</p>
         </MenuItem>
-        <MenuItem onClick={this.handleProfileMenuOpen}>
+        <MenuItem onTouchEnd={this.handleProfileMenuOpen}>
           <IconButton color="inherit">
             <AccountCircle />
           </IconButton>
@@ -307,7 +307,7 @@ class MainBar extends React.Component {
                          
                       </div>
                         {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
-                      <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
+                      <IconButton onTouchEnd={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />
                     </IconButton>
                     
@@ -325,14 +325,14 @@ class MainBar extends React.Component {
                       <IconButton
                         aria-owns={isMenuOpen ? 'material-appbar' : undefined}
                         aria-haspopup="true"
-                        onClick={this.handleProfileMenuOpen}
+                        onTouchEnd={this.handleProfileMenuOpen}
                         color="inherit"
                       >
                         <AccountCircle />
                       </IconButton>
                     </div>
                     <div className={classes.sectionMobile}>
-                      <IconButton aria-haspopup="true" onClick={this.handleMobileMenuOpen} color="inherit">
+                      <IconButton aria-haspopup="true" onTouchEnd={this.handleMobileMenuOpen} color="inherit">
                         <MoreIcon />
                       </IconButton>
                     </div>
@@ -348,13 +348,13 @@ class MainBar extends React.Component {
                       className={classes.tabs}
                   >
 
-                      <Tab icon={<WalkIcon />} onClick={() => {
+                      <Tab icon={<WalkIcon />} onTouchEnd={() => {
                           this.props.setNavMode('walking')
                       }} />
-                      <Tab icon={<BusIcon />} onClick={() => {
+                      <Tab icon={<BusIcon />} onTouchEnd={() => {
                           this.props.setNavMode('transit')
                       }} />
-                      <Tab icon={<DriveIcon />} onClick={() => {
+                      <Tab icon={<DriveIcon />} onTouchEnd={() => {
                           this.props.setNavMode('driving')
                       }}/>
                   </Tabs>
@@ -368,13 +368,13 @@ class MainBar extends React.Component {
                       className={classes.tabs}
 
                   >
-                      <Tab icon={<HomeIcon />} onClick={() => {
+                      <Tab icon={<HomeIcon />} onTouchEnd={() => {
                           this.props.history.push('/')
                       }} />
-                      <Tab icon={<MapIcon />} id='mapIcon' onClick={() => {
+                      <Tab icon={<MapIcon />} id='mapIcon' onTouchEnd={() => {
                           this.props.history.push('/map')
                       }} />
-                      <Tab icon={<ContactsIcon />} onClick={() => {
+                      <Tab icon={<ContactsIcon />} onTouchEnd={() => {
                           this.props.history.push('/contacts')
                       }} />
                   </Tabs>
