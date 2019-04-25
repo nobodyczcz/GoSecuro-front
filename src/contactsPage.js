@@ -13,11 +13,40 @@ import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 
-
+import Modal from '@material-ui/core/Modal';
+import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
 
+
+function getModalStyle() {
+  
+    return {
+      top: `calc(100% - 60% )`,
+      left: `calc(100% - 98% )`,
+      width: `calc(100% - 10% )`,
+    };
+  }
+
 const styles = theme => ({
+    addNewButton:{
+        left:`calc( 100% - 125px )`
+    },
+
+    customLeftButton:{
+        left:`calc( 100% - 90% )`,
+        minWidth: '70px',
+        height: '40px',
+        width: '100px'
+    },
+
+    customRightButton:{
+        left:`calc( 50% - 10% )`,
+        minWidth: '70px',
+        height: '40px',
+        width: '100px'
+    },
+
     paper: {
         position: 'fixed',
         width: '100%',
@@ -35,8 +64,6 @@ const styles = theme => ({
         overflow: "scroll",
         paddingLeft: '3%',
         paddingRight: '3%',
-
-
     },
     contCard: {
         width: '100%',
@@ -51,6 +78,17 @@ const styles = theme => ({
         marginRight:'1%',
         width:'49%'
     },
+    mainText:{
+        color:'#FF7504',
+        justifyContent: 'center',
+    },
+    modalPaper: {
+        position: 'absolute',
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[5],
+        padding: '10px',
+        outline: 'none',
+      },
 });
 class ContactsPage extends React.Component {
     constructor(props) {
@@ -59,10 +97,20 @@ class ContactsPage extends React.Component {
             name: '',
             mobile: '',
             userName:'',
+            open:false,
             contactList:[]
         };
 
     }
+
+    handleOpen = () => {
+        this.setState({ open: true });
+    };
+    
+    handleClose = () => {
+    this.setState({ open: false });
+    };
+
     componentDidMount() {
         this.updateContactList()
         if (localStorage.userName) {
@@ -75,7 +123,10 @@ class ContactsPage extends React.Component {
     }
     handleChange = name => event => {
         if (name == "mobile" && event.target.value.length > 10) {
-            console.log("max reach")
+            console.log("Mobile number: Max limit 10 reached")
+        }
+        else if(name == "name" && event.target.value.length > 10){
+            console.log("Contact Name: Max limit 10 reached")
         }
         else {
             this.setState({ [name]: event.target.value });
@@ -109,6 +160,9 @@ class ContactsPage extends React.Component {
         localStorage.contactList = JSON.stringify(list)
         this.updateContactList()
         this.setState({ name: '', mobile: '' });
+
+        //close the popup
+        this.handleClose();
     };
 
     updateContactList() {
@@ -137,6 +191,7 @@ class ContactsPage extends React.Component {
         return (
             <Paper className={classes.paper}>
                 <div className={classes.content}>
+                    
                     <TextField
                         id="userName"
                         label="Your Name"
@@ -147,9 +202,29 @@ class ContactsPage extends React.Component {
                         inputProps={{maxlength:'10'}}
                         margin="normal"
                     />
-                    <Card>
-                        <CardContent>
-                            <Typography gutterBottom align='center' variant="h6">
+                    <Typography id='headerText' className={classes.mainText} gutterBottom align='left' variant='h5'>
+                        Emergency Contacts
+                    </Typography> 
+                    
+                    <Fab
+                        variant="extended"
+                        size="medium"
+                        color="secondary"
+                        aria-label="Add"
+                        className={classes.addNewButton}
+                        onClick={this.handleOpen}
+                    >
+                        <AddIcon className={classes.extendedIcon} />
+                        Add New
+                    </Fab>
+                    <Modal
+                        aria-labelledby="New-Emergency-Contact"
+                        aria-describedby="adds-new-emergency-contact"
+                        open={this.state.open}
+                        onClose={this.handleClose}
+                        >
+                        <div style={getModalStyle()} className={classes.modalPaper}>
+                        <Typography gutterBottom align='left' variant="h6">
                                 New Emergency Contact
                             </Typography>
                             
@@ -174,70 +249,75 @@ class ContactsPage extends React.Component {
                                 margin="normal"
                             />
 
-                        </CardContent>
-                        <CardContent style={{paddingTop:0}}>
                             <Fab
                                 variant="extended"
-                                size="medium"
                                 color="secondary"
-                                aria-label="Add"
-                                className={classes.margin}
+                                aria-label="Cancel"
+                                className={classes.customLeftButton}
+                                onClick={this.handleClose}
+                            >
+                                Cancel
+                            </Fab>
+
+                            <Fab
+                                variant="extended"
+                                color="secondary"
+                                aria-label="Save"
+                                className={classes.customRightButton}
                                 onClick={this.handleAddNew}
                             >
-                                <AddIcon className={classes.extendedIcon} />
-                                Add New
-                                </Fab>
-                        </CardContent>
-                    </Card>
-                    <Typography gutterBottom align='center' variant="h6">
-                        Emergency Contacts
-                    </Typography>
+                                Save
+                            </Fab>
+                        </div>
+                    </Modal>
                 </div>
+
                 <div className={classes.contacts}>
                         
-                    <Grid
-                        container
-                        direction="row"
-                        justify="flex-start"
-                        alignItems="center"
-                        spacing={8}
-                    >
-                        {this.state.contactList.map(function (item, i) {
-                            return (
-                                <Grid key={i} item xs={12} md={6} lg={3}>
-                                    <Card className={classes.contCard} >
-                                        <CardContent >
-                                            <Typography className={classes.cont} gutterBottom align='left' variant="h6">
-                                                Name: {item.name}
-                                            </Typography>
-
-                                            <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                                Mobile:  {item.mobile}
-                                            </Typography>
-
-
-                                            <Button
-                                                variant="contained"
-                                                color="secondary"
-                                                className={classes.button}
-                                                onClick={() => { this.handleDelete(i) }}
-                                        >
-                                                <DeleteIcon className={classes.rightIcon} />
-                                                Delete
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                                        );
-                        }.bind(this))}
-                    </Grid>
-                </div>
-                
-                
+                        <Grid
+                            container
+                            direction="row"
+                            justify="flex-start"
+                            alignItems="center"
+                            spacing={8}
+                        >
+                            {this.state.contactList.map(function (item, i) {
+                                return (
+                                    <Grid key={i} item xs={12} md={6} lg={3}>
+                                        <Card className={classes.contCard} >
+                                            <CardContent >
+                                                <Typography className={classes.cont} gutterBottom align='left' variant="h6">
+                                                    Name: {item.name}
+                                                </Typography>
+    
+                                                <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
+                                                    Mobile:  {item.mobile}
+                                                </Typography>
+    
+    
+                                                <Button
+                                                    variant="contained"
+                                                    color="secondary"
+                                                    className={classes.button}
+                                                    onClick={() => { this.handleDelete(i) }}
+                                            >
+                                                    <DeleteIcon className={classes.rightIcon} />
+                                                    Delete
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    </Grid>
+                                            );
+                            }.bind(this))}
+                        </Grid>
+                    </div>                
             </Paper>
 
         );
     }
 }
 
+ContactsPage.propTypes = {
+    classes: PropTypes.object.isRequired,
+  };
 export default withStyles(styles)(ContactsPage);

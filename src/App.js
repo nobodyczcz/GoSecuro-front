@@ -95,6 +95,27 @@ const styles = theme => ({
         opacity:0.8
 
     },
+    startUpPageLayer: {
+        position: 'absolute',
+        top:0,
+        left:0,
+        width: '100%',
+        height: '100%',
+        zIndex: 1400,
+        backgroundColor: "#ffffff"
+    },
+    welcomeImgContainer:{
+        position:'absolute',
+        top: '20%',
+        left: '5%',
+        width: '95%',
+        zIndex: 1410,
+    },
+    welcomeImg:{
+        width:'100%',
+        top:0,
+        left:0,
+    },
 });
 
 const theme = createMuiTheme({
@@ -212,7 +233,12 @@ class App extends Component {
             navigating: false,
             currentRoute: null,
             mapLayer:'all',
+            startUpPageLayer: true,
+            welcomeImgContainer:true,
         };
+        
+        this.interval= null;
+
         console.log('initiate done')
 
     }
@@ -232,6 +258,8 @@ class App extends Component {
         var suburbs = inerSuburbNames;
         var data = [];
 
+        this.interval = setTimeout(() => this.setState({startUpPageLayer: false}), 3000);
+
 
         for (var i in suburbs) {
             if (!this.suburbSet.has(suburbs[i])) {
@@ -249,6 +277,10 @@ class App extends Component {
             this.requestCrime(JSON.stringify(data));
         }
 
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     requestCrime(jsonData) {
@@ -827,6 +859,16 @@ class App extends Component {
             );
     }
 
+    startUpPage() {
+        return(
+            <div className={this.props.classes.startUpPageLayer} >
+                <div className={this.props.classes.welcomeImgContainer} >
+                    <img src="img/icon.png" className={this.props.classes.welcomeImg} alt='GoSafe'/> 
+                </div>
+            </div>
+        );
+    }
+
     
 
     render() {
@@ -850,6 +892,7 @@ class App extends Component {
         return (
             <MuiThemeProvider theme={theme}>
                 <Router history={history}>
+                    { this.state.startUpPageLayer ? this.startUpPage() : null }
                     <SwipeableDrawer
                         open={this.state.left}
                         onClose={this.toggleDrawer('left', false)}
