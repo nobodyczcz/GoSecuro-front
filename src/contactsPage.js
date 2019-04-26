@@ -15,6 +15,7 @@ import Fab from '@material-ui/core/Fab';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
+import IconButton from '@material-ui/core/IconButton';
 
 import { withStyles } from '@material-ui/core/styles';
 
@@ -27,6 +28,19 @@ function getModalStyle() {
       width: `calc(100% - 10% )`,
     };
   }
+
+function EditIcon(props) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" 
+            width="1.5em" 
+            height="1.5em" 
+            viewBox="0 0 24 24"
+            {...props}
+        >
+        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+        </svg>
+    );
+}
 
 const styles = theme => ({
     addNewButton:{
@@ -45,6 +59,21 @@ const styles = theme => ({
         minWidth: '70px',
         height: '40px',
         width: '100px'
+    },
+
+    deleteIconButton:{
+        float: 'right',
+        top: `calc( 100% - 90% )`
+
+    },
+    editIconButton:{
+        float: 'right',
+        top: `calc( 100% - 90% )`,
+        color: 'secondary',
+        fill: 'secondary',
+        transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+        opacity: '1',
+
     },
 
     paper: {
@@ -67,7 +96,7 @@ const styles = theme => ({
     },
     contCard: {
         width: '100%',
-        height:"140px",
+        height:"100px",
         marginBottom:theme.spacing.unit * 2,
     },
     cont: {
@@ -108,7 +137,18 @@ class ContactsPage extends React.Component {
     };
     
     handleClose = () => {
-    this.setState({ open: false });
+        this.setState({ open: false });
+    };
+
+    handleEditOpen = (item) => {
+        this.setState({ isOpen: true,
+                        activeItemName: item.name,
+                        activeMobile: item.mobile
+        });
+    };
+
+    handleEditClose = () => {
+        this.setState({ isOpen: false});
     };
 
     componentDidMount() {
@@ -141,7 +181,7 @@ class ContactsPage extends React.Component {
     };
     handleAddNew = () => {
         if (this.state.name.length === 0 || this.state.mobile.length === 0) {
-            console.log("enpty")
+            console.log("empty")
             return
         }
         if (!localStorage.contactList) {
@@ -177,6 +217,20 @@ class ContactsPage extends React.Component {
         
     }
 
+    handleEdit(index) {
+        var list = JSON.parse(localStorage.contactList)
+        list.splice(index, 1);
+        list.push({
+            name: this.state.name,
+            mobile: this.state.mobile
+        });
+        localStorage.contactList = JSON.stringify(list);
+        this.updateContactList();
+
+        //close the popup
+        this.handleEditClose();
+
+    }
     handleDelete(index) {
         var list = JSON.parse(localStorage.contactList)
         list.splice(index, 1);
@@ -286,24 +340,86 @@ class ContactsPage extends React.Component {
                                     <Grid key={i} item xs={12} md={6} lg={3}>
                                         <Card className={classes.contCard} >
                                             <CardContent >
+                                                <EditIcon
+                                                    className={classes.editIconButton}
+                                                    color="secondary"
+                                                    fill="secondary"
+                                                    float="right"
+                                                    onClick={() => {this.handleEditOpen(item)}} 
+                                                >
+                                                </EditIcon>
+                                                <Modal
+                                                    aria-labelledby="Edit-Emergency-Contact"
+                                                    aria-describedby="edits-emergency-contact"
+                                                    open={this.state.isOpen}
+                                                    onClose={this.handleEditClose}
+                                                    >
+                                                    <div style={getModalStyle()} className={classes.modalPaper}>
+                                                    <Typography gutterBottom align='left' variant="h6">
+                                                            Emergency Contact
+                                                        </Typography>
+                                                        
+                                                        <TextField
+                                                            id="cantactName"
+                                                            label="Name"
+                                                            className={classes.textField}
+                                                            defaultValue={this.state.activeItemName}
+                                                            value={this.state.name}
+                                                            onChange={this.handleChange('name')}
+                                                            type='text'
+                                                            inputProps={{maxlength:'10'}}
+                                                            margin="normal"
+                                                        />
+                                                        <TextField
+                                                            id="cantactMobile"
+                                                            label="Mobile"
+                                                            className={classes.textField}
+                                                            defaultValue={this.state.activeMobile}
+                                                            value={this.state.mobile}
+                                                            onChange={this.handleChange('mobile')}
+                                                            type='number'
+                                                            inputProps={{ maxlength:'10'}}
+                                                            margin="normal"
+                                                        />
+
+                                                        <Fab
+                                                            variant="extended"
+                                                            color="secondary"
+                                                            aria-label="Cancel"
+                                                            className={classes.customLeftButton}
+                                                            onClick={this.handleEditClose}
+                                                        >
+                                                            Cancel
+                                                        </Fab>
+
+                                                        <Fab
+                                                            variant="extended"
+                                                            color="secondary"
+                                                            aria-label="Save"
+                                                            className={classes.customRightButton}
+                                                            onClick={() => { this.handleEdit(i) }}
+                                                        >
+                                                            Save
+                                                        </Fab>
+                                                    </div>
+                                                </Modal>
+                                                
+                                                <IconButton 
+                                                    className={classes.deleteIconButton}
+                                                    aria-label="Delete"
+                                                    color="secondary"
+                                                    onClick={() => { this.handleDelete(i) }}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="h6">
                                                     Name: {item.name}
                                                 </Typography>
     
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
                                                     Mobile:  {item.mobile}
-                                                </Typography>
+                                                </Typography>    
     
-    
-                                                <Button
-                                                    variant="contained"
-                                                    color="secondary"
-                                                    className={classes.button}
-                                                    onClick={() => { this.handleDelete(i) }}
-                                            >
-                                                    <DeleteIcon className={classes.rightIcon} />
-                                                    Delete
-                                                </Button>
                                             </CardContent>
                                         </Card>
                                     </Grid>

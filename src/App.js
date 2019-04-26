@@ -74,7 +74,7 @@ const styles = theme => ({
         zIndex:1300
     },
     fullList: {
-    width: 'auto',
+        width: 'auto',
     },
     panicPosition: {
         position: 'fixed',
@@ -82,8 +82,12 @@ const styles = theme => ({
         left: 'calc( 50% - 50px)',
         zIndex:1200,
     },
+    sideContentBar: {
+        marginTop: theme.spacing.unit * 5,
+    },
     sideContent: {
-        marginTop: theme.spacing.unit * 5, 
+        color:'#FF7504',
+        underline: "none",
     },
     legend: {
         position: "absolute",
@@ -859,6 +863,19 @@ class App extends Component {
             );
     }
 
+    aboutUs() {
+        return(
+            <div>
+                <Typography className={classes.mainText} variant='h6'>
+                    <br/>
+                    Your safe journey Home is important.
+                    <br/>
+                    Find your safe way home.
+                </Typography>
+            </div> 
+        );
+    }
+
     startUpPage() {
         return(
             <div className={this.props.classes.startUpPageLayer} >
@@ -878,12 +895,15 @@ class App extends Component {
 
         const sideList = (
             <div>
-                <List className={classes.sideContent}>
+                <List className={classes.sideContentBar}>
                     <ListItem button key='Navigation'>
-                        <ListItemIcon>
-                            <TurnedInIon></TurnedInIon>
-                        </ListItemIcon>
-                        <Link to="/AboutUs">About Us</Link>
+                        <Link 
+                            className={classes.sideContent}
+                            variant='h6'
+                            onClick={() => {this.aboutUs()}}
+                        >
+                            About Us
+                        </Link>
                     </ListItem>
                 </List>
             </div>
