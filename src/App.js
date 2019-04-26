@@ -22,6 +22,7 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
 import ContactsPage from './contactsPage.js'
+import AboutUs from './AboutUs.js'
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
@@ -29,6 +30,8 @@ import MapController from './mapController.js';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
+import Typography from '@material-ui/core/Typography';
+import { Divider } from '@material-ui/core';
 
 
 
@@ -88,7 +91,7 @@ const styles = theme => ({
     },
     sideContent: {
         color:'#FF7504',
-        underline: "none",
+        textDecoration:'none'
     },
     legend: {
         position: "absolute",
@@ -988,7 +991,7 @@ class App extends Component {
     aboutUs() {
         return(
             <div>
-                <Typography className={classes.mainText} variant='h6'>
+                <Typography variant='h6'>
                     <br/>
                     Your safe journey Home is important.
                     <br/>
@@ -1022,9 +1025,34 @@ class App extends Component {
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
-                            onClick={() => {this.aboutUs()}}
+                            to='/aboutUs'
+                            onClick={() => {
+                                this.props.push('/aboutUs')}}
                         >
                             About Us
+                        </Link>
+                    </ListItem>
+                    <ListItem button key='Navigation'>
+                        <Link 
+                            className={classes.sideContent}
+                            variant='h6'
+                            to='/aboutUs'
+                            onClick={() => {
+                                this.props.push('/aboutUs')}}
+                        >
+                            Settings
+                        </Link>
+                    </ListItem>
+                    <Divider/>
+                    <ListItem button key='Navigation'>
+                        <Link 
+                            className={classes.sideContent}
+                            variant='h6'
+                            to='/aboutUs'
+                            onClick={() => {
+                                this.props.push('/aboutUs')}}
+                        >
+                            Logout
                         </Link>
                     </ListItem>
                 </List>
@@ -1057,6 +1085,7 @@ class App extends Component {
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={RegisterPage} />
                     <Route exact path="/login" component={LoginPage} />
+                    <Route exact path="/aboutUs" component={AboutUs}/>
                 </Router>  
           </MuiThemeProvider>
         );

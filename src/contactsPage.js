@@ -63,16 +63,17 @@ const styles = theme => ({
 
     deleteIconButton:{
         float: 'right',
-        top: `calc( 100% - 90% )`
+        top: `calc( 100% - 90% )`,
+        padding: '0'
 
     },
     editIconButton:{
         float: 'right',
         top: `calc( 100% - 90% )`,
-        color: 'secondary',
-        fill: 'secondary',
         transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         opacity: '1',
+        fill: '#FF7504',
+        paddingLeft: '20px'
 
     },
 
@@ -90,7 +91,7 @@ const styles = theme => ({
     },
     contacts: {
         height:"100%",
-        overflow: "scroll",
+        overflowY: "scroll",
         paddingLeft: '3%',
         paddingRight: '3%',
     },
@@ -118,6 +119,14 @@ const styles = theme => ({
         padding: '10px',
         outline: 'none',
       },
+      contactPaper: {
+        position: 'fixed',
+        width: '100%',
+        height: '100%',
+        top: `calc( 100% - 54% )`,
+        left: '0',
+        zIndex: 900,
+      }
 });
 class ContactsPage extends React.Component {
     constructor(props) {
@@ -140,10 +149,11 @@ class ContactsPage extends React.Component {
         this.setState({ open: false });
     };
 
-    handleEditOpen = (item) => {
+    handleEditOpen = (index,item) => {
         this.setState({ isOpen: true,
                         activeItemName: item.name,
-                        activeMobile: item.mobile
+                        activeMobile: item.mobile,
+                        activeIndex:index
         });
     };
 
@@ -219,8 +229,7 @@ class ContactsPage extends React.Component {
 
     handleEdit(index) {
         var list = JSON.parse(localStorage.contactList)
-        list.splice(index, 1);
-        list.push({
+        list.splice(index, 1,{
             name: this.state.name,
             mobile: this.state.mobile
         });
@@ -345,7 +354,7 @@ class ContactsPage extends React.Component {
                                                     color="secondary"
                                                     fill="secondary"
                                                     float="right"
-                                                    onClick={() => {this.handleEditOpen(item)}} 
+                                                    onClick={() => {this.handleEditOpen(i,item)}} 
                                                 >
                                                 </EditIcon>
                                                 <Modal
@@ -397,7 +406,7 @@ class ContactsPage extends React.Component {
                                                             color="secondary"
                                                             aria-label="Save"
                                                             className={classes.customRightButton}
-                                                            onClick={() => { this.handleEdit(i) }}
+                                                            onClick={() => { this.handleEdit(this.state.activeIndex) }}
                                                         >
                                                             Save
                                                         </Fab>
@@ -426,7 +435,7 @@ class ContactsPage extends React.Component {
                                             );
                             }.bind(this))}
                         </Grid>
-                    </div>                
+                    </div>              
             </Paper>
 
         );

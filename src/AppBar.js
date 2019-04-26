@@ -26,7 +26,7 @@ import BusIcon from '@material-ui/icons/DirectionsBus';
 import WalkIcon from '@material-ui/icons/DirectionsWalk';
 import DriveIcon from '@material-ui/icons/DriveEta';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
+import Paper from '@material-ui/core/Paper';
 
 
 const styles = theme => ({
@@ -38,6 +38,7 @@ const styles = theme => ({
         width: '94%',
         height:theme.spacing.unit * 6,
     },
+    
     tabsRoot: {
         height: theme.spacing.unit * 1,
 
@@ -277,7 +278,6 @@ class MainBar extends React.Component {
     );
 
         return (
-          
           <div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
