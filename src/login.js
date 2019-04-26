@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
 import Paper from '@material-ui/core/Paper';
-import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
+import { Link } from "react-router-dom";
+
 import APIs from './apis.js';
 import { ValidatorForm, SelectValidator, TextValidator } from 'react-material-ui-form-validator';
 
@@ -30,28 +25,31 @@ const styles = theme => ({
         width: "100%",
         marginTop: 0,
     },
-    selectAge: {
-        minWidth: "100px",
+    logoarea: {
+        width: '100%',
+        display: 'flex',
+
+        justifyContent: 'center',
     },
-    toolbar: {
-        justifyContent: "center",
-        marginTop: "20px",
+    logo: {
+        marginTop:'20%',
+        maxHeight:'300px'
     },
     content: {
         padding: "5%",
     },
-    buttons: {
-        position: "fixed",
-        bottom: 0,
-        width: "90%",
-        padding: "5%",
-        justifyItems: "space-between"
-    },
     button: {
-        minWidth: "100px",
+        marginTop:"10px",
+        width: "100%",
+        height: "30px",
+        marginBottom: "10px",
+    },
+    signup: {
+        display:"flex",
+        justifyContent: 'center',
     }
 });
-class Login extends React.Component {
+class LoginPage extends React.Component {
     constructor(props) {
         super(props);
         this.apis = new APIs();
@@ -117,7 +115,9 @@ class Login extends React.Component {
         return (
             <Paper className={classes.paper}>
 
-               
+                <div className={classes.logoarea}>
+                    <img className={classes.logo} src="img/icon.png"/>
+                </div>
                 <ValidatorForm
                     ref="theForm"
                     id="theForm"
@@ -162,20 +162,41 @@ class Login extends React.Component {
                                 margin="normal"
                             />
                         </Grid>
+
+                        <Grid xs={12}>
+                            <Fab
+                                variant="extended"
+                                className={classes.button}
+                                color="secondary"
+                                type="submit"
+                                form="theForm"
+                            >
+                                LOGIIN
+                        </Fab>
+                        </Grid>
+                        <Grid xs={12}>
+                            <div className={classes.signup}>
+                                <a>Don't have an account?</a>
+                                <Link to="/register"> Sign Up</Link>
+                            </div>
+                            
+
+                            
+                        </Grid>
+                        <Grid xs={12}>
+                            <Typography variant="body2"></Typography>
+                        </Grid>
+
+                        <Grid xs={12}>
+                            <Button size="small" className={classes.button}>
+                                SKIP FOR NOW
+                            </Button>
+                            
+                        </Grid>
+
                     </Grid>
 
-                    <Grid xs={12}>
-                        <Button
-                            style={{ float: "center" }}
-                            variant="contained"
-                            className={classes.button}
-                            color="secondary"
-                            type="submit"
-                            form="theForm"
-                        >
-                            Next
-                        </Button>
-                    </Grid>
+                    
                 </ValidatorForm>
 
 
@@ -185,4 +206,4 @@ class Login extends React.Component {
     }
 }
 
-export default withStyles(styles)(Login);
+export default withStyles(styles)(LoginPage);

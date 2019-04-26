@@ -9,6 +9,15 @@ class APIs {
 
     }
 
+    isLogin() {
+        if (sessionStorage.getItem(this.tokenKey)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     callApi(api,data,success,error) {
 
             var token = sessionStorage.getItem(this.tokenKey);

@@ -162,7 +162,7 @@ class MainBar extends React.Component {
                 lng: position.coords.longitude
             };
             var circle = new window.google.maps.Circle(
-                { center: geolocation, radius: '1000' });
+                { center: geolocation, radius: 1000 });
             var options = {
                 bounds: circle.getBounds(),
                 types: ['establishment']

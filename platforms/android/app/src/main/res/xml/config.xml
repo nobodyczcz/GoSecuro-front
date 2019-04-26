@@ -17,6 +17,11 @@
     <feature name="Geolocation">
         <param name="android-package" value="org.apache.cordova.geolocation.Geolocation" />
     </feature>
+    <feature name="File">
+        <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+        <param name="onload" value="true" />
+    </feature>
+    <allow-navigation href="cdvfile:*" />
     <feature name="Badge">
         <param name="android-package" value="de.appplant.cordova.plugin.badge.Badge" />
     </feature>

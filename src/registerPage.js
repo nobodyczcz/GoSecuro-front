@@ -59,6 +59,7 @@ class RegisterPage extends React.Component {
             firstName: "",
             lastName: "",
             mobileNumber: "",
+            address:'',
             email: "",
             gender: '',
             password: "",
@@ -105,6 +106,7 @@ class RegisterPage extends React.Component {
         var regdata = {
             Phone: this.state.mobileNumber,
             Email: this.state.email,
+            Adress:this.state.address,
             FirstName: this.state.firstName,
             LastName: this.state.lastName,
             Gender: this.state.gender,
