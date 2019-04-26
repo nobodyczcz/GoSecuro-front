@@ -25,9 +25,10 @@ import ContactsPage from './contactsPage.js'
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
-import MapController from './mapController.js'
+import MapController from './mapController.js';
 
-import RegisterPage from './registerPage.js'
+import RegisterPage from './registerPage.js';
+import LoginPage from './login.js';
 
 
 
@@ -248,19 +249,70 @@ class App extends Component {
 
     
 
-    /*Map and crime rate visiualization related functions
-     * 
-     * 
+    
+     /*
+     * app initialize and load data from server
      */
-
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
-        var suburbs = inerSuburbNames;
-        var data = [];
+        
 
         this.interval = setTimeout(() => this.setState({startUpPageLayer: false}), 3000);
 
+        if (window.cordova) {
+            //try to find crimeRates.json if using cordova
+            window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, function (fs) {
 
+                console.log('file system open: ' + fs.name);
+                fs.root.getFile("crimeRates.json", { create: false, exclusive: false }, this.successGetCrimeJson.bind(this), this.failedGetCrimeJson.bind(this));
+
+            }.bind(this), this.onErrorLoadFs.bind(this));
+        }
+        else {
+            //directly load from server is using broswer
+            this.retrieveCrimeRates()
+        }
+    }
+
+    successGetCrimeJson(fileEntry) {
+        //if crimeRates.json exist. read the file and display them on map
+        console.log("crimeRates.json exist: " + fileEntry.isFile.toString());
+        
+        fileEntry.file(function (file) {
+            var reader = new FileReader();
+            this.fileReader = reader; //allow call back function access reader object
+
+            reader.onloadend = function () {
+                console.log("Successful file read: " + this.fileReader.result);
+                this.crimeData = JSON.parse(this.fileReader.result);
+                this.displayCrimeRateByLayerSetting();
+                
+
+            }.bind(this);
+
+            reader.readAsText(file);
+
+        }.bind(this), this.failedGetCrimeJson.bind(this));
+    }
+    failedGetCrimeJson(error) {
+        //if crimeRates.json doesn't exist, load data from server 
+        console.log(JSON.stringify(error))
+        console.log("read crimeReates.json failed, load from server")
+        this.retrieveCrimeRates()
+    }
+    onErrorLoadFs(error) {
+        //if don't have permission to file system, load from server
+        console.log(JSON.stringify(error))
+        console.log("Permission failed. read crimeReates.json failed, load from server")
+        this.retrieveCrimeRates()
+    }
+
+
+
+    retrieveCrimeRates() {
+        var suburbs = inerSuburbNames;
+        var data = [];
+        // Request crime rate data. 30 suburbs per http post
         for (var i in suburbs) {
             if (!this.suburbSet.has(suburbs[i])) {
                 data.push(suburbs[i])
@@ -273,19 +325,22 @@ class App extends Component {
             }
 
         }
+
         if (data.length > 0) {
             this.requestCrime(JSON.stringify(data));
         }
-
     }
 
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
+
+
+
     requestCrime(jsonData) {
         //load crime data from server. Display the data one loaded 
-        console.log('sendData: ', jsonData);
+        console.log('sendData: '+jsonData);
         fetch(window.serverUrl + 'api/Suburbs/Details/', {
             method: 'POST',
             body: jsonData,
@@ -315,7 +370,7 @@ class App extends Component {
                     crime.properties.crimeRate = response[i].crimeRate
                     crime.geometry = JSON.parse(response[i].boundary.replace(/'/g, '"'));
                     this.crimeData.features.push(crime);
-                    newRateData.features.push(crime)
+                    newRateData.features.push(crime);
                 }
                 if (this.state.mapLayer === 'all') {
                     this.mapController.displayAllCrime(this.map, newRateData);
@@ -324,16 +379,83 @@ class App extends Component {
                     this.mapController.displayHighCrimeOnly(this.map, newRateData);
                 }
 
+                if (this.crimeData.features.length > 415) {
+                    if (window.cordova) {
+                        this.saveCrimateRateJson();
+                    }
+                }
+
                 
 
             })
             .catch(error => {
                 console.log('error')
-                console.error('Error:', error)
+                console.error('Error:'+ error)
             });
     }
 
-    
+    saveCrimateRateJson() {
+        window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, function (fs) {
+
+            console.log('file system open: ' + fs.name);
+            fs.root.getFile("crimeRates.json", { create: true, exclusive: false }, function (fileEntry) {
+
+                this.writeFile(fileEntry, JSON.stringify(this.crimeData));
+
+            }.bind(this), this.onErrorCreateFile);
+
+        }.bind(this), this.onErrorCreatePermission);
+    }
+
+    writeFile(fileEntry, dataObj) {
+        // Create a FileWriter object for our FileEntry .
+        fileEntry.createWriter(function (fileWriter) {
+
+            fileWriter.onwriteend = function () {
+                console.log("Successful file write...");
+            };
+
+            fileWriter.onerror = function (e) {
+                console.log("Failed file write: " + e.toString());
+            };
+
+            // If data object is not passed in,
+            // create a new Blob instead.
+            if (!dataObj) {
+                dataObj = new Blob(['some file data'], { type: 'text/plain' });
+            }
+
+            fileWriter.write(dataObj);
+        });
+    }
+
+    onErrorCreateFile(error) {
+        console.log(error.toString())
+    }
+    onErrorCreatePermission(error) {
+        console.log(error.toString())
+    }
+
+    /*
+     * app initialize and load data from server finish
+     */
+
+
+    /*Map and crime rate visiualization related functions
+     * 
+     * 
+     */
+    displayCrimeRateByLayerSetting() {
+        if (this.state.mapLayer === 'all') {
+            this.handleAllCrime();
+        }
+        else if (this.state.mapLayer === 'high') {
+            this.handleHighCrime();
+        }
+        else if (this.state.mapLayer === 'off') {
+            this.handleCrimeOff();
+        }
+    }
     handleAllCrime() {
         //Whe user click full heatmap in layer meun. Display all crime rate data on map.
         this.mapController.clearMap(this.map)
@@ -914,6 +1036,7 @@ class App extends Component {
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={RegisterPage} />
+                    <Route exact path="/login" component={LoginPage} />
                 </Router>  
           </MuiThemeProvider>
         );

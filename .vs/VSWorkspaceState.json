@@ -3,9 +3,8 @@
     "",
     "\\public",
     "\\public\\img",
-    "\\src",
-    "\\src\\img"
+    "\\src"
   ],
-  "SelectedNode": "\\src\\AppBar.js",
+  "SelectedNode": "\\public\\index.html",
   "PreviewInSolutionExplorer": false
 }

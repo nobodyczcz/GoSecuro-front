@@ -21,6 +21,9 @@
     },
     "cordova-plugin-ionic-keyboard": {
       "PACKAGE_NAME": "com.fitech.gosafefront"
+    },
+    "cordova-plugin-file": {
+      "PACKAGE_NAME": "com.fitech.gosafefront"
     }
   },
   "dependent_plugins": {
