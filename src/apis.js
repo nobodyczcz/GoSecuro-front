@@ -39,7 +39,8 @@ class APIs {
 
             $.ajax({
                 type: 'POST',
-                url: this.url+api,
+                url: this.url + api,
+                contentType: 'application/json; charset=utf-8',
                 headers: headers,
                 data: JSON.stringify(data)
             }).done(success).fail(error);

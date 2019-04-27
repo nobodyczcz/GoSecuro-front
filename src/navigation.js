@@ -43,10 +43,37 @@ class NavigationPage extends React.Component {
     }
 
     componentDidMount() {
-        if (window.cordova) {
-            this.props.locationSharing.start()
-        }
+        this.handleStartTracking()
+        
 
+    }
+
+    handleStartTracking() {
+        console.log("Start tracking. start location:" + JSON.stringify(this.props.userLocation));
+        if (window.cordova) {
+            this.props.locationSharing.startTracking(this.props.userLocation);
+
+        }
+        else { console.log("tracking do not work in broswer emviroment")}
+
+    }
+
+    handleStopTracking() {
+        console.log("Stop tracking. stop location:" + JSON.stringify(this.props.userLocation));
+
+        if (window.cordova) {
+            this.props.locationSharing.stopTracking();
+
+        }
+        else { console.log("tracking do not work in broswer emviroment") }
+
+    }
+
+
+    handleCancelNav() {
+        this.handleStopTracking();
+        this.props.history.goBack();
+        
     }
 
 
@@ -69,7 +96,7 @@ class NavigationPage extends React.Component {
 
                 <AppBar className={classes.foot} color="primary" position="static">
                     <Toolbar className={classes.footBar}>
-                        <Button variant='extended' onClick={this.handleCancelNav()} >Cancel</Button>
+                        <Button variant='extended' onClick={this.handleCancelNav.bind(this)} >Cancel</Button>
                     </Toolbar>
                     </AppBar>
             </div>

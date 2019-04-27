@@ -630,6 +630,7 @@ class App extends Component {
             console.log(thelng)
             console.log(this.heading)
             this.userLocation = { lat: thelat, lng: thelng }
+            this.setState({ userLocation : this.userLocation})
             this.map.setCenter({ lat: thelat, lng: thelng })
             this.map.setZoom(15)
             if (!this.userMarker) {
@@ -683,7 +684,8 @@ class App extends Component {
         }
         console.log('heading:' + this.heading)
 
-        this.userLocation = { lat: thelat, lng: thelng }
+        this.userLocation = { lat: thelat, lng: thelng };
+        this.setState({ userLocation: this.userLocation });
 
         if (this.userMarker) {
             console.log('update user location')
@@ -1159,7 +1161,7 @@ class App extends Component {
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={() => <RegisterPage history={history} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage userLocation={this.state.userLocation} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     
                 </Router>  
