@@ -1035,8 +1035,7 @@ class App extends Component {
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
-                            onClick={() => {
-                                this.props.push('/aboutUs')}}
+
                         >
                             About Us
                         </Link>
@@ -1046,8 +1045,6 @@ class App extends Component {
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
-                            onClick={() => {
-                                this.props.push('/aboutUs')}}
                         >
                             Settings
                         </Link>
@@ -1058,8 +1055,6 @@ class App extends Component {
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
-                            onClick={() => {
-                                this.props.push('/aboutUs')}}
                         >
                             Logout
                         </Link>
@@ -1094,7 +1089,8 @@ class App extends Component {
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={RegisterPage} />
                     <Route exact path="/login" component={() => <LoginPage history={history}  />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage/>} />
+                    <Route exact path="/navigation" component={() => <NavigationPage />} />
+                    <Route exact path="/aboutUs" component={AboutUs} />
                 </Router>  
           </MuiThemeProvider>
         );
