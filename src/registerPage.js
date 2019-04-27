@@ -292,7 +292,12 @@ class RegisterPage extends React.Component {
                     </Grid>
                 
                     <span className={classes.buttons}>
-                        <Button variant="contained" className={classes.button} color="secondary">
+                        <Button
+                            variant="contained"
+                            className={classes.button}
+                            color="secondary"
+                            onClick={() => { this.props.history.goBack()}}
+                        >
                             Cancel
                         </Button>
                         <Button

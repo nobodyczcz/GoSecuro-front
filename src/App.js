@@ -1087,9 +1087,9 @@ class App extends Component {
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
-                    <Route exact path="/register" component={RegisterPage} />
+                    <Route exact path="/register" component={() => <RegisterPage history={history} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history}  />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage history={history} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                 </Router>  
           </MuiThemeProvider>

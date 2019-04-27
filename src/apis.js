@@ -18,7 +18,12 @@ class APIs {
         }
     }
 
-    callApi(api,data,success,error) {
+    callApi(api, data, success, error) {
+        //call the api with data
+        //api : the route to api
+        //data : json data you want to pass to server
+        //success : success call back function that take error as argument
+        //error : error call back function that take error as argument
 
             var token = sessionStorage.getItem(this.tokenKey);
             var headers = {};
