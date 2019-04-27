@@ -1026,8 +1026,6 @@ class App extends Component {
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
-                            onClick={() => {
-                                this.props.push('/aboutUs')}}
                         >
                             About Us
                         </Link>
@@ -1050,7 +1048,7 @@ class App extends Component {
                             variant='h6'
                             to='/aboutUs'
                             onClick={() => {
-                                this.props.push('/aboutUs')}}
+                                this.props.history.push('/aboutUs')}}
                         >
                             Logout
                         </Link>
