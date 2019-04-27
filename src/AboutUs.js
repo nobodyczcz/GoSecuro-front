@@ -3,12 +3,22 @@ import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { createBrowserHistory, createHashHistory } from 'history';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
+
+import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
 
+var history;
+if (window.cordova) {
+    history = new createHashHistory();
+}
+else {
+    history = new createBrowserHistory();
+}
 
 const styles = theme => ({
     appBar: {
@@ -19,7 +29,8 @@ const styles = theme => ({
         backgroundColor:'#fffafa'
     },
     backButton:{
-        color: '#FF7504'
+        color: '#FF7504',
+        zIndex: 1210
 
     },
     content: {
@@ -61,6 +72,7 @@ class AboutUs extends React.Component{
     render(){
         const { classes,theme } = this.props;
         return(
+            <Router history={history}>
             <Paper className={classes.paper}>
                 
                 <div>
@@ -69,7 +81,7 @@ class AboutUs extends React.Component{
                             className={classes.appBar}
                     >
                         <Toolbar className={classes.navHeader}>
-                            <IconButton className={classes.backButton}>
+                            <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                             </IconButton>
                         </Toolbar>
@@ -96,6 +108,7 @@ class AboutUs extends React.Component{
                     
                 </div>
             </Paper>
+            </Router>
             
         );
     }

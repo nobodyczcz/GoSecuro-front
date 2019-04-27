@@ -36,6 +36,7 @@ import LoginPage from './login.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
+import APIs from './apis.js';
 
 
 var history;
@@ -157,6 +158,7 @@ const theme = createMuiTheme({
 class App extends Component {
     constructor(props) {
         super(props);
+        this.apis = new APIs();
         this.map = null;
         if (window.cordova) {
             console.log('Using cordova: initiate app')
@@ -253,8 +255,9 @@ class App extends Component {
             currentRoute: null,
             mapLayer:'all',
             startUpPageLayer: true,
-            welcomeImgContainer: true,
             isLogin: this.serverApi.isLogin(),
+            welcomeImgContainer:true,
+            error:[]
         };
         
         this.interval= null;
@@ -507,6 +510,28 @@ class App extends Component {
         this.handleMobileMenuClose();
         this.setState({ mapLayer: 'off' });
 
+    }
+
+    regError(jqXHR) {
+        this.state.errors = [];
+        var response = jqXHR.responseJSON;
+        if (response) {
+            if (response.Message) this.state.errors.push(response.Message);
+            if (response.ModelState) {
+                var modelState = response.ModelState;
+                for (var prop in modelState) {
+                    if (modelState.hasOwnProperty(prop)) {
+                        var msgArr = modelState[prop]; // expect array here
+                        if (msgArr.length) {
+                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                        }
+                    }
+                }
+            }
+            if (response.error) this.state.errors.push(response.error);
+            if (response.error_description) this.state.errors.push(response.error_description);
+        }
+        console.log(this.state.errors)
     }
 
     /*Map and crime rate visiualization related functions
@@ -978,6 +1003,13 @@ class App extends Component {
         
     }
 
+    handleLogout=()=>{
+        console.log(window.serverUrl);
+        
+        this.apis.logout(this.regError.bind(this))
+
+    }
+
 
 
     theBar = () => {
@@ -1062,14 +1094,13 @@ class App extends Component {
                         </Link>
                     </ListItem>
                     <Divider/>
-                    <ListItem button key='Navigation3'>
-                        {this.state.isLogin ?
-                            <Link
-                                className={classes.sideContent}
-                                variant='h6'
-                                to='/aboutUs'
-                            >
-                                Logout
+                    <ListItem button key='Navigation'>
+                        <Link 
+                            className={classes.sideContent}
+                            variant='h6'
+                            to='/aboutUs'
+                        >
+                            Logout
                         </Link>
                             :
                             <Link
