@@ -211,6 +211,7 @@ class MainBar extends React.Component {
             this.setState({ searching: true, searchCoord: [searchIconPosition.left, searchIconPosition.top] });
             if (this.state.tabValue != 1) {
                 document.getElementById('mapIcon').click();
+                this.props.history.push('/map');
 
             }
         }

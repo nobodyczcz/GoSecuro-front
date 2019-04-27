@@ -27,6 +27,17 @@ const styles = theme => ({
         justifyContent: "center",
         marginTop: "20px",
     },
+    foot: {
+        position: "fixed",
+        zIndex: 1200,
+        minHeight:"150px",
+        height: "10%",
+        bottom:0,
+    },
+    footBar: {
+        display: 'flex',
+        justifyContents:"space-between"
+    }
 
 });
 class NavigationPage extends React.Component {
@@ -41,7 +52,9 @@ class NavigationPage extends React.Component {
     }
 
     componentDidMount() {
-       
+        if (window.cordova) {
+            this.props.locationSharing.start()
+        }
 
     }
 
@@ -51,16 +64,24 @@ class NavigationPage extends React.Component {
     render() {
         const { classes } = this.props;
         return (
-            <AppBar className={classes.appBar} color="primary" position="static">
-                    <Toolbar className={classes.toolbar}>
-                        <Typography
-                            variant="h6"
-                            color="inherit"
-                        >
-                            Navigation
-                        </Typography>
-                    </Toolbar>
+            <div>
+                <AppBar className={classes.appBar} color="primary" position="static">
+                        <Toolbar className={classes.toolbar}>
+                            <Typography
+                                variant="h6"
+                                color="inherit"
+                            >
+                                Navigation
+                            </Typography>
+                        </Toolbar>
                 </AppBar>
+
+                <AppBar className={classes.foot} color="primary" position="static">
+                    <Toolbar className={classes.footBar}>
+                        <Button variant='extended' onClick={this.handleCancelNav()} >Cancel</Button>
+                    </Toolbar>
+                    </AppBar>
+            </div>
 
 
 

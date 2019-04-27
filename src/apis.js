@@ -69,7 +69,7 @@ class APIs {
     }
 
     logout(error) {
-        // Log out from the cookie based logon.
+        // Log out from the taken based logon.
         var token = sessionStorage.getItem(this.tokenKey);
         var headers = {};
         if (token) {

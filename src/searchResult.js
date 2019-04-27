@@ -208,7 +208,7 @@ class ResultCard extends Component {
                             </IconButton>
                             {
                                 this.props.currentRoute ? 
-                                    <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={this.handleDrawerChange}>
+                                <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={() => { this.props.history.push('/navigation') }}>
                                         Start
                                         <NavigationIcon /> 
                                     </Fab>

@@ -28,6 +28,8 @@ import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
+import APIs from './apis.js';
+import LocationSharing from './locationSharing.js';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
@@ -167,6 +169,12 @@ class App extends Component {
             console.log('Not using cordova: initiate app')
         };
 
+        //apis to our server
+        this.serverApi = new APIs();
+        this.locationSharing = new LocationSharing();
+        if (window.cordova) {
+            this.locationSharing.initialize();
+        }
 
         /*
         Map related attributes:
@@ -196,6 +204,7 @@ class App extends Component {
         }; //Store navigation route at here
 
         this.navValue = 0; //dicide which tag (walking driving and publictransport) is activated when jump to navigate page, 
+        //api to google's service
         this.api = null;
 
         this.apiKey = 'AIzaSyAFxfzpmKW1-P7LoPmoeTjwoHrNH-Noe_0';
@@ -244,7 +253,8 @@ class App extends Component {
             currentRoute: null,
             mapLayer:'all',
             startUpPageLayer: true,
-            welcomeImgContainer:true,
+            welcomeImgContainer: true,
+            isLogin: this.serverApi.isLogin(),
         };
         
         this.interval= null;
@@ -262,6 +272,9 @@ class App extends Component {
      /*
      * app initialize and load data from server
      */
+    handleLogin() {
+        this.setState({ isLogin: true });
+    }
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         
@@ -907,7 +920,7 @@ class App extends Component {
                 }
 
                 {this.state.searchResponse ? (
-                    <ResultCard apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                    <ResultCard history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
             </div>
         );
@@ -1039,7 +1052,7 @@ class App extends Component {
                             About Us
                         </Link>
                     </ListItem>
-                    <ListItem button key='Navigation'>
+                    <ListItem button key='Navigation2'>
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
@@ -1049,14 +1062,25 @@ class App extends Component {
                         </Link>
                     </ListItem>
                     <Divider/>
-                    <ListItem button key='Navigation'>
-                        <Link 
-                            className={classes.sideContent}
-                            variant='h6'
-                            to='/aboutUs'
-                        >
-                            Logout
+                    <ListItem button key='Navigation3'>
+                        {this.state.isLogin ?
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/aboutUs'
+                            >
+                                Logout
                         </Link>
+                            :
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/login'
+                            >
+                                Login
+                        </Link>
+                            }
+                        
                     </ListItem>
                 </List>
             </div>
@@ -1087,8 +1111,8 @@ class App extends Component {
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={() => <RegisterPage history={history} />} />
-                    <Route exact path="/login" component={() => <LoginPage history={history}  />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage history={history} />} />
+                    <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.handleLogin.bind(this)} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                 </Router>  
           </MuiThemeProvider>

@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import Fab from '@material-ui/core/Fab';
 import Button from '@material-ui/core/Button';
 import { Link } from "react-router-dom";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import APIs from './apis.js';
 import { ValidatorForm, SelectValidator, TextValidator } from 'react-material-ui-form-validator';
@@ -47,6 +48,9 @@ const styles = theme => ({
     signup: {
         display:"flex",
         justifyContent: 'center',
+    },
+    progress: {
+        width:"20px"
     }
 });
 class LoginPage extends React.Component {
@@ -62,6 +66,7 @@ class LoginPage extends React.Component {
             password: "",
             confirmPassword: "",
             error: [],
+            logining:false,
 
         };
 
@@ -72,14 +77,18 @@ class LoginPage extends React.Component {
     handleClickNext = () => {
         console.log(window.serverUrl);
         var regdata = {
-            Phone: this.state.mobileNumber,
-            Password: this.state.password,
+            grant_type: "password",
+            userName: this.state.mobileNumber,
+            password: this.state.password,
         };
         this.apis.login(regdata, this.regSuccess.bind(this), this.regError.bind(this))
+        this.setState({logining:true})
     }
 
     regSuccess(data) {
         console.log("Success")
+        this.props.history.push("/");
+        this.props.handleLogin();
         //jump to next page
     }
 
@@ -103,6 +112,7 @@ class LoginPage extends React.Component {
             if (response.error_description) this.state.errors.push(response.error_description);
         }
         console.log(this.state.errors)
+        this.setState({ logining: false })
     }
 
     handleChange = name => event => {
@@ -172,6 +182,8 @@ class LoginPage extends React.Component {
                                 form="theForm"
                             >
                                 LOGIIN
+                                {this.state.logining ? <CircularProgress size={20} color="primary" />:null}
+                                
                         </Fab>
                         </Grid>
                         <Grid xs={12}>
