@@ -3,12 +3,20 @@ import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { createBrowserHistory, createHashHistory } from 'history';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import { Toolbar } from '@material-ui/core';
 
+var history;
+if (window.cordova) {
+    history = new createHashHistory();
+}
+else {
+    history = new createBrowserHistory();
+}
 
 const styles = theme => ({
     appBar: {
