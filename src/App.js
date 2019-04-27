@@ -36,9 +36,6 @@ import LoginPage from './login.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
-import APIs from './apis.js';
-
-
 var history;
 if (window.cordova) {
     history = new createHashHistory();
