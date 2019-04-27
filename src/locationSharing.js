@@ -5,7 +5,16 @@ import APIs from './apis.js';
 class LocationSharing {
     constructor() {
         this.api = new APIs();
+        this.navigationRoute = null;
+        this.journeyId = null;
+        this.navigationRoute=null;
+        this.currentLat=null;
+        this.currentLng=null;
         this.BackgroundGeolocation = window.BackgroundGeolocation;
+        
+    }
+
+    initialize() {
         this.BackgroundGeolocation.configure({
             locationProvider: this.BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
             desiredAccuracy: this.BackgroundGeolocation.HIGH_ACCURACY,
@@ -14,22 +23,21 @@ class LocationSharing {
             notificationTitle: 'Gosafe background tracking',
             notificationText: 'enabled',
             debug: true,
-           
-            url: 'http://192.168.81.15:3000/location',
-            httpHeaders: {
-                'X-FOO': 'bar'
-            },
-            // customize post properties
-            postTemplate: {
-                lat: '@latitude',
-                lon: '@longitude',
-                foo: 'bar' // you can also add your own properties
-            }
         });
         this.BackgroundGeolocation.on('location', function (location) {
             // handle your locations here
+            this.currentLat = location.latitude;
+            this.currentLng = location.longitude;
+            var data = {
+                JourneyJourneyId: this.journeyId,
+                CoordLat: location.latitude,
+                CoordLog: location.longitude
+
+            }
+
             // to perform long running operation on iOS
             // you need to create background task
+            console.log(JSON.stringify(location));
             this.BackgroundGeolocation.startTask(function (taskKey) {
                 // execute long running task
                 // eg. ajax post location
@@ -43,10 +51,24 @@ class LocationSharing {
 
         this.BackgroundGeolocation.on('start', function () {
             console.log('[INFO] BackgroundGeolocation service has been started');
-        });
+            var theApi = 'api/Journey/create';
+            var data = {
+                NavigateRoute: this.getNavigationRoute(),
+                SCoordLat: this.getCurrentLat(),
+                SCoordLog: this.getCurrentLng(),
+            }
+            this.api.callApi(theApi, JSON.stringify(data), this.startSuccess.bind(this), this.startError.bind(this))
+        }.bind(this));
 
         this.BackgroundGeolocation.on('stop', function () {
             console.log('[INFO] BackgroundGeolocation service has been stopped');
+            var theApi = 'api/Journey/journeyFinish';
+            var data = {
+                JourneyId: this.getJourneyId(),
+                ECoordLat: this.getCurrentLat(),
+                ECoordLog: this.getCurrentLng(),
+            }
+            this.api.callApi(theApi, JSON.stringify(data), this.startSuccess.bind(this), this.startError.bind(this))
         });
 
         this.BackgroundGeolocation.on('authorization', function (status) {
@@ -54,8 +76,8 @@ class LocationSharing {
             if (status !== this.BackgroundGeolocation.AUTHORIZED) {
                 // we need to set delay or otherwise alert may not be shown
                 setTimeout(function () {
-                    var showSettings = confirm('App requires location tracking permission. Would you like to open app settings?');
-                    if (showSetting) {
+                    var showSettings = window.confirm('App requires location tracking permission. Would you like to open app settings?');
+                    if (showSettings) {
                         return this.BackgroundGeolocation.showAppSettings();
                     }
                 }.bind(this), 1000);
@@ -79,6 +101,42 @@ class LocationSharing {
 
             // you don't need to check status before start (this is just the example)
         });
+    }
+
+    startSuccess(data) {
+        console.log(data)
+        this.journeyId = data.data.journeyId;
+        this.tempLinkID = data.data.tempLinkID;
+    }
+
+    startError(error) {
+        console.log(JSON.string(error))
+    }
+
+    getNavigationRoute() {
+        return this.navigationRoute;
+    }
+
+    getJourneyId() {
+        return this.journeyId;
+    }
+
+    getCurrentLat() {
+        return this.currentLat;
+    }
+
+    getCurrentLng() {
+        return this.CurrentLng;
+    }
+
+    startTracking(coord) {
+        this.currentLat = coord.lat;
+        this.currentLng = coord.lng;
+        this.BackgroundGeolocation.start();
+    }
+
+    stopTracking() {
+        this.BackgroundGeolocation.stop();
     }
 
 

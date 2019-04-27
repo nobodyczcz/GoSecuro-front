@@ -1,18 +1,9 @@
 import React, { Component } from 'react';
-import Paper from '@material-ui/core/Paper';
-import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import APIs from './apis.js';
-import { ValidatorForm, SelectValidator, TextValidator } from 'react-material-ui-form-validator';
 
 
 import { withStyles } from '@material-ui/core/styles';
@@ -27,6 +18,17 @@ const styles = theme => ({
         justifyContent: "center",
         marginTop: "20px",
     },
+    foot: {
+        position: "fixed",
+        zIndex: 1200,
+        minHeight:"150px",
+        height: "10%",
+        bottom:0,
+    },
+    footBar: {
+        display: 'flex',
+        justifyContents:"space-between"
+    }
 
 });
 class NavigationPage extends React.Component {
@@ -41,7 +43,9 @@ class NavigationPage extends React.Component {
     }
 
     componentDidMount() {
-       
+        if (window.cordova) {
+            this.props.locationSharing.start()
+        }
 
     }
 
@@ -51,16 +55,24 @@ class NavigationPage extends React.Component {
     render() {
         const { classes } = this.props;
         return (
-            <AppBar className={classes.appBar} color="primary" position="static">
-                    <Toolbar className={classes.toolbar}>
-                        <Typography
-                            variant="h6"
-                            color="inherit"
-                        >
-                            Navigation
-                        </Typography>
-                    </Toolbar>
+            <div>
+                <AppBar className={classes.appBar} color="primary" position="static">
+                        <Toolbar className={classes.toolbar}>
+                            <Typography
+                                variant="h6"
+                                color="inherit"
+                            >
+                                Navigation
+                            </Typography>
+                        </Toolbar>
                 </AppBar>
+
+                <AppBar className={classes.foot} color="primary" position="static">
+                    <Toolbar className={classes.footBar}>
+                        <Button variant='extended' onClick={this.handleCancelNav()} >Cancel</Button>
+                    </Toolbar>
+                    </AppBar>
+            </div>
 
 
 
