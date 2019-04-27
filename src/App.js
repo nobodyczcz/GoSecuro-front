@@ -1035,7 +1035,6 @@ class App extends Component {
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
-
                         >
                             About Us
                         </Link>
