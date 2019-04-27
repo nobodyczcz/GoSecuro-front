@@ -188,7 +188,7 @@ class LoginPage extends React.Component {
                         </Grid>
 
                         <Grid xs={12}>
-                            <Button size="small" className={classes.button}>
+                            <Button size="small" className={classes.button} onClick={() => { this.props.history.push("/")}}>
                                 SKIP FOR NOW
                             </Button>
                             

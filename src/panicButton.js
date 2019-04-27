@@ -11,8 +11,8 @@ const styles = theme => ({
     panic: {
         posotion: 'flex',
         zIndex: 1300,
-        width: 100,
-        height: 100,
+        width: 80,
+        height: 80,
         
     },
     progress: {
@@ -21,7 +21,7 @@ const styles = theme => ({
         
     },
     siren: {
-        width: 70,
+        width: 60,
     }
 });
 class PanicButton extends React.Component {
@@ -73,7 +73,7 @@ class PanicButton extends React.Component {
                     var string = "Hi " + name + ", \nYour friend " + localStorage.userName + " is in trouble at the moment.\nThis is their last current location " + googleLink + ".\nYou might want to get in touch with them to make sure they are alright..\nThanks. \n(Sent automatically by GoSafe) ";
                     var data = [contList[i].mobile, string] 
                     var jsonData = JSON.stringify(data)
-                    fetch('https://gosafe-back20190407071339.azurewebsites.net/Suburbs/Message/', {
+                    fetch(window.serverUrl+'api/Suburbs/Message/', {
                         method: 'POST',
                         body: jsonData,
                         headers: {
@@ -108,7 +108,7 @@ class PanicButton extends React.Component {
                         variant="static"
                         value={this.state.completed}
                         color="secondary"
-                        size={100}
+                        size={80}
                     />
                     : null}
                 {this.state.disabled ?

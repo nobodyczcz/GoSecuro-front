@@ -254,6 +254,19 @@ module.exports = [
         "merges": [
             "window.FileSystem"
         ]
+    },
+    {
+        "file": "plugins/cordova-plugin-mauron85-background-geolocation/www/BackgroundGeolocation.js",
+        "id": "cordova-plugin-mauron85-background-geolocation.BackgroundGeolocation",
+        "pluginId": "cordova-plugin-mauron85-background-geolocation",
+        "clobbers": [
+            "BackgroundGeolocation"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-mauron85-background-geolocation/www/radio.js",
+        "id": "cordova-plugin-mauron85-background-geolocation.radio",
+        "pluginId": "cordova-plugin-mauron85-background-geolocation"
     }
 ];
 module.exports.metadata = 
@@ -266,7 +279,8 @@ module.exports.metadata =
     "cordova-plugin-statusbar": "2.4.2",
     "cordova-plugin-whitelist": "1.3.3",
     "cordova-plugin-ionic-keyboard": "2.1.3",
-    "cordova-plugin-file": "6.0.1"
+    "cordova-plugin-file": "6.0.1",
+    "cordova-plugin-mauron85-background-geolocation": "3.0.3"
 }
 // BOTTOM OF METADATA
 });

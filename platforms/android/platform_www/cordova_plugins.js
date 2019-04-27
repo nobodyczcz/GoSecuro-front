@@ -244,6 +244,19 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
         "cordova"
       ],
       "runs": true
+    },
+    {
+      "id": "cordova-plugin-mauron85-background-geolocation.BackgroundGeolocation",
+      "file": "plugins/cordova-plugin-mauron85-background-geolocation/www/BackgroundGeolocation.js",
+      "pluginId": "cordova-plugin-mauron85-background-geolocation",
+      "clobbers": [
+        "BackgroundGeolocation"
+      ]
+    },
+    {
+      "id": "cordova-plugin-mauron85-background-geolocation.radio",
+      "file": "plugins/cordova-plugin-mauron85-background-geolocation/www/radio.js",
+      "pluginId": "cordova-plugin-mauron85-background-geolocation"
     }
   ];
   module.exports.metadata = {
@@ -254,6 +267,7 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
     "cordova-plugin-statusbar": "2.4.2",
     "cordova-plugin-geolocation": "4.0.1",
     "cordova-plugin-ionic-keyboard": "2.1.3",
-    "cordova-plugin-file": "6.0.1"
+    "cordova-plugin-file": "6.0.1",
+    "cordova-plugin-mauron85-background-geolocation": "3.0.3"
   };
 });
