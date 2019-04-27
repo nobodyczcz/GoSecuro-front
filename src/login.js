@@ -181,7 +181,7 @@ class LoginPage extends React.Component {
                                 type="submit"
                                 form="theForm"
                             >
-                                LOGIIN
+                                LOGIN
                                 {this.state.logining ? <CircularProgress size={20} color="primary" />:null}
                                 
                         </Fab>

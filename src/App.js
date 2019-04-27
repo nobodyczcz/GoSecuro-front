@@ -1099,7 +1099,7 @@ class App extends Component {
                                 onClick={this.handleLogout}
                                 onError={errors => console.log(errors)}
                             >
-                                logout
+                                Logout
                         </Link>
                             :
                             <Link
