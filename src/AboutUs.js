@@ -49,6 +49,7 @@ const styles = theme => ({
         height: '100%',
         top: '0',
         left: '0',
+        zIndex: '1200'
     },
     navHeader: {
         padding: 0,
