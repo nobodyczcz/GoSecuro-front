@@ -48,8 +48,20 @@ const styles = theme => ({
         display: 'none',
     },
     toolbar: {
-        positon: 'fixed',
-        justifyContent: 'center',
+        display: 'flex',
+        width:"100%",
+        justifyContent: 'stretch',
+        alignItems:"center",
+    },
+    drawerTriger: {
+        width: "100%",
+        display: 'flex',
+        justifyContent: 'left',
+        zIndex:1200
+    },
+    contentPaper: {
+        overflowX: 'hidden',
+        height:"100%",
     },
     drawer: {
 
@@ -60,6 +72,7 @@ const styles = theme => ({
         paddingLeft: '3%',
         paddingRight:'3%',
         overflowX: 'hidden',
+        overflowY: 'hidden',
         height: '40%',
         borderRadius: '5px 5px 0px 0px',
         transition: theme.transitions.create('height', {
@@ -92,6 +105,7 @@ const styles = theme => ({
             outline: '1px solid slategrey'
         }
     },
+
     navButton: {
         marginTop:60,
     },
@@ -100,8 +114,8 @@ const styles = theme => ({
         position: 'fixed',
         zIndex: 1300,
         top: 'calc( 75% - 150px)',
-        left: 'calc( 50% - 50px)',
-        transition: theme.transitions.create('height', {
+        left: 'calc( 50% - 40px)',
+        transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
@@ -112,12 +126,18 @@ const styles = theme => ({
 
         position: 'fixed',
         top: 'calc( 100% - 120px)',
-        left: 'calc( 50% - 50px)',
-        transition: theme.transitions.create('height', {
+        left: 'calc( 50% - 40px)',
+        transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
 
+    },
+    startNavi: {
+        height: "30px",
+        minWidth: "90px",
+        left: "-90px",
+        zIndex:1300
     },
 });
 
@@ -143,6 +163,7 @@ class ResultCard extends Component {
         console.log(index)
         var location = this.props.results[index].geometry.location;
         this.props.map.setCenter(location);
+        this.props.map.setZoom(18);
     };
     handleNavClick = (index) => {
         this.props.navigateTo(this.props.results[index].geometry.location);
@@ -154,114 +175,128 @@ class ResultCard extends Component {
         return (
             <div>
                 <div className={
-                    this.state.open ? classes.panicOpen : classes.panicClose
+                    classNames({
+                        [classes.panicOpen]: this.state.open,
+                        [classes.panicClose]: !this.state.open,
+                    })
+                    
                 }>
                     <PanicButton getLocation={this.props.getLocation} />
                 </div>
-            <Drawer
-                anchor="bottom"
-                variant="permanent"
-                className={classNames(classes.drawer, {
-                    [classes.drawerOpen]: this.state.open,
-                    [classes.drawerClose]: !this.state.open,
-                })}
-                classes={{
-                    paper: classNames({
+                <Drawer
+                    anchor="bottom"
+                    variant="permanent"
+                    className={classNames(classes.drawer, {
                         [classes.drawerOpen]: this.state.open,
                         [classes.drawerClose]: !this.state.open,
-                    }),
-                }}
-                open={this.state.open}
-            >
+                    })}
+                    classes={{
+                        paper: classNames({
+                            [classes.drawerOpen]: this.state.open,
+                            [classes.drawerClose]: !this.state.open,
+                        }),
+                    }}
+                    open={this.state.open}
+                >
                 
                 
                 
-                <div className={classes.toolbar}>
-                    <IconButton onClick={this.handleDrawerChange}>
-                        {this.state.open ? <ChevronDownIcon /> : <ChevronUpIcon />}
-                        Search Result
-                    </IconButton>
-                </div>
-                {
-                    this.props.currentRoute ?
-                        this.props.currentRoute.routes[0].legs.map(function (leg, i) {
-                            return (
-                                <div key={i}>
-                                    {
-                                        leg.steps.map(function (step, x) {
-
-                                            return (
-                                                <Card className={classes.contentCard} key={i.toString() + x.toString()} >
-                                                    <CardContent>
-                                                        <Typography variant="subtitle2">
-                                                            {step.distance.text} {step.duration.text}
-                                                        </Typography>
-                                                        <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-
-                                                    </CardContent>
-                                                </Card>
-                                                );
-                                        })
-                                    }
-                                </div>
-                            );
-                        })
-                        :
-                        this.props.results.map(function (item, i) {
-                            var photo = "img/no-image.png"
-                            var imgLink = photo
-                            if (item.photos) {
-                                imgLink = item.photos[0].getUrl();
-                                //imgLink = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&key=" + this.props.apiKey + "&photoreference=" + photo;
-                            }
-
-                            var name = item.name;
-                            var icon = item.icon;
-                            var address = item.formatted_address;
-                            var location = item.geometry.location;
-
-                            return (
-                                <Card className={classes.contentCard} key={i} >
-
-                                    <CardMedia
-                                        component="img"
-                                        alt={photo}
-                                        className={classes.media}
-                                        image={imgLink}
-                                        title="result photo"
-                                        onClick={() => this.handleCardClick(i)}
-                                    />
-                                    <div
-                                        className={classes.cardContent}
-                                        onClick={() => this.handleCardClick(i)}
-                                    >
-                                        <CardContent>
-                                            <Typography variant="h6">
-                                                {name}
-                                            </Typography>
-                                            <Typography variant="body2">
-                                                {address}
-                                            </Typography>
-
-                                        </CardContent>
-                                    </div>
-                                    <Fab
-                                        variant="extended"
-                                        size="small"
-                                        color="primary"
-                                        aria-label="Add"
-                                        className={classes.navButton}
-                                        onClick={() => { this.handleNavClick(i) }}
-                                    >
-                                        <NavigationIcon className={classes.extendedIcon} />
+                    <div className={classes.toolbar}>
+                            <IconButton className={classes.drawerTriger} onClick={this.handleDrawerChange}>
+                                {this.state.open ? <ChevronDownIcon /> : <ChevronUpIcon />}
+                                Results
+                            </IconButton>
+                            {
+                                this.props.currentRoute ? 
+                                    <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={this.handleDrawerChange}>
+                                        Start
+                                        <NavigationIcon /> 
                                     </Fab>
-                                </Card>
-                            )
-                        }.bind(this))
-                }
+                                    : null
+                            }
+                    </div>
+                    <div className={classes.contentPaper}>
+                        {
+                        this.props.currentRoute ?
+                            this.props.currentRoute.routes[0].legs.map(function (leg, i) {
+                                return (
+                                    <div key={i}>
+                                        {
+                                            leg.steps.map(function (step, x) {
+
+                                                return (
+                                                    <Card className={classes.contentCard} key={i.toString() + x.toString()} >
+                                                        <CardContent>
+                                                            <Typography variant="subtitle2">
+                                                                {step.distance.text} {step.duration.text}
+                                                            </Typography>
+                                                            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
+
+                                                        </CardContent>
+                                                    </Card>
+                                                    );
+                                            })
+                                        }
+                                    </div>
+                                );
+                            })
+                            :
+                            this.props.results.map(function (item, i) {
+                                var photo = "img/no-image.png"
+                                var imgLink = photo
+                                if (item.photos) {
+                                    imgLink = item.photos[0].getUrl();
+                                    //imgLink = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&key=" + this.props.apiKey + "&photoreference=" + photo;
+                                }
+
+                                var name = item.name;
+                                var icon = item.icon;
+                                var address = item.formatted_address;
+                                var location = item.geometry.location;
+
+                                return (
+                                    <Card className={classes.contentCard} key={i} >
+
+                                        <CardMedia
+                                            component="img"
+                                            alt={photo}
+                                            className={classes.media}
+                                            image={imgLink}
+                                            title="result photo"
+                                            onClick={() => this.handleCardClick(i)}
+                                        />
+                                        <div
+                                            className={classes.cardContent}
+                                            onClick={() => this.handleCardClick(i)}
+                                        >
+                                            <CardContent>
+                                                <Typography variant="h6">
+                                                    {name}
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {address}
+                                                </Typography>
+
+                                            </CardContent>
+                                        </div>
+                                        <Fab
+                                            variant="extended"
+                                            size="small"
+                                            color="primary"
+                                            aria-label="Add"
+                                            className={classes.navButton}
+                                            onClick={() => { this.handleNavClick(i) }}
+                                        >
+                                            <NavigationIcon className={classes.extendedIcon} />
+                                        </Fab>
+                                    </Card>
+                                )
+                            }.bind(this))
+                        }
+                    </div>
                 
-                </Drawer>
-                </div>
+                 </Drawer>
+            </div>
         )
     };
 }

@@ -24,6 +24,9 @@
     },
     "cordova-plugin-file": {
       "PACKAGE_NAME": "com.fitech.gosafefront"
+    },
+    "cordova-plugin-mauron85-background-geolocation": {
+      "PACKAGE_NAME": "com.fitech.gosafefront"
     }
   },
   "dependent_plugins": {

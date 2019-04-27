@@ -202,6 +202,7 @@ class MainBar extends React.Component {
     handleSearch = event => {
         var input = document.getElementById('searchInput');
         var text = input.value;
+        input.value = "";
         console.log(text);
         if (text) {
             var searchIconPosition = event.currentTarget.getBoundingClientRect()
@@ -217,6 +218,12 @@ class MainBar extends React.Component {
         }
 
     }
+    handleInputChange = event => {
+        if (event.key == 'Enter') {
+            var input = document.getElementById('searchIcon');
+            input.click();
+        }
+    }
 
     handleClickAway = () => {
         document.getElementById('searchInput').blur();
@@ -225,56 +232,8 @@ class MainBar extends React.Component {
     render() {
 
       this.state.navValue = this.props.navValue;
-      const { anchorEl, mobileMoreAnchorEl } = this.state;
       const { classes } = this.props;
-      const isMenuOpen = Boolean(anchorEl);
-      const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-      const renderMenu = (
-      <Menu
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onTouchEnd={this.handleMenuClose}>Profile</MenuItem>
-        <MenuItem onTouchEnd={this.handleMenuClose}>My account</MenuItem>
-      </Menu>
-    );
-
-    const renderMobileMenu = (
-      <Menu
-        anchorEl={mobileMoreAnchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isMobileMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onTouchEnd={this.handleMobileMenuClose}>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <p>Messages</p>
-        </MenuItem>
-        <MenuItem onTouchEnd={this.handleMobileMenuClose}>
-          <IconButton color="inherit">
-            <Badge badgeContent={11} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <p>Notifications</p>
-        </MenuItem>
-        <MenuItem onTouchEnd={this.handleProfileMenuOpen}>
-          <IconButton color="inherit">
-            <AccountCircle />
-          </IconButton>
-          <p>Profile</p>
-        </MenuItem>
-      </Menu>
-    );
 
         return (
           
@@ -298,7 +257,8 @@ class MainBar extends React.Component {
                             <InputBase
                               placeholder={this.state.searchPlaceHolder}
                               inputProps={{ maxlength: "10" }}
-                              id="searchInput"
+                                id="searchInput"
+                                onKeyPress={this.handleInputChange.bind(this)}
                                 classes={{
                                     root: classes.inputRoot,
                                     input: classes.inputInput,
@@ -307,35 +267,12 @@ class MainBar extends React.Component {
                         
                     </div>
                         {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
-                      <IconButton onTouchEnd={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
+                        <IconButton id="searchIcon" onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />
                     </IconButton>
                     
-                    <div className={classes.sectionDesktop}>
-                      <IconButton color="inherit">
-                        <Badge badgeContent={4} color="secondary">
-                          <MailIcon />
-                        </Badge>
-                      </IconButton>
-                      <IconButton color="inherit">
-                        <Badge badgeContent={17} color="secondary">
-                          <NotificationsIcon />
-                        </Badge>
-                      </IconButton>
-                      <IconButton
-                        aria-owns={isMenuOpen ? 'material-appbar' : undefined}
-                        aria-haspopup="true"
-                        onTouchEnd={this.handleProfileMenuOpen}
-                        color="inherit"
-                      >
-                        <AccountCircle />
-                      </IconButton>
-                    </div>
-                    <div className={classes.sectionMobile}>
-                      <IconButton aria-haspopup="true" onTouchEnd={this.handleMobileMenuOpen} color="inherit">
-                        <MoreIcon />
-                      </IconButton>
-                    </div>
+                    
+                    
                   </Toolbar>
               </AppBar>
               {this.props.displayNavRoutes ?
@@ -381,8 +318,6 @@ class MainBar extends React.Component {
               }
 
               
-        {renderMenu}
-        {renderMobileMenu}
       </div>
     );
   }

@@ -26,6 +26,7 @@ import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
 import MapController from './mapController.js';
+import NavigationPage from './navigation.js'
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
@@ -80,7 +81,7 @@ const styles = theme => ({
     panicPosition: {
         position: 'fixed',
         top: 'calc( 100% - 150px)',
-        left: 'calc( 50% - 50px)',
+        left: 'calc( 50% - 40px)',
         zIndex:1200,
     },
     sideContent: {
@@ -88,10 +89,10 @@ const styles = theme => ({
     },
     legend: {
         position: "absolute",
-        top: 'calc( 100% - 100px)',
+        top: 'calc( 100% - 120px)',
         width: "30%",
         left:"2%",
-        zIndex: 1300,
+        zIndex: 1100,
         borderRadius: "5px",
         opacity:0.8
 
@@ -117,6 +118,7 @@ const styles = theme => ({
         top:0,
         left:0,
     },
+
 });
 
 const theme = createMuiTheme({
@@ -257,7 +259,10 @@ class App extends Component {
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         
 
-        this.interval = setTimeout(() => this.setState({startUpPageLayer: false}), 3000);
+        this.interval = setTimeout(() => this.setState({ startUpPageLayer: false }), 3000);
+        if (!localStorage.userName || !localStorage.password) {
+            history.push('\login');
+        }
 
         if (window.cordova) {
             //try to find crimeRates.json if using cordova
@@ -586,7 +591,7 @@ class App extends Component {
     handleMyLocationClick() {
         console.log('my location clicked')
         if (!this.userLocation) {
-
+            this.currentLocation()
         }
         else if (this.focusUser) {
             this.map.setZoom(18);
@@ -674,6 +679,10 @@ class App extends Component {
     };
 
     displaySearchResult = (result) => {
+        if (this.state.currentRoute) {
+            this.setState({ currentRoute: null, displayNavRoutes:false }, function () { this.directionsDisplay.setDirections(null) });
+
+        }
         this.mainBar.current.setState({ searching: false });
         console.log(result)
         this.setState({ searchResponse: result, displayBack: true })
@@ -1036,7 +1045,8 @@ class App extends Component {
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={RegisterPage} />
-                    <Route exact path="/login" component={LoginPage} />
+                    <Route exact path="/login" component={() => <LoginPage history={history}  />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage/>} />
                 </Router>  
           </MuiThemeProvider>
         );

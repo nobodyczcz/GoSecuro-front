@@ -62,5 +62,13 @@
     },
     "is_top_level": true,
     "variables": {}
+  },
+  "cordova-plugin-mauron85-background-geolocation": {
+    "source": {
+      "type": "registry",
+      "id": "@mauron85/cordova-plugin-background-geolocation@3.0.3"
+    },
+    "is_top_level": true,
+    "variables": {}
   }
 }
