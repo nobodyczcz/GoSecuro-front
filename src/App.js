@@ -23,6 +23,7 @@ import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
 import ContactsPage from './contactsPage.js'
 import AboutUs from './AboutUs.js'
+import SideLoginPage from './loginPage.js'
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
@@ -1085,6 +1086,16 @@ class App extends Component {
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
+                            to='/loginPage'
+                            onError={errors => console.log(errors)}
+                        >
+                            Login
+                        </Link>
+                    </ListItem>
+                    <ListItem button key='Navigation'>
+                        <Link 
+                            className={classes.sideContent}
+                            variant='h6'
                             onClick={this.handleLogout}
                             onError={errors => console.log(errors)}
                         >
@@ -1123,6 +1134,7 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history}  />} />
                     <Route exact path="/navigation" component={() => <NavigationPage history={history} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path="/loginPage" component={() => <SideLoginPage history={history}  />} />
                 </Router>  
           </MuiThemeProvider>
         );
