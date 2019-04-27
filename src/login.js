@@ -81,18 +81,20 @@ class LoginPage extends React.Component {
             userName: this.state.mobileNumber,
             password: this.state.password,
         };
-        this.apis.login(regdata, this.regSuccess.bind(this), this.regError.bind(this))
+        this.apis.login(regdata, this.loginSuccess.bind(this), this.loginError.bind(this))
         this.setState({logining:true})
     }
 
-    regSuccess(data) {
+    loginSuccess(data) {
         console.log("Success")
+        //this.apis.setToken(data.access_token);
         this.props.history.push("/");
         this.props.handleLogin();
+        
         //jump to next page
     }
 
-    regError(jqXHR) {
+    loginError(jqXHR) {
         this.state.errors = [];
         var response = jqXHR.responseJSON;
         if (response) {

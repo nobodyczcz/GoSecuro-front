@@ -5,8 +5,14 @@ class APIs {
     constructor() {
         this.url = window.serverUrl;
         this.tokenKey = 'accessToken';
+        this.userName = null;
+        this.password = null;
 
 
+    }
+
+    setToken(token) {
+        sessionStorage.setItem(this.tokenKey, token);
     }
 
     isLogin() {
@@ -55,36 +61,45 @@ class APIs {
             );
     }
 
-    login(loginData,success,error) {
+    login
 
+    login(loginData,success,error) {
+        this.userName = loginData.userName;
+        this.password = loginData.password;
         $.ajax({
             type: 'POST',
             url: this.url+'/Token',
             data: loginData
         }).done(function (data) {
             // Cache the access token in session storage.
-            sessionStorage.setItem(this.tokenKey, data.access_token);
+            this.setToken(data.access_token);
+            localStorage.setItem("userName", this.userName);
+            localStorage.setItem("password", this.password);
             success(data);
-            }).fail(error);
+            }.bind(this)).fail(error);
     }
 
-    logout(error) {
+    logout(success,error) {
         // Log out from the taken based logon.
         var token = sessionStorage.getItem(this.tokenKey);
         var headers = {};
         if (token) {
             headers.Authorization = 'Bearer ' + token;
         }
-
+        console.log("logout the Token:"+token)
+        localStorage.removeItem("userName");
+        localStorage.removeItem("password");
+        sessionStorage.removeItem(this.tokenKey);
+        success();
         $.ajax({
             type: 'POST',
-            url: this.url+'/api/Account/Logout',
+            url: this.url+'api/Account/Logout',
             headers: headers
         }).done(function (data) {
             // Successfully logged out. Delete the token.
-            this.user('');
-            sessionStorage.removeItem(this.tokenKey);
-        }).fail(error);
+
+
+        }.bind(this)).fail(error);
     }
 
 }

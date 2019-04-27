@@ -272,8 +272,23 @@ class App extends Component {
      /*
      * app initialize and load data from server
      */
-    handleLogin() {
+    loginSuccess() {
         this.setState({ isLogin: true });
+    }
+
+    loginError(e) {
+        history.push('\login');
+        console.log(e)
+    }
+    logoutSuccess() {
+        this.setState({ isLogin: false });
+    }
+
+    handleLogout = () => {
+        console.log(window.serverUrl);
+
+        this.apis.logout(this.logoutSuccess.bind(this),this.regError.bind(this))
+
     }
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
@@ -282,6 +297,14 @@ class App extends Component {
         this.interval = setTimeout(() => this.setState({ startUpPageLayer: false }), 3000);
         if (!localStorage.userName || !localStorage.password) {
             history.push('\login');
+        }
+        else {
+            var data = {
+                grant_type: "password",
+                userName: localStorage.userName,
+                password: localStorage.password,
+            };
+            this.serverApi.login(data, this.loginSuccess.bind(this), this.loginError.bind(this))
         }
 
         if (window.cordova) {
@@ -1000,12 +1023,7 @@ class App extends Component {
         
     }
 
-    handleLogout=()=>{
-        console.log(window.serverUrl);
-        
-        this.apis.logout(this.regError.bind(this))
 
-    }
 
 
 
@@ -1096,8 +1114,7 @@ class App extends Component {
                             <Link
                                 className={classes.sideContent}
                                 variant='h6'
-                                onClick={this.handleLogout}
-                                onError={errors => console.log(errors)}
+                                onClick={this.handleLogout.bind(this)}
                             >
                                 Logout
                         </Link>
@@ -1141,7 +1158,7 @@ class App extends Component {
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={() => <RegisterPage history={history} />} />
-                    <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.handleLogin.bind(this)} />} />
+                    <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     
