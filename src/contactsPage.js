@@ -210,6 +210,7 @@ class ContactsPage extends React.Component {
             return
         }
         console.log(window.serverUrl);
+        console.log('create new contact list')
 
         if(this.props.isLogin){
             var contdata = {
@@ -222,7 +223,7 @@ class ContactsPage extends React.Component {
         }
         else{
             if (!localStorage.contactList) {
-                console.log('create new contact list')
+                //console.log('create new contact list')
                 var list = JSON.stringify([]);
                 localStorage.setItem('contactList', list);
             };
@@ -244,7 +245,7 @@ class ContactsPage extends React.Component {
     };
 
     addSuccess(data) {
-        console.log("Success")
+        console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
         //jump to next page
     }
@@ -317,7 +318,7 @@ class ContactsPage extends React.Component {
     retrieveSuccess(reply) {
         console.log("Success")
         if (this.props.isLogin){
-            this.state.contactList = JSON.parse(JSON.parse(reply).data)
+            this.setState({contactList : JSON.parse(JSON.parse(reply).data)});
             localStorage.setItem("localContactList",this.state.contactList);
         }
             

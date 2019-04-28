@@ -125,7 +125,7 @@ class UserProfile extends React.Component{
             open:false,
             isreadOnly: true,
             showButtons: 'none',
-            contactList:[]
+            userProfile:[]
         };
 
     }
@@ -154,7 +154,8 @@ class UserProfile extends React.Component{
 
     retrieveSuccess(reply) {
         console.log("User profile successfully retrieved")
-        console.log("user profile: " + JSON.parse(reply.data))    
+        console.log("user profile: " + JSON.parse(reply.data));
+        this.setState({userProfile : JSON.parse(reply.data)});            
         //jump to next page
     }
 
