@@ -35,7 +35,7 @@ const styles = theme => ({
     },
     content: {
         justifyContent: 'center',
-        paddingTop:'60px',
+        marginTop:'80px',
         paddingLeft: theme.spacing.unit * 3.5,
         paddingRight: theme.spacing.unit * 3.5
     },
