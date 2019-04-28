@@ -26,24 +26,26 @@ class LocationSharing {
         });
         this.BackgroundGeolocation.on('location', function (location) {
             // handle your locations here
+            console.log("[INFO] on location update")
+            var theApi = "api/JTracking/Create";
             this.currentLat = location.latitude;
             this.currentLng = location.longitude;
             var data = {
-                JourneyJourneyId: this.journeyId,
+                JourneyJourneyId: this.getJourneyId(),
                 CoordLat: location.latitude,
                 CoordLog: location.longitude
 
             }
-
+            this.api.callApi(theApi, data, this.uploadSuccess.bind(this), this.uploadError.bind(this))
             // to perform long running operation on iOS
             // you need to create background task
-            console.log(JSON.stringify(location));
-            this.BackgroundGeolocation.startTask(function (taskKey) {
-                // execute long running task
-                // eg. ajax post location
-                // IMPORTANT: task has to be ended by endTask
-                this.BackgroundGeolocation.endTask(taskKey);
-            }.bind(this));
+            console.log("[INFO]" + JSON.stringify(data));
+            //this.BackgroundGeolocation.startTask(function (taskKey) {
+            //    // execute long running task
+            //    // eg. ajax post location
+            //    // IMPORTANT: task has to be ended by endTask
+            //    this.BackgroundGeolocation.endTask(taskKey);
+            //}.bind(this));
         }.bind(this));
         this.BackgroundGeolocation.on('error', function (error) {
             console.log('[ERROR] BackgroundGeolocation error:', error.code, error.message);
@@ -57,7 +59,8 @@ class LocationSharing {
                 SCoordLat: this.getCurrentLat(),
                 SCoordLog: this.getCurrentLng(),
             }
-            this.api.callApi(theApi, JSON.stringify(data), this.startSuccess.bind(this), this.startError.bind(this))
+            console.log("send data:" + JSON.stringify(data));
+            this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
         }.bind(this));
 
         this.BackgroundGeolocation.on('stop', function () {
@@ -68,8 +71,9 @@ class LocationSharing {
                 ECoordLat: this.getCurrentLat(),
                 ECoordLog: this.getCurrentLng(),
             }
-            this.api.callApi(theApi, JSON.stringify(data), this.startSuccess.bind(this), this.startError.bind(this))
-        });
+            console.log("[INFO] ask server stop: " + JSON.stringify(data));
+            this.api.callApi(theApi, data, this.stopSuccess.bind(this), this.stopError.bind(this))
+        }.bind(this));
 
         this.BackgroundGeolocation.on('authorization', function (status) {
             console.log('[INFO] BackgroundGeolocation authorization status: ' + status);
@@ -103,15 +107,43 @@ class LocationSharing {
         });
     }
 
+    uploadSuccess(data) {
+        console.log("[INFO]up load LOCATION success")
+    }
+    uploadError(error) {
+        console.log("[ERROR]" + JSON.stringify(error))
+    }
+
     startSuccess(data) {
-        console.log(data)
-        this.journeyId = data.data.journeyId;
-        this.tempLinkID = data.data.tempLinkID;
+        console.log("[INFO] tell server start journey success")
+        data = JSON.parse(data);
+        var reply = JSON.parse(data.data);
+        console.log("[INFO]" + data.data);
+        console.log("[INFO]" + reply);
+        this.journeyId = reply.journeyID;
+        this.tempLinkID = reply.tempLinkID;
+        
     }
 
     startError(error) {
-        console.log(JSON.string(error))
+        console.log("[ERROR] tell server start journey failed")
+        console.log(JSON.stringify(error))
     }
+
+    stopSuccess(data) {
+        console.log("[INFO]Stop success")
+        this.journeyId = null;
+        this.tempLinkID = null;
+    }
+
+    stopError(error) {
+        console.log("[ERROR] tell server STOP journey failed")
+
+        console.log(JSON.string(error));
+        this.journeyId = null;
+        this.tempLinkID = null;
+    }
+
 
     getNavigationRoute() {
         return this.navigationRoute;
@@ -126,7 +158,7 @@ class LocationSharing {
     }
 
     getCurrentLng() {
-        return this.CurrentLng;
+        return this.currentLng;
     }
 
     startTracking(coord) {

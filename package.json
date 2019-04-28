@@ -19,6 +19,7 @@
     "cordova-plugin-statusbar": "^2.4.2",
     "cordova-plugin-whitelist": "1",
     "fetch": "^1.1.0",
+    "geolib": "^2.0.24",
     "history": "^4.9.0",
     "jquery": "^3.4.0",
     "mapbox-gl": "^0.53.1",
@@ -70,8 +71,8 @@
       }
     },
     "platforms": [
-      "android",
-      "browser"
+      "browser",
+      "android"
     ]
   },
   "devDependencies": {}

@@ -58,6 +58,7 @@ class LoginPage extends React.Component {
         super(props);
         this.apis = new APIs();
         this.state = {
+            displayError:false,
             firstName: "",
             lastName: "",
             mobileNumber: "",
@@ -82,7 +83,7 @@ class LoginPage extends React.Component {
             password: this.state.password,
         };
         this.apis.login(regdata, this.loginSuccess.bind(this), this.loginError.bind(this))
-        this.setState({logining:true})
+        this.setState({ logining: true, displayError: false });
     }
 
     loginSuccess(data) {
@@ -114,7 +115,7 @@ class LoginPage extends React.Component {
             if (response.error_description) this.state.errors.push(response.error_description);
         }
         console.log(this.state.errors)
-        this.setState({ logining: false })
+        this.setState({ logining: false,displayError:true })
     }
 
     handleChange = name => event => {
@@ -173,6 +174,7 @@ class LoginPage extends React.Component {
                                 onChange={this.handleChange('password')}
                                 margin="normal"
                             />
+                            {this.state.displayError ? <Typography color="secondary" variant="body2">The user name or password is incorrect.</Typography> : null}
                         </Grid>
 
                         <Grid xs={12}>

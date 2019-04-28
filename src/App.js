@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import TurnedInIon from '@material-ui/icons/TurnedIn';
+import Switch from '@material-ui/core/Switch';
 
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
@@ -65,7 +66,15 @@ const styles = theme => ({
     myPositionIcon: {
         position: 'absolute',
         left: 'calc(100% - 60px)',
-        top:'calc(100% - 120px)',
+        top:'calc(100% - 180px)',
+        display: 'flex',
+        zIndex: 1100,
+    },
+    sharingFab: {
+        position: 'absolute',
+        width:'140px',
+        left: 'calc(100% - 150px)',
+        top: 'calc(100% - 130px)',
         display: 'flex',
         zIndex: 1100,
     },
@@ -219,6 +228,8 @@ class App extends Component {
         console.log('create ref')
         this.mainBar = React.createRef();
 
+        this.naviPage = React.createRef();
+
         console.log('test data')
         this.crimeData = {
             'type': 'FeatureCollection',
@@ -242,6 +253,9 @@ class App extends Component {
         
         
         this.state = {  // state of react component
+            tempLinks: {},
+            tracking: false,
+            sharing:false,
             left: false,
             currentPage: 0,
             mobileMoreAnchorEl: null,
@@ -275,12 +289,14 @@ class App extends Component {
      * app initialize and load data from server
      */
     loginSuccess() {
+        this.getLinksTimer = setInterval(this.retrieveTemplinks.bind(this), 15000); //retrieve the templink from server eveery 15 s
         this.setState({ isLogin: true });
     }
 
     loginError(e) {
+        clearInterval(this.getLinksTimer);
         history.push('\login');
-        console.log(e)
+        console.log(e[1])
     }
     logoutSuccess() {
         this.setState({ isLogin: false });
@@ -288,10 +304,45 @@ class App extends Component {
 
     handleLogout = () => {
         console.log(window.serverUrl);
-
+        clearInterval(this.getLinksTimer);
         this.apis.logout(this.logoutSuccess.bind(this),this.regError.bind(this))
 
     }
+    retrieveTemplinks = () => {
+        if (this.state.isLogin) {
+            var theApi = 'api/TempLinks/avaliableLinks'
+            var data = null;
+            this.apis.callApi(theApi, data, this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
+        }
+        
+    }
+
+    receiveLinks = (data) => {
+        console.log(data)
+        var results = JSON.stringify(JSON.stringify(data).data);
+        var tempLinks = this.state.tempLinks;
+        for (var key in tempLinks) {
+            if (!results.includes(tempLinks[key])) {
+                delete tempLinks[key]
+            }
+        }
+        for (var key in results) {
+            if (!this.state[tempLinks[key]]) {
+                tempLinks[results[key].tempLink] = {
+                    firstName: results[key].firstName,
+                    lastName: results[key].lastName,
+                    journey:null,
+                }
+            }
+        }
+
+        console.log("[INFO] update templinks " + JSON.stringify(tempLinks))
+        this.setState({ 'tempLinks': tempLinks });
+    }
+    receiveLinksError = (error)=>{
+        console.log('[ERROR]'+error)
+    }
+
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         
@@ -322,6 +373,8 @@ class App extends Component {
             //directly load from server is using broswer
             this.retrieveCrimeRates()
         }
+
+
     }
 
     successGetCrimeJson(fileEntry) {
@@ -687,7 +740,11 @@ class App extends Component {
         console.log('heading:' + this.heading)
 
         this.userLocation = { lat: thelat, lng: thelng };
-        this.setState({ userLocation: this.userLocation });
+        if (this.naviPage.current) {
+            this.mainBar.current.setupAutoComplete(this.userLocation);
+            
+        }
+        
 
         if (this.userMarker) {
             console.log('update user location')
@@ -960,6 +1017,19 @@ class App extends Component {
                 <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
                     <MyLocationIcon />
                 </Fab>
+
+                <Fab variant="extended" className={classes.sharingFab} color="primary">
+                    <Typography variant='body2' color="secondary">
+                        Share location
+                    </Typography>
+                    <Switch
+                        checked={this.state.sharing}
+                        onChange={this.handleSwitch('sharing')}
+                        value="sharing"
+                    />
+                </Fab>
+               
+
                 {!this.state.searchResponse ? (
                     <div className={classes.panicPosition}>
                         <PanicButton getLocation={this.getLocation.bind(this)} />
@@ -994,6 +1064,32 @@ class App extends Component {
         else {
             this.setState({ mobileMoreAnchorEl: event.currentTarget, layerMenu: true });
         }
+    };
+
+    handleSwitch = name => event => {
+        if (name == 'sharing' && window.cordova) {
+            if (event.target.checked) {
+                console.log("[INFO]Sharing location on, count 3 seconds")
+                this.interval = setTimeout(function() {
+                    if (this.state.sharing) {
+                        console.log("[INFO]3 seconds reach, switch still on. start sharing.")
+                        this.locationSharing.startTracking(this.userLocation);
+                        this.setState({tracking:true})
+                        
+                    }
+                    else {
+                        console.log("[INFO]3 seconds reach, switch OFF.")
+                    }
+                }.bind(this), 3000);
+            }
+            else {
+                if (this.state.tracking) {
+                    this.locationSharing.stopTracking();
+                }
+            }
+            
+        }
+        this.setState({ [name]: event.target.checked });
     };
     /* The buttons and icons on map page
      * 
@@ -1174,7 +1270,7 @@ class App extends Component {
                     <Route exact path="/contacts" component={ContactsPage} />
                     <Route exact path="/register" component={() => <RegisterPage history={history} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage userLocation={this.state.userLocation} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} userLocation={this.state.userLocation} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={UserProfile} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history}/>} />
