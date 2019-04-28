@@ -1345,14 +1345,17 @@ class App extends Component {
                     </ListItem>
                     <Divider/>
                     <ListItem button key='Navigation3'>
-                        
-                            <Link
-                                className={classes.sideContent}
-                                variant='h6'
-                                to='/userProfile'
-                            >
-                                User Profile
-                        </Link>
+                            {this.state.isLogin ?
+                                <Link
+                                    className={classes.sideContent}
+                                    variant='h6'
+                                    to='/userProfile'
+                                >
+                                    User Profile
+                                </Link>
+                                :
+                                null
+                            }
                         
                     </ListItem>
                     <ListItem button key='Navigation4'>
