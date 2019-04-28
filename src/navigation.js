@@ -120,6 +120,7 @@ class NavigationPage extends React.Component {
     handleStartTracking() {
         console.log("Start tracking. start location:" + JSON.stringify(this.props.userLocation));
         if (window.cordova) {
+            this.props.locationSharing.navigationRoute = JSON.stringify(this.props.currentRoute);
             this.props.locationSharing.startTracking(this.props.userLocation);
 
         }

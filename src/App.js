@@ -31,6 +31,8 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
+import LightLocation from './LightLocation.json';
+
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
 import APIs from './apis.js';
@@ -202,6 +204,16 @@ class App extends Component {
         }
         this.tempLinks = {};
         this.friendPath = null;
+        this.friendMarkers = {
+            start: null,
+            current: null,
+            planFinish: null,
+        }
+        this.friendMarkersInfo = {
+            startInfo: null,
+            currentInfo: null,
+            planFinish:null
+        }
 
         /*
         Map related attributes:
@@ -362,6 +374,14 @@ class App extends Component {
             if (data[key].locationListJson != "[]") {
                 this.tempLinks[data[key].TempLinkId].locations = this.tempLinks[data[key].TempLinkId].locations.concat(JSON.parse(data[key].locationListJson));
                 console.log(this.tempLinks[data[key].TempLinkId].locations)
+                if (this.state.friendDisplay) {
+                    var latlngs = this.convertLocations(JSON.parse(data[key].locationListJson))
+                    this.friendPath.push(latlngs)
+                    this.friendMarkers.current.setPosition(latlngs[latlngs.length-1])
+
+                    
+                }
+
             }
             
         }
@@ -429,22 +449,65 @@ class App extends Component {
 
     handleAvatar = (e) => {
         
-        var tempLink = e.target.key
+        var tempLink = e
 
-        if (this.state.firendDisplay == tempLink) {
-            this.directionsDisplay.setDirections(null)
+        if (this.state.friendDisplay == tempLink) {
+            console.log("canceel display")
+            this.directionsDisplay.setMap(null)
+            this.friendMarkers.start.setMap(null)
+            this.friendMarkers.current.setMap(null)
+            this.friendPath.setMap(null);
+
+
+            this.setState({
+                friendDisplay: null
+            })
         }
         else {
+            console.log("display friend")
             var navRoute = this.tempLinks[tempLink].journey.NavigateRoute
             if (navRoute) {
-                this.directionsDisplay.setDirections(navRoute)
+                this.directionsDisplay.setDirections(JSON.parse(navRoute))
+                //this.friendMarkers.planFinish.setPosition()
             }
+            this.displayTracking(this.tempLinks[tempLink].locations);
+            this.friendMarkers.start.setPosition({ lat: this.tempLinks[tempLink].journey.SCoordLat, lng: this.tempLinks[tempLink].journey.SCoordLog})
+            this.friendMarkers.start.setMap(this.map)
+            this.friendMarkersInfo.startInfo.setContent("Start time: " + this.tempLinks[tempLink].journey.StartTime)
+
+            if (this.tempLinks[tempLink].locations.length) {
+
+            }
+            this.friendMarkers.current.setPosition({ lat: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLat, lng: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLog })
+            this.friendMarkers.current.setMap(this.map)
+            this.friendMarkersInfo.currentInfo.setContent("Current location : " + this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].Time);
+
+
             this.setState({
-                firendDisplay: e.target.key
+                friendDisplay: tempLink
             })
         }
 
         
+    }
+
+    displayTracking(locations) {
+        var coords = []
+        var lastLatLng = {}
+        for (var key in locations) {
+            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
+            lastLatLng = { lat: locations[key].CoordLat, lng: locations[key].CoordLog }
+        }
+        this.friendPath.setPath(coords);
+        this.friendPath.setMap(this.map);
+        this.map.setCenter(lastLatLng);
+    }
+    convertLocations(locations) {
+        var coords = []
+        for (var key in locations) {
+            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
+        }
+        return coords
     }
 
     componentDidMount() { //start loading crime rate data when this page is rendered
@@ -759,8 +822,28 @@ class App extends Component {
         this.friendPath = new window.google.maps.Polyline({
             strokeColor: '#ff7504',
             strokeOpacity: 1.0,
-            strokeWeight: 3
+            strokeWeight: 6
         });
+        this.friendMarkers = {
+            start: new window.google.maps.Marker(),
+            current: new window.google.maps.Marker(),
+            planFinish: new window.google.maps.Marker(),
+        }
+        this.friendMarkersInfo = {
+            startInfo: new window.google.maps.InfoWindow(),
+            currentInfo: new window.google.maps.InfoWindow(),
+            planFinish: new window.google.maps.InfoWindow()
+        }
+        this.friendMarkers.start.addListener('click', function () {
+            this.friendMarkersInfo.startInfo.open(this.map, this.friendMarkers.start);
+        }.bind(this));
+        this.friendMarkers.current.addListener('click', function () {
+            this.friendMarkersInfo.currentInfo.open(this.map, this.friendMarkers.current);
+        }.bind(this));
+        this.friendMarkers.planFinish.addListener('click', function () {
+            this.friendMarkersInfo.planFinish.open(this.map, this.friendMarkers.planFinish);
+        }.bind(this));
+
 
         this.mainBar.current.setupAutoComplete();
         console.log('set auto complete done')
@@ -1143,7 +1226,7 @@ class App extends Component {
                         }
 
                         return (
-                            <Fab className={classes.avatar} color={this.state.firendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                            <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
                     } > { displayName }</Fab>
                     )
             }.bind(this))}
