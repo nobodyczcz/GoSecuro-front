@@ -309,7 +309,7 @@ class ContactsPage extends React.Component {
         console.log("Retrieving emergency contacts");
         var apiRoute = 'api/UserEmergency/retrieveEmergencies';
         if (this.props.isLogin)
-            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError);
+            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError.bind(this));
     
         else
             this.updateContactList();

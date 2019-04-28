@@ -7,6 +7,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import TurnedInIon from '@material-ui/icons/TurnedIn';
 import Switch from '@material-ui/core/Switch';
+import Avatar from '@material-ui/core/Avatar';
+
 
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
@@ -136,6 +138,19 @@ const styles = theme => ({
         top:0,
         left:0,
     },
+    friendsBoard: {
+        position: 'absolute',
+        left: '20px',
+        width: '60px',
+        zIndex: 1100,
+        height:"60%",
+
+    },
+    avatar: {
+        marginTop: '10px',
+        width: "60px",
+        height:"60px"
+    }
 
 });
 
@@ -186,6 +201,7 @@ class App extends Component {
             this.locationSharing.initialize();
         }
         this.tempLinks = {};
+        this.friendPath = null;
 
         /*
         Map related attributes:
@@ -254,6 +270,7 @@ class App extends Component {
         
         
         this.state = {  // state of react component
+            tempLinks:[],
             tracking: false,
             sharing:false,
             left: false,
@@ -315,7 +332,7 @@ class App extends Component {
             this.apis.callApi(theApi, data, this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
         }
 
-        if (this.tempLinks.length > 0) {
+        if (Object.keys(this.tempLinks).length > 0) {
             console.log("[info]length >0")
             var theApi = 'api/TempLinks/updateLocations'
             var data = []
@@ -324,16 +341,34 @@ class App extends Component {
                     console.log("[info]request update location")
                     var locations = this.tempLinks[key].locations
                     var theTemp = {
-                        tempLink: key,
+                        TempLinkId: key,
                         lastLocTime: locations.length > 0 ? locations[locations.length - 1].Time : this.tempLinks[key].journey.StartTime
                     }
                     data.push(theTemp)
                 }
                 
-            } 
-            //this.apis.callApi(theApi, tempLinks.keys(), this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
+            }
+            if (data.length > 0) {
+                console.log("[INFO] request locations")
+                this.apis.callApi(theApi, data, this.receiveLocations.bind(this), this.receiveLocationsError.bind(this));
+
+            }
         }
         
+    }
+    receiveLocations = (data) => {
+        console.log(data)
+        for (var key in data) {
+            if (data[key].locationListJson != "[]") {
+                this.tempLinks[data[key].TempLinkId].locations = this.tempLinks[data[key].TempLinkId].locations.concat(JSON.parse(data[key].locationListJson));
+                console.log(this.tempLinks[data[key].TempLinkId].locations)
+            }
+            
+        }
+        
+    }
+    receiveLocationsError = (error) => {
+        console.log(error)
     }
 
     receiveLinks = (data) => {
@@ -342,32 +377,38 @@ class App extends Component {
         var tempLinks = this.tempLinks;
         var linkList=[];
         for (var key in results) {
-            linkList.push(results[key].tempLink)
+            linkList.push(results[key].TempLinkId)
         }
         console.log(tempLinks)
         console.log(linkList)
-
+        var updated = false;
         for (var key in tempLinks) {
             if (!linkList.includes(key)) {
                 delete tempLinks[key]
+                updated = true;
             }
         }
         for (var key in results) {
-            if (!tempLinks[results[key].tempLink]) {
-                tempLinks[results[key].tempLink] = {
+            if (!tempLinks[results[key].TempLinkId]) {
+                tempLinks[results[key].TempLinkId] = {
                     firstName: results[key].firstName,
                     lastName: results[key].lastName,
                     journey: null,
                     locations:[]
                 }
+                updated = true; 
                 var theApi = "api/Journey/EmergencyRetrieve"
-                var data = { templinkId: results[key].tempLink }
+                var data = { TempLinkId: results[key].TempLinkId }
                 this.serverApi.callApi(theApi, data, this.getJourneySuccess.bind(this),this.getJourneyError.bind(this))
             }
         }
 
         console.log("[INFO] update templinks " + JSON.stringify(tempLinks));
         this.tempLinks = tempLinks;
+        if (updated) {
+            console.log("[INFO] temp link list chaged");
+            this.setState({ "tempLinks": Object.keys(this.tempLinks) });
+        }
         
     }
     receiveLinksError = (error)=>{
@@ -377,13 +418,33 @@ class App extends Component {
         var results = JSON.parse(JSON.parse(data).data);
         console.log(results)
             
-        this.tempLinks[results.tempLink].journey = results;
+        this.tempLinks[results.TempLinkId].journey = results;
 
         console.log(data)
     }
 
     getJourneyError = (error) => {
         console.log(error)
+    }
+
+    handleAvatar = (e) => {
+        
+        var tempLink = e.target.key
+
+        if (this.state.firendDisplay == tempLink) {
+            this.directionsDisplay.setDirections(null)
+        }
+        else {
+            var navRoute = this.tempLinks[tempLink].journey.NavigateRoute
+            if (navRoute) {
+                this.directionsDisplay.setDirections(navRoute)
+            }
+            this.setState({
+                firendDisplay: e.target.key
+            })
+        }
+
+        
     }
 
     componentDidMount() { //start loading crime rate data when this page is rendered
@@ -695,6 +756,11 @@ class App extends Component {
         //initialize direction service
         this.directionsService = new window.google.maps.DirectionsService();
         this.directionsDisplay = new window.google.maps.DirectionsRenderer();
+        this.friendPath = new window.google.maps.Polyline({
+            strokeColor: '#ff7504',
+            strokeOpacity: 1.0,
+            strokeWeight: 3
+        });
 
         this.mainBar.current.setupAutoComplete();
         console.log('set auto complete done')
@@ -1056,6 +1122,33 @@ class App extends Component {
                         </ClickAwayListener>
                     ) : null}
                 </div>
+                <div className={classes.friendsBoard}>
+                    {this.state.tempLinks.map(function (item, index) {
+
+                        var journey = this.tempLinks[item];
+                        var fullName = (journey.firstName ? journey.firstName : "") + (journey.lastName ? journey.lastName : "")
+                        var displayName = "";
+                        if (fullName.length <= 5) {
+                            displayName = fullName;
+                        }
+                        else if (journey.firstName && journey.firstName.length <= 5) {
+                            displayName = journey.firstName;
+                        }
+                        else {
+                            displayName = (journey.firstName ? journey.firstName[0] : "") + (journey.lastName ? journey.lastName[0] : "");
+                        }
+
+                        if (displayName == "") {
+                            displayName = "None"
+                        }
+
+                        return (
+                            <Fab className={classes.avatar} color={this.state.firendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                    } > { displayName }</Fab>
+                    )
+            }.bind(this))}
+                </div>
+
                 <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
                     <MyLocationIcon />
                 </Fab>
