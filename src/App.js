@@ -372,8 +372,10 @@ class App extends Component {
         console.log('[ERROR]'+error)
     }
     getJourneySuccess = (data) => {
-        var results = JSON.parse(JSON.parse(data).data);
+        var results = JSON.parse(data.data);
         for (var key in results) {
+            console.log("[Receive journey]"+results)
+            console.log(this.tempLinks)
             this.tempLinks[results[key].tempLink].journey = results[key];
         }
         console.log(data)
