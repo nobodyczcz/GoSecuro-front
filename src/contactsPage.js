@@ -331,7 +331,7 @@ class ContactsPage extends React.Component {
         //jump to next page
     }
     regError(jqXHR) {
-        this.state.errors = [];
+        this.setState({ errors : []});
         var response = jqXHR.responseJSON;
         if (response) {
             if (response.Message) this.state.errors.push(response.Message);
