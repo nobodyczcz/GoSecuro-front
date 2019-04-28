@@ -19,6 +19,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 var history;
 if (window.cordova) {
@@ -110,6 +112,9 @@ const styles = theme => ({
         width: "100%",
         marginTop:0,
     },
+    selectAge: {
+        minWidth:"100px",
+    },
     profile: {
         marginTop: '100px',
     },
@@ -188,6 +193,10 @@ class UserProfile extends React.Component{
             
     }
 
+    handleChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+
     retrieveUserProfile(){
         this.setState({ isLoading: true });
         console.log(window.serverUrl);
@@ -204,7 +213,16 @@ class UserProfile extends React.Component{
         console.log("User profile successfully retrieved")
         console.log("user profile: " + JSON.parse(reply.data));
         console.log(JSON.parse(reply.data));
-        this.setState({userProfile : JSON.parse(reply.data), isLoading: false}); 
+        var profile = JSON.parse(reply.data)
+        this.setState({
+            firstName: profile.FirstName,
+            lastName: profile.LastName,
+            phone: profile.Phone,
+            email: profile.Email,
+            gender: profile.Gender,
+            address: profile.Address,
+            isLoading: false
+        }); 
 
         //jump to next page
     }
@@ -280,9 +298,9 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="FirstName"
                                                 className={classes.textField}
-                                                defaultValue={this.state.userProfile.FirstName}
                                                 value={this.state.firstName}
                                                 type='text'
+                                                onChange={this.handleChange('firstName')}
                                                 inputProps={{
                                                     maxlength:'10',
                                                     readOnly: this.state.isreadOnly
@@ -295,8 +313,9 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="LastName"
                                                 className={classes.textField}
-                                                defaultValue={this.state.userProfile.LastName}
                                                 value={this.state.lastName}
+                                                onChange={this.handleChange('lastName')}
+
                                                 type='text'
                                                 inputProps={{
                                                     maxlength:'10',
@@ -310,8 +329,8 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="PhoneNumber"
                                                 className={classes.textField}
-                                                defaultValue={this.state.userProfile.Phone}
                                                 value={this.state.phone}
+                                                onChange={this.handleChange('phone')}
                                                 type='number'
                                                 inputProps={{
                                                     maxlength:'10',
@@ -325,8 +344,9 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="EmailId"
                                                 className={classes.textField}
-                                                defaultValue={this.state.userProfile.Email}
                                                 value={this.state.email}
+                                                onChange={this.handleChange('email')}
+    
                                                 type='text'
                                                 inputProps={{
                                                     maxlength:'10',
@@ -337,26 +357,34 @@ class UserProfile extends React.Component{
                                             <Typography className={classes.label} variant='h6'>
                                                 Gender
                                             </Typography>
-                                            <TextField
-                                                id="gender"
-                                                className={classes.textField}
-                                                defaultValue={this.state.userProfile.Gender}
+                                            <Select
                                                 value={this.state.gender}
-                                                type='text'
+                                                onChange={this.handleChange('gender')}
+                                                name="gender"
                                                 inputProps={{
-                                                    maxlength:'10',
+                                                    id: 'gender',
                                                     readOnly: this.state.isreadOnly
                                                 }}
-                                                margin="normal"
-                                            />
+
+                                                className={classes.selectAge}
+                                            >
+                                                <MenuItem value={"None"}>
+                                                    <em>None</em>
+                                                </MenuItem>
+                                                <MenuItem value={"male"}>Male</MenuItem>
+                                                <MenuItem value={"female"}>Female</MenuItem>
+                                                <MenuItem value={"neither"}>Neither</MenuItem>
+                                            </Select>
+                                           
                                             <Typography className={classes.label} variant='h6'>
                                                 Address
                                             </Typography>
                                             <TextField
                                                 id="gender"
                                                 className={classes.textField}
-                                                defaultValue={this.state.userProfile.Address}
                                                 value={this.state.address}
+                                                onChange={this.handleChange('address')}
+
                                                 type='text'
                                                 inputProps={{
                                                     maxlength:'10',
