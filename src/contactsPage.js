@@ -11,6 +11,7 @@ import APIs from './apis.js';
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
@@ -125,7 +126,11 @@ const styles = theme => ({
         top: `calc( 100% - 54% )`,
         left: '0',
         zIndex: 900,
-      }
+      },
+      progress: {
+        marginLeft: theme.spacing.unit * 20,
+        padding: '5px'
+      },
 });
 class ContactsPage extends React.Component {
     constructor(props) {
@@ -137,6 +142,7 @@ class ContactsPage extends React.Component {
             userName:'',
             open:false,
             contactList:[],
+            loading: true,
             errors:[]
         };
 
@@ -251,13 +257,22 @@ class ContactsPage extends React.Component {
     }
 
     updateContactList() {
-        
-        if (localStorage.getItem('contactList')) {
-            console.log(localStorage.getItem('contactList'));
-            this.setState({ contactList: JSON.parse(localStorage.contactList) })
+
+        if(this.props.isLogin){
+            if (localStorage.getItem('localContactList')) {
+                console.log(localStorage.getItem('localContactList'));
+                this.setState({ contactList: JSON.parse(localStorage.localContactList) })
+            }
         }
-        else {
-            this.setState({ contactList: [] })
+        else{
+        
+            if (localStorage.getItem('contactList')) {
+                console.log(localStorage.getItem('contactList'));
+                this.setState({ contactList: JSON.parse(localStorage.contactList) })
+            }
+            else {
+                this.setState({ contactList: [] })
+            }
         }
         
     }
@@ -304,6 +319,7 @@ class ContactsPage extends React.Component {
 
     }
     retrieveEmergencies() {
+        this.setState({ loading: true });
 
         console.log(window.serverUrl);
         console.log("Retrieving emergency contacts");
@@ -313,6 +329,8 @@ class ContactsPage extends React.Component {
     
         else
             this.updateContactList();
+        
+        
     }
 
     retrieveSuccess(reply) {
@@ -321,7 +339,8 @@ class ContactsPage extends React.Component {
             this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
             localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
-            
+
+        this.setState({ loading: false });            
         //jump to next page
     }
 
@@ -441,7 +460,7 @@ class ContactsPage extends React.Component {
                 </div>
 
                 <div className={classes.contacts}>
-                        
+                       
                         <Grid
                             container
                             direction="row"
@@ -449,6 +468,9 @@ class ContactsPage extends React.Component {
                             alignItems="center"
                             spacing={8}
                         >
+                        
+                            {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
+                     
                             {this.state.contactList.map(function (item, i) {
                                 return (
                                     <Grid key={i} item xs={12} md={6} lg={3}>

@@ -16,6 +16,8 @@ import Fab from '@material-ui/core/Fab';
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
+
 import IconButton from '@material-ui/core/IconButton';
 
 import { createBrowserHistory, createHashHistory } from 'history';
@@ -139,6 +141,10 @@ const styles = theme => ({
         justifyContent: "center",
         marginTop:"20px",
     },
+    progress: {
+        marginLeft: theme.spacing.unit * 20,
+        padding: '5px'
+    },
 
 });
 class EmergencyContacts extends React.Component{
@@ -207,8 +213,8 @@ class EmergencyContacts extends React.Component{
         }
         console.log(window.serverUrl);
         var contdata = {
-            name: this.state.name,
-            mobile: this.state.mobile,
+            EmergencyContactPhone: this.state.mobile,
+            ECname: this.state.name,
         };
         //console.log("add contact:" + contdata);
         var apiRoute = 'api/UserEmergency/create';
@@ -239,7 +245,8 @@ class EmergencyContacts extends React.Component{
     }
     handleDelete(index) {
         console.log(window.serverUrl);
-        var list = JSON.parse(localStorage.localContactList)
+        console.log("Deleting contact");
+        var list = localStorage.localContactList
         var result = list.splice(index, 1);
         console.log("splice result:" + result);
         localStorage.localContactList = JSON.stringify(list);
@@ -420,6 +427,7 @@ class EmergencyContacts extends React.Component{
                             alignItems="center"
                             spacing={8}
                         >
+                            {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
                             
                             {this.state.contactList.map(function (item, i) {
                                 return (
@@ -494,16 +502,16 @@ class EmergencyContacts extends React.Component{
                                                     className={classes.deleteIconButton}
                                                     aria-label="Delete"
                                                     color="secondary"
-                                                    onClick={() => { this.handleDelete(i) }}
+                                                    onClick={function(){ this.handleDelete(i)}.bind(this) }
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="h6">
-                                                    Name: {item.name}
+                                                    Name: {item.ECname}
                                                 </Typography>
     
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                                    Mobile:  {item.mobile}
+                                                    Mobile:  {item.EmergencyContactPhone}
                                                 </Typography>    
     
                                             </CardContent>
