@@ -21,8 +21,10 @@ import { createBrowserHistory, createHashHistory } from 'history';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
-import ContactsPage from './contactsPage.js'
+import ContactsPage from './contactsPage.js';
+import EmergencyContacts from './emergencyContactsPage.js';
 import AboutUs from './AboutUs.js';
+import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
@@ -1112,6 +1114,17 @@ class App extends Component {
                     </ListItem>
                     <Divider/>
                     <ListItem button key='Navigation3'>
+                        
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/userProfile'
+                            >
+                                User Profile
+                        </Link>
+                        
+                    </ListItem>
+                    <ListItem button key='Navigation4'>
                         {this.state.isLogin ?
                             <Link
                                 className={classes.sideContent}
@@ -1163,6 +1176,8 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage userLocation={this.state.userLocation} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path="/userProfile" component={UserProfile} />
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history}/>} />
                     
                 </Router>  
           </MuiThemeProvider>

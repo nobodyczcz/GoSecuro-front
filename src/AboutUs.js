@@ -72,7 +72,7 @@ class AboutUs extends React.Component{
     render(){
         const { classes,theme } = this.props;
         return(
-            <Router history={history}>
+            
             <Paper className={classes.paper}>
                 
                 <div>
@@ -108,7 +108,6 @@ class AboutUs extends React.Component{
                     
                 </div>
             </Paper>
-            </Router>
             
         );
     }

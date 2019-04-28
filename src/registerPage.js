@@ -12,10 +12,20 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import APIs from './apis.js';
+
+import { createBrowserHistory, createHashHistory } from 'history';
+import { Router, Route, Link } from "react-router-dom";
 import { ValidatorForm, SelectValidator,TextValidator } from 'react-material-ui-form-validator';
-
-
 import { withStyles } from '@material-ui/core/styles';
+
+
+var history;
+if (window.cordova) {
+    history = new createHashHistory();
+}
+else {
+    history = new createBrowserHistory();
+}
 
 const styles = theme => ({
     paper: {
@@ -114,6 +124,9 @@ class RegisterPage extends React.Component {
             ConfirmPassword: this.state.password,
         };
         this.apis.register(regdata,this.regSuccess.bind(this),this.regError.bind(this))
+
+        //jump to next page: add emergency contacts page
+        this.props.history.push('/');
     }
 
     regSuccess(data) {
