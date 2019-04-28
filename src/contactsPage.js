@@ -317,9 +317,9 @@ class ContactsPage extends React.Component {
 
     retrieveSuccess(reply) {
         console.log("Success")
-        if (this.props.isLogin){
-            this.setState({contactList : JSON.parse(JSON.parse(reply).data)});
-            localStorage.setItem("localContactList",this.state.contactList);
+        if (this.props.isLogin) {
+            this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
+            localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
             
         //jump to next page
@@ -459,7 +459,7 @@ class ContactsPage extends React.Component {
                                                     color="secondary"
                                                     fill="secondary"
                                                     float="right"
-                                                    onClick={() => {this.handleEditOpen(i,item)}} 
+                                                    onClick={function(){this.handleEditOpen(i,item)}.bind(this)} 
                                                 >
                                                 </EditIcon>
                                                 <Modal
@@ -511,7 +511,7 @@ class ContactsPage extends React.Component {
                                                             color="secondary"
                                                             aria-label="Save"
                                                             className={classes.customRightButton}
-                                                            onClick={() => { this.handleEdit(this.state.activeIndex) }}
+                                                            onClick={function(){ this.handleEdit(this.state.activeIndex) }.bind(this)}
                                                         >
                                                             Save
                                                         </Fab>
@@ -522,16 +522,16 @@ class ContactsPage extends React.Component {
                                                     className={classes.deleteIconButton}
                                                     aria-label="Delete"
                                                     color="secondary"
-                                                    onClick={() => { this.handleDelete(i) }}
+                                                    onClick={function(){ this.handleDelete(i) }.bind(this)}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="h6">
-                                                    Name: {item.name}
+                                                    Name: {item.ECname}
                                                 </Typography>
     
                                                 <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                                    Mobile:  {item.mobile}
+                                                    Mobile:  {item.EmergencyContactPhone}
                                                 </Typography>    
     
                                             </CardContent>

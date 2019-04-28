@@ -316,6 +316,7 @@ class App extends Component {
         }
 
         if (this.tempLinks.length > 0) {
+            console.log("[info]length >0")
             var theApi = 'api/TempLinks/updateLocations'
             var data = []
             for (var key in this.tempLinks) {
