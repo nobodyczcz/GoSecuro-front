@@ -125,7 +125,7 @@ class UserProfile extends React.Component{
             open:false,
             isreadOnly: true,
             showButtons: 'none',
-            contactList:[]
+            userProfile:[]
         };
 
     }
@@ -135,13 +135,13 @@ class UserProfile extends React.Component{
     }
 
     handleEditCancel(){
-        this.state.isreadOnly = true;
-        this.state.showButtons = 'none';
+        this.setState({isreadOnly : true});
+        this.setState({showButtons : 'none'});
+        
     }
     handleEditClick(){
-                
-        this.state.isreadOnly = false;
-        this.state.showButtons = 'inherit';
+        this.setState({isreadOnly : false});
+        this.setState({showButtons : 'inherit'});
     }
     retrieveUserProfile(){
         console.log(window.serverUrl);
@@ -156,7 +156,8 @@ class UserProfile extends React.Component{
 
     retrieveSuccess(reply) {
         console.log("User profile successfully retrieved")
-        console.log("user profile: " + JSON.parse(JSON.parse(reply).data))          
+        console.log("user profile: " + JSON.parse(JSON.parse(reply).data))
+        this.setState({userProfile : JSON.parse(JSON.parse(reply).data)});          
         //jump to next page
     }
 
@@ -218,7 +219,7 @@ class UserProfile extends React.Component{
                                 color="secondary"
                                 fill="secondary"
                                 float="right"
-                                onClick={this.handleEditClick} 
+                                onClick={this.handleEditClick.bind(this)} 
                             >
                             </EditIcon>
                             <Card className={classes.contCard} >
