@@ -1312,7 +1312,7 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} userLocation={this.state.userLocation} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
-                    <Route exact path="/userProfile" component={UserProfile} />
+                    <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} isLogin={this.state.isLogin}/>} />
                     
                 </Router>  
