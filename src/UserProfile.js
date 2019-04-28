@@ -15,6 +15,7 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import APIs from './apis.js';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
@@ -65,7 +66,8 @@ const styles = theme => ({
     },
     content: {
         padding: '5%',
-        marginTop: '80px'
+        marginTop: '80px',
+        overflowY: "scroll",
     },
     contentText:{
         color:'#FF7504',
@@ -109,23 +111,28 @@ const styles = theme => ({
     },
     label: {
         color: '#FF7504'
-    }
+    },
+    progress: {
+        marginLeft: theme.spacing.unit * 20,
+        padding: '5px'
+      },
 });
 class UserProfile extends React.Component{
     constructor(props) {
         super(props);
         this.apis = new APIs();
         this.state = {
-            username: 'Sushmitha',
-            contact: '111',
+            firstName: '',
+            lastName: '',
+            phone: '111',
             email: 'www',
             gender: 'f',
-            name: '',
-            mobile: '',
+            address: '',
             open:false,
             isreadOnly: true,
             showButtons: 'none',
-            userProfile:[]
+            userProfile:[],
+            isLoading: true
         };
 
     }
@@ -134,14 +141,41 @@ class UserProfile extends React.Component{
         this.retrieveUserProfile();
     }
 
+    editSuccess(reply) {
+        console.log("User profile Edit successfull!")
+        //jump to next page
+    }
+
+    handleEdit() {
+        console.log(window.serverUrl);
+        console.log("Editing user profile");
+        
+        if (this.props.isLogin) {
+            var apiRoute = 'api/UserProfiles/EditProfiles';
+            var userData = {
+            Address: this.state.adress,
+            Gender: this.state.gender,
+            FirstName: this.state.firstName,
+            LastName: this.state.lastName,
+            Phone: this.state.phone,
+            Email: this.state.email
+            };
+            console.log("[INFO]already login")
+            this.apis.callApi(apiRoute, userData, this.editSuccess.bind(this), this.retError);
+        }
+    }
+
     handleEditCancel() {
         this.setState({ isreadOnly: true, showButtons: 'none' })     
 
     }
+
     handleEditClick(){
         this.setState({ isreadOnly: false, showButtons: 'inherit'})     
     }
+
     retrieveUserProfile(){
+        this.setState({ isLoading: true });
         console.log(window.serverUrl);
         console.log("Retrieving user profile");
         var apiRoute = 'api/UserProfiles/Retrieve';
@@ -155,12 +189,14 @@ class UserProfile extends React.Component{
     retrieveSuccess(reply) {
         console.log("User profile successfully retrieved")
         console.log("user profile: " + JSON.parse(reply.data));
-        this.setState({userProfile : JSON.parse(reply.data)});            
+        console.log(JSON.parse(reply.data));
+        this.setState({userProfile : JSON.parse(reply.data), isLoading: false}); 
+
         //jump to next page
     }
 
     retError(jqXHR) {
-        this.state.errors = [];
+        this.setState({ errors : []});
         var response = jqXHR.responseJSON;
         if (response) {
             if (response.Message) this.state.errors.push(response.Message);
@@ -211,90 +247,116 @@ class UserProfile extends React.Component{
                         spacing={8}
                         className={classes.content}
                     >
-                        <Grid item xs={12} md={6} lg={3}>
-                            <EditIcon
-                                className={classes.editIconButton}
-                                color="secondary"
-                                fill="secondary"
-                                float="right"
-                                onClick={this.handleEditClick.bind(this)} 
-                            >
-                            </EditIcon>
-                            <Card className={classes.contCard} >
-                                <CardContent>
-                                    <Typography className={classes.label} variant='h6'>
-                                        Username
-                                    </Typography>
-                                    <TextField
-                                        id="userName"
-                                        className={classes.textField}
-                                        value={this.state.userName}
-                                        type='text'
-                                        inputProps={{
-                                            maxlength:'10',
-                                            readOnly: this.state.isreadOnly
-                                        }}
-                                        margin="normal"
-                                    />
-                                    <Typography className={classes.label} variant='h6'>
-                                    Phone Number
-                                    </Typography>
-                                    <TextField
-                                        id="cantactNumber"
-                                        className={classes.textField}
-                                        value={this.state.contact}
-                                        type='number'
-                                        inputProps={{
-                                            maxlength:'10',
-                                            readOnly: this.state.isreadOnly
-                                        }}
-                                        margin="normal"
-                                    />
-                                    <Typography className={classes.label} variant='h6'>
-                                        Email Id
-                                    </Typography>
-                                    <TextField
-                                        id="email"
-                                        className={classes.textField}
-                                        value={this.state.email}
-                                        type='text'
-                                        inputProps={{
-                                            maxlength:'10',
-                                            readOnly: this.state.isreadOnly
-                                        }}
-                                        margin="normal"
-                                    />
-                                    <Typography className={classes.label} variant='h6'>
-                                        Gender
-                                    </Typography>
-                                    <TextField
-                                        id="gender"
-                                        className={classes.textField}
-                                        value={this.state.gender}
-                                        type='text'
-                                        inputProps={{
-                                            maxlength:'10',
-                                            readOnly: this.state.isreadOnly
-                                        }}
-                                        margin="normal"
-                                    />
-                                    <Typography className={classes.label} variant='h6'>
-                                        Address
-                                    </Typography>
-                                    <TextField
-                                        id="gender"
-                                        className={classes.textField}
-                                        value={this.state.gender}
-                                        type='text'
-                                        inputProps={{
-                                            maxlength:'10',
-                                            readOnly: this.state.isreadOnly
-                                        }}
-                                        margin="normal"
-                                    />
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                        {this.state.isLoading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
+                     
+                        {this.state.userProfile.map(function (item, i) {
+                            return(
+                                <Grid item xs={12} md={6} lg={3}>
+                                    <EditIcon
+                                        className={classes.editIconButton}
+                                        color="secondary"
+                                        fill="secondary"
+                                        float="right"
+                                        onClick={this.handleEditClick.bind(this)} 
+                                    >
+                                    </EditIcon>
+                                    <Card className={classes.contCard} >
+                                        <CardContent>
+                                            <Typography className={classes.label} variant='h6'>
+                                                First Name
+                                            </Typography>
+                                            <TextField
+                                                id="FirstName"
+                                                className={classes.textField}
+                                                defaultValue={item.FirstName}
+                                                value={this.state.firstName}
+                                                type='text'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: this.state.isreadOnly
+                                                }}
+                                                margin="normal"
+                                            />
+                                            <Typography className={classes.label} variant='h6'>
+                                                Last Name
+                                            </Typography>
+                                            <TextField
+                                                id="LastName"
+                                                className={classes.textField}
+                                                defaultValue={item.LastName}
+                                                value={this.state.lastName}
+                                                type='text'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: this.state.isreadOnly
+                                                }}
+                                                margin="normal"
+                                            />
+                                            <Typography className={classes.label} variant='h6'>
+                                                Phone Number
+                                            </Typography>
+                                            <TextField
+                                                id="PhoneNumber"
+                                                className={classes.textField}
+                                                defaultValue={item.Phone}
+                                                value={this.state.phone}
+                                                type='number'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: true
+                                                }}
+                                                margin="normal"
+                                            />
+                                            <Typography className={classes.label} variant='h6'>
+                                                Email Id
+                                            </Typography>
+                                            <TextField
+                                                id="EmailId"
+                                                className={classes.textField}
+                                                defaultValue={item.Email}
+                                                value={this.state.email}
+                                                type='text'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: true
+                                                }}
+                                                margin="normal"
+                                            />
+                                            <Typography className={classes.label} variant='h6'>
+                                                Gender
+                                            </Typography>
+                                            <TextField
+                                                id="gender"
+                                                className={classes.textField}
+                                                defaultValue={item.Gender}
+                                                value={this.state.gender}
+                                                type='text'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: this.state.isreadOnly
+                                                }}
+                                                margin="normal"
+                                            />
+                                            <Typography className={classes.label} variant='h6'>
+                                                Address
+                                            </Typography>
+                                            <TextField
+                                                id="gender"
+                                                className={classes.textField}
+                                                defaultValue={item.Address}
+                                                value={this.state.address}
+                                                type='text'
+                                                inputProps={{
+                                                    maxlength:'10',
+                                                    readOnly: this.state.isreadOnly
+                                                }}
+                                                margin="normal"
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            );
+                        }.bind(this))}
                         </Grid>
                         <span className={classes.buttons}
                             style= {{display:'none'}}>

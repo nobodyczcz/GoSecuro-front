@@ -257,13 +257,22 @@ class ContactsPage extends React.Component {
     }
 
     updateContactList() {
-        
-        if (localStorage.getItem('contactList')) {
-            console.log(localStorage.getItem('contactList'));
-            this.setState({ contactList: JSON.parse(localStorage.contactList) })
+
+        if(this.props.isLogin){
+            if (localStorage.getItem('localContactList')) {
+                console.log(localStorage.getItem('localContactList'));
+                this.setState({ contactList: JSON.parse(localStorage.localContactList) })
+            }
         }
-        else {
-            this.setState({ contactList: [] })
+        else{
+        
+            if (localStorage.getItem('contactList')) {
+                console.log(localStorage.getItem('contactList'));
+                this.setState({ contactList: JSON.parse(localStorage.contactList) })
+            }
+            else {
+                this.setState({ contactList: [] })
+            }
         }
         
     }
