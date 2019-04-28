@@ -320,6 +320,7 @@ class App extends Component {
             var data = []
             for (var key in this.tempLinks) {
                 if (this.tempLinks[key].journey) {
+                    console.log("[info]request update location")
                     var locations = this.tempLinks[key].locations
                     var theTemp = {
                         tempLink: key,
@@ -372,12 +373,11 @@ class App extends Component {
         console.log('[ERROR]'+error)
     }
     getJourneySuccess = (data) => {
-        var results = JSON.parse(data.data);
-        for (var key in results) {
-            console.log("[Receive journey]"+results)
-            console.log(this.tempLinks)
-            this.tempLinks[results[key].tempLink].journey = results[key];
-        }
+        var results = JSON.parse(JSON.parse(data).data);
+        console.log(results)
+            
+        this.tempLinks[results.tempLink].journey = results;
+
         console.log(data)
     }
 
@@ -494,7 +494,6 @@ class App extends Component {
             }
         }).then(res => res.json())
             .then(response => {
-                console.log(response);
                 response = JSON.parse(response);
                 var newRateData = {
                     'type': 'FeatureCollection',
