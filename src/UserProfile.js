@@ -66,7 +66,7 @@ const styles = theme => ({
     },
     content: {
         padding: '5%',
-        marginTop: '80px',
+        marginTop: '65px',
         overflowY: "scroll",
     },
     contentText:{
@@ -74,8 +74,12 @@ const styles = theme => ({
         textAlign: 'justify'
     },
     contCard: {
-        padding:"5%",
-        marginBottom:theme.spacing.unit * 2,
+        padding:"0",
+        marginBottom:theme.spacing.unit * 0.5,
+    },
+    cardContent:{
+        padding: "16px",
+        paddingBottom: "16px"
     },
     editIconButton:{
         top: `calc( 100% - 90% )`,
@@ -124,9 +128,9 @@ class UserProfile extends React.Component{
         this.state = {
             firstName: '',
             lastName: '',
-            phone: '111',
-            email: 'www',
-            gender: 'f',
+            phone: '',
+            email: '',
+            gender: '',
             address: '',
             open:false,
             isreadOnly: true,
@@ -143,6 +147,7 @@ class UserProfile extends React.Component{
 
     editSuccess(reply) {
         console.log("User profile Edit successfull!")
+        this.retrieveUserProfile();
         //jump to next page
     }
 
@@ -166,12 +171,21 @@ class UserProfile extends React.Component{
     }
 
     handleEditCancel() {
-        this.setState({ isreadOnly: true, showButtons: 'none' })     
+        console.log(this.state.isreadOnly)
+        this.setState({ isreadOnly: true, showButtons: 'none' })
+        console.log(this.state.isreadOnly)     
 
     }
 
     handleEditClick(){
-        this.setState({ isreadOnly: false, showButtons: 'inherit'})     
+        console.log(this.state.isreadOnly)
+        console.log(this.state.showButtons)
+        this.setState({ isreadOnly: false, showButtons: 'inherit'})
+        console.log("Edit icon clicked");
+        
+        console.log(this.state.isreadOnly)
+        console.log(this.state.showButtons)
+            
     }
 
     retrieveUserProfile(){
@@ -249,8 +263,6 @@ class UserProfile extends React.Component{
                     >
                         {this.state.isLoading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
                      
-                        {this.state.userProfile.map(function (item, i) {
-                            return(
                                 <Grid item xs={12} md={6} lg={3}>
                                     <EditIcon
                                         className={classes.editIconButton}
@@ -261,14 +273,14 @@ class UserProfile extends React.Component{
                                     >
                                     </EditIcon>
                                     <Card className={classes.contCard} >
-                                        <CardContent>
+                                        <CardContent className={classes.cardContent} >
                                             <Typography className={classes.label} variant='h6'>
                                                 First Name
                                             </Typography>
                                             <TextField
                                                 id="FirstName"
                                                 className={classes.textField}
-                                                defaultValue={item.FirstName}
+                                                defaultValue={this.state.userProfile.FirstName}
                                                 value={this.state.firstName}
                                                 type='text'
                                                 inputProps={{
@@ -283,7 +295,7 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="LastName"
                                                 className={classes.textField}
-                                                defaultValue={item.LastName}
+                                                defaultValue={this.state.userProfile.LastName}
                                                 value={this.state.lastName}
                                                 type='text'
                                                 inputProps={{
@@ -298,7 +310,7 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="PhoneNumber"
                                                 className={classes.textField}
-                                                defaultValue={item.Phone}
+                                                defaultValue={this.state.userProfile.Phone}
                                                 value={this.state.phone}
                                                 type='number'
                                                 inputProps={{
@@ -313,7 +325,7 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="EmailId"
                                                 className={classes.textField}
-                                                defaultValue={item.Email}
+                                                defaultValue={this.state.userProfile.Email}
                                                 value={this.state.email}
                                                 type='text'
                                                 inputProps={{
@@ -328,7 +340,7 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="gender"
                                                 className={classes.textField}
-                                                defaultValue={item.Gender}
+                                                defaultValue={this.state.userProfile.Gender}
                                                 value={this.state.gender}
                                                 type='text'
                                                 inputProps={{
@@ -343,7 +355,7 @@ class UserProfile extends React.Component{
                                             <TextField
                                                 id="gender"
                                                 className={classes.textField}
-                                                defaultValue={item.Address}
+                                                defaultValue={this.state.userProfile.Address}
                                                 value={this.state.address}
                                                 type='text'
                                                 inputProps={{
@@ -355,11 +367,10 @@ class UserProfile extends React.Component{
                                         </CardContent>
                                     </Card>
                                 </Grid>
-                            );
-                        }.bind(this))}
+                            
                         </Grid>
                         <span className={classes.buttons}
-                            style= {{display:'none'}}>
+                            style= {{display:this.state.showButtons}}>
                             <Button
                                 variant="contained"
                                 className={classes.button}
@@ -373,7 +384,7 @@ class UserProfile extends React.Component{
                                 variant="contained"
                                 className={classes.button}
                                 color="secondary"
-                                onClick={()=>{this.props.history.push('/')}}
+                                onClick={this.handleEdit.bind(this)}
                             >
                                 Save
                             </Button>
