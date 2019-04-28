@@ -7,8 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-
-
+import APIs from './apis.js';
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
@@ -131,12 +130,14 @@ const styles = theme => ({
 class ContactsPage extends React.Component {
     constructor(props) {
         super(props);
+        this.apis = new APIs();
         this.state = {
             name: '',
             mobile: '',
             userName:'',
             open:false,
-            contactList:[]
+            contactList:[],
+            errors:[]
         };
 
     }
@@ -162,15 +163,27 @@ class ContactsPage extends React.Component {
     };
 
     componentDidMount() {
-        this.updateContactList()
-        if (localStorage.userName) {
-            this.setState({ userName: localStorage.userName })
+        if(this.props.isLogin){
+            this.retrieveEmergencies();
+            if (localStorage.localUserName) {
+                this.setState({ userName: localStorage.userName })
+            }
+            else {
+                localStorage.setItem('localUserName','')
+            }
+
         }
-        else {
-            localStorage.setItem('userName','')
-        }
-        
+        else{
+            if (localStorage.userName) {
+                this.setState({ userName: localStorage.userName })
+            }
+            else {
+                localStorage.setItem('userName','')
+            }
+
+        }        
     }
+
     handleChange = name => event => {
         if (name == "mobile" && event.target.value.length > 10) {
             console.log("Mobile number: Max limit 10 reached")
@@ -185,35 +198,56 @@ class ContactsPage extends React.Component {
 
 
     };
+
     handleUserNameChange = event => {
         this.setState({ userName: event.target.value });
         localStorage.userName = event.target.value
     };
+
     handleAddNew = () => {
         if (this.state.name.length === 0 || this.state.mobile.length === 0) {
             console.log("empty")
             return
         }
-        if (!localStorage.contactList) {
-            console.log('create new contact list')
-            var list = JSON.stringify([]);
-            localStorage.setItem('contactList', list);
-        };
-        console.log(localStorage['contactList'])
-        
-        var list = JSON.parse(localStorage.contactList)
-        list.push({
-            name: this.state.name,
-            mobile: this.state.mobile
-        });
+        console.log(window.serverUrl);
 
-        localStorage.contactList = JSON.stringify(list)
-        this.updateContactList()
-        this.setState({ name: '', mobile: '' });
+        if(this.props.isLogin){
+            var contdata = {
+                EmergencyContactPhone: this.state.mobile,
+                ECname: this.state.name,
+            };
+            var apiRoute = 'api/UserEmergency/create';
+            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+            
+        }
+        else{
+            if (!localStorage.contactList) {
+                console.log('create new contact list')
+                var list = JSON.stringify([]);
+                localStorage.setItem('contactList', list);
+            };
+            console.log(localStorage['contactList'])
+            
+            var list = JSON.parse(localStorage.contactList)
+            list.push({
+                name: this.state.name,
+                mobile: this.state.mobile
+            });
+    
+            localStorage.contactList = JSON.stringify(list)
+            this.updateContactList()
+            this.setState({ name: '', mobile: '' });
+        }
 
         //close the popup
         this.handleClose();
     };
+
+    addSuccess(data) {
+        console.log("Success")
+        this.retrieveEmergencies();
+        //jump to next page
+    }
 
     updateContactList() {
         
@@ -228,25 +262,95 @@ class ContactsPage extends React.Component {
     }
 
     handleEdit(index) {
-        var list = JSON.parse(localStorage.contactList)
-        list.splice(index, 1,{
-            name: this.state.name,
-            mobile: this.state.mobile
-        });
-        localStorage.contactList = JSON.stringify(list);
-        this.updateContactList();
+
+        if(this.props.isLogin){
+            var contData = {
+                pre: {
+                    name: this.state.activeItemName,
+                    mobile: this.state.activeMobile,
+                },
+                now: {
+                    name: this.state.name,
+                    mobile: this.state.mobile,
+                }
+            };
+            console.log("contData:" + contData);
+            var apiRoute = 'api/UserEmergency/edit';
+            this.apis.callApi(apiRoute,contData,this.editSuccess.bind(this),this.regError.bind(this))
+        }
+        else{
+            var list = JSON.parse(localStorage.contactList)
+            list.splice(index, 1,{
+                name: this.state.name,
+                mobile: this.state.mobile
+            });
+            localStorage.contactList = JSON.stringify(list);
+            this.updateContactList();
+        }
 
         //close the popup
         this.handleEditClose();
 
     }
     handleDelete(index) {
-        var list = JSON.parse(localStorage.contactList)
-        list.splice(index, 1);
-        localStorage.contactList = JSON.stringify(list);
+        
+        console.log(window.serverUrl);
+        var list = JSON.parse(localStorage.localContactList)
+        var result = list.splice(index, 1);
+        console.log("splice result:" + result);
+        localStorage.localContactList = JSON.stringify(list);
         this.updateContactList();
 
     }
+    retrieveEmergencies() {
+
+        console.log(window.serverUrl);
+        console.log("Retrieving emergency contacts");
+        var apiRoute = 'api/UserEmergency/retrieveEmergencies';
+        if (this.props.isLogin)
+            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError);
+    
+        else
+            this.updateContactList();
+        }
+
+    retrieveSuccess(reply) {
+        console.log("Success")
+        if (this.props.isLogin){
+            this.state.contactList = JSON.parse(JSON.parse(reply).data)
+            localStorage.setItem("localContactList",this.state.contactList);
+        }
+            
+        //jump to next page
+    }
+
+    editSuccess(data) {
+        console.log("Success")
+        this.retrieveEmergencies();
+        //jump to next page
+    }
+    regError(jqXHR) {
+        this.state.errors = [];
+        var response = jqXHR.responseJSON;
+        if (response) {
+            if (response.Message) this.state.errors.push(response.Message);
+            if (response.ModelState) {
+                var modelState = response.ModelState;
+                for (var prop in modelState) {
+                    if (modelState.hasOwnProperty(prop)) {
+                        var msgArr = modelState[prop]; // expect array here
+                        if (msgArr.length) {
+                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                        }
+                    }
+                }
+            }
+            if (response.error) this.state.errors.push(response.error);
+            if (response.error_description) this.state.errors.push(response.error_description);
+        }
+        console.log(this.state.errors)
+    }
+
 
 
     render() {

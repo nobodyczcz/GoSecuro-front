@@ -76,7 +76,7 @@ const styles = theme => ({
         minWidth: "100px",
     },
     content: {
-        marginTop: "140px",
+        marginTop: "10px",
         padding: '3%',
     },
     cont: {
@@ -144,6 +144,7 @@ const styles = theme => ({
 class EmergencyContacts extends React.Component{
     constructor(props) {
         super(props);
+        this.apis = new APIs();
         this.state = {
             name: '',
             mobile: '',
@@ -151,7 +152,8 @@ class EmergencyContacts extends React.Component{
             open:false,
             logining:true,
             isLogin:true,
-            contactList:[]
+            contactList:[],
+            errors:[]
         };
 
     }
@@ -179,13 +181,7 @@ class EmergencyContacts extends React.Component{
     };
 
     componentDidMount() {
-        this.updateContactList()
-        if (localStorage.userName) {
-            this.setState({ userName: localStorage.userName })
-        }
-        else {
-            localStorage.setItem('userName','')
-        }
+        this.retrieveEmergencies();
         
     }
 
@@ -214,27 +210,12 @@ class EmergencyContacts extends React.Component{
             name: this.state.name,
             mobile: this.state.mobile,
         };
-        console.log("add contact:" + contdata);
-        //var apiRoute = 'api/UserEmergency/create';
-        //this.apis.callApi(apiRoute,contdata,this.regSuccess.bind(this),this.regError.bind(this))
-
+        //console.log("add contact:" + contdata);
+        var apiRoute = 'api/UserEmergency/create';
+        this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
         //close the popup
         this.handleClose();
     };
-
-    updateContactList() {
-
-        
-        
-        if (localStorage.getItem('contactList')) {
-            console.log(localStorage.getItem('contactList'));
-            this.setState({ contactList: JSON.parse(localStorage.contactList) })
-        }
-        else {
-            this.setState({ contactList: [] })
-        }
-        
-    }
 
     handleEdit(index) {
 
@@ -250,28 +231,43 @@ class EmergencyContacts extends React.Component{
             }
         };
         console.log("contData:" + contData);
-        //var apiRoute = 'api/UserEmergency/edit';
-        //this.apis.callApi(apiRoute,contdata,this.editSuccess.bind(this),this.editError.bind(this))
-
+        var apiRoute = 'api/UserEmergency/edit';
+        this.apis.callApi(apiRoute,contData,this.editSuccess.bind(this),this.regError.bind(this))
         //close the popup
         this.handleEditClose();
 
     }
     handleDelete(index) {
-        var list = JSON.parse(localStorage.contactList)
+        console.log(window.serverUrl);
+        var list = JSON.parse(localStorage.localContactList)
         var result = list.splice(index, 1);
         console.log("splice result:" + result);
-        localStorage.contactList = JSON.stringify(list);
+        localStorage.localContactList = JSON.stringify(list);
         this.updateContactList();
+
+        // var contdata = {
+        //     name: this.state.name,
+        //     mobile: this.state.mobile,
+        // };
+        // //console.log("add contact:" + contdata);
+        // var apiRoute = 'api/UserEmergency/create';
+        // this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+        // this.retrieveEmergencies();
+        
 
     }
 
     editSuccess(data) {
         console.log("Success")
+        this.retrieveEmergencies();
         //jump to next page
-        this.props.history.push('./');
     }
-
+    
+    addSuccess(data) {
+        console.log("Success")
+        this.retrieveEmergencies();
+        //jump to next page
+    }
     regSuccess(data) {
         console.log("Success")
         //jump to next page
@@ -302,25 +298,40 @@ class EmergencyContacts extends React.Component{
     retrieveEmergencies() {
         console.log(window.serverUrl);
         var apiRoute = 'api/UserEmergency/retrieveEmergencies';
-        if (this.props.state.isLogin)
+        if (this.props.isLogin)
             this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError.bind(this));
     
         else
             this.state.contactList=[]
         }
 
-    retrieveSuccess(data) {
+    retrieveSuccess(reply) {
         console.log("Success")
-        if (this.props.state.isLogin)
-            this.state.contactList = JSON.parse(data)
+        if (this.props.isLogin){
+            this.state.contactList = JSON.parse(JSON.parse(reply).data)
+            localStorage.setItems("localContactList",this.state.contactList);
+        }
+            
         //jump to next page
+    }
+
+    updateContactList() {
+        
+        if (localStorage.getItem('localContactList')) {
+            console.log(localStorage.getItem('contactList'));
+            this.setState({ contactList: JSON.parse(localStorage.localContactList) })
+        }
+        else {
+            this.setState({ contactList: [] })
+        }
+        
     }
 
 
 
     render() {
         const { classes } = this.props;
-        this.retrieveEmergencies();
+        
         return (
             <Paper className={classes.paper}>
                 <AppBar color="secondary" position="static">
@@ -509,7 +520,7 @@ class EmergencyContacts extends React.Component{
                             variant="contained"
                             className={classes.button}
                             color="secondary"
-                            to = "./"
+                            onClick={()=>{this.props.history.push('/')}}
                         >
                             Skip
                         </Button>
@@ -518,7 +529,7 @@ class EmergencyContacts extends React.Component{
                             variant="contained"
                             className={classes.button}
                             color="secondary"
-                            to = "./"
+                            onClick={()=>{this.props.history.push('/')}}
                         >
                             Done
                         </Button>

@@ -1267,13 +1267,13 @@ class App extends Component {
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
-                    <Route exact path="/contacts" component={ContactsPage} />
-                    <Route exact path="/register" component={() => <RegisterPage history={history} />} />
+                    <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} userLocation={this.state.userLocation} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={UserProfile} />
-                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history}/>} />
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} isLogin={this.state.isLogin}/>} />
                     
                 </Router>  
           </MuiThemeProvider>

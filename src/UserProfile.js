@@ -13,6 +13,7 @@ import Typography from '@material-ui/core/Typography';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 
 import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
@@ -62,7 +63,7 @@ const styles = theme => ({
         minWidth: "100px",
     },
     content: {
-        padding: '0',
+        padding: '5%',
         marginTop: '80px'
     },
     contentText:{
@@ -73,16 +74,19 @@ const styles = theme => ({
         padding:"5%",
         marginBottom:theme.spacing.unit * 2,
     },
+    editIconButton:{
+        top: `calc( 100% - 90% )`,
+        transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+        opacity: '1',
+        fill: '#FF7504',
+        paddingLeft: `calc( 100% - 10% )`
+    },
     emergencyText:{
         color:'Red',
         textAlign: 'center',
     },
     headerTitle:{
-        align:'center',
-        position: 'absolute',
-        marginTop: theme.spacing.unit * 1.5,
-        paddingLeft: '35%'
-        
+        marginLeft: `calc( 100% - 80% )`,        
     },
     paper: {
         position: 'fixed',
@@ -92,11 +96,9 @@ const styles = theme => ({
         left: '0',
         zIndex:1200,
     },
-    navHeader: {
-        padding: 0,
-        marginLeft: 0,
-        marginRight: 0,
-      },
+    toolbar: {
+        marginTop:"20px",
+    },
     textField: {
         width: "100%",
         marginTop:0,
@@ -120,13 +122,20 @@ class UserProfile extends React.Component{
             mobile: '',
             open:false,
             isreadOnly: true,
+            showButtons: 'none',
             contactList:[]
         };
 
     }
 
+    handleEditCancel(){
+        this.state.isreadOnly = true;
+    }
     handleEditClick(){
+                
         this.state.isreadOnly = false;
+        this.state.showButtons = 'inherit';
+
     }
     render(){
         const { classes,theme } = this.props;
@@ -139,14 +148,15 @@ class UserProfile extends React.Component{
                             position="fixed"
                             className={classes.appBar}
                     >
-                        <Toolbar className={classes.navHeader}>
+                        <Toolbar className={classes.toolbar}>
                             <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                             </IconButton>
-                        </Toolbar>
-                        <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
+                            <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
                             User Profile
                         </Typography>
+                        </Toolbar>
+                        
                     </AppBar>
                     <div classNames={classes.profile}>
                     <Grid
@@ -242,6 +252,26 @@ class UserProfile extends React.Component{
                             </Card>
                         </Grid>
                         </Grid>
+                        <span className={classes.buttons}
+                            style= {{display:'none'}}>
+                            <Button
+                                variant="contained"
+                                className={classes.button}
+                                color="secondary"
+                                onClick={this.handleEditCancel}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                style={{ float: "right" }}
+                                variant="contained"
+                                className={classes.button}
+                                color="secondary"
+                                onClick={()=>{this.props.history.push('/')}}
+                            >
+                                Save
+                            </Button>
+                        </span>  
                     </div>
                     
                    

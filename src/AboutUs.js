@@ -48,11 +48,7 @@ const styles = theme => ({
         textAlign: 'center',
     },
     headerTitle:{
-        align:'center',
-        position: 'absolute',
-        marginTop: theme.spacing.unit * 1.5,
-        paddingLeft: '35%'
-        
+        marginLeft: `calc( 100% - 80% )`,        
     },
     paper: {
         position: 'fixed',
@@ -62,11 +58,9 @@ const styles = theme => ({
         left: '0',
         zIndex:1200,
     },
-    navHeader: {
-        padding: 0,
-        marginLeft: 0,
-        marginRight: 0,
-      },
+    toolbar: {
+        marginTop:"20px",
+    },
 });
 class AboutUs extends React.Component{
     render(){
@@ -80,14 +74,15 @@ class AboutUs extends React.Component{
                             position="fixed"
                             className={classes.appBar}
                     >
-                        <Toolbar className={classes.navHeader}>
+                        <Toolbar className={classes.toolbar}>
                             <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                             </IconButton>
+                            <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
+                                About Us
+                            </Typography>
                         </Toolbar>
-                        <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
-                            About Us
-                        </Typography>
+                        
                     </AppBar>
                     <div className={classes.content}>
                     <Typography className={classes.contentText} variant='h6'>

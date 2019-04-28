@@ -125,13 +125,26 @@ class RegisterPage extends React.Component {
         };
         this.apis.register(regdata,this.regSuccess.bind(this),this.regError.bind(this))
 
-        //jump to next page: add emergency contacts page
-        this.props.history.push('/');
+        //jump to next page: 
+        
     }
 
     regSuccess(data) {
-        console.log("Success")
-        //jump to next page
+        console.log("User successfully registered.")
+        //jump to next page: add emergency contacts page
+        var logindata = {
+            grant_type: "password",
+            userName: this.state.mobileNumber,
+            password: this.state.password
+        };
+        this.apis.login(logindata,this.loginSuccess.bind(this),this.regError.bind(this))
+
+    }
+
+    loginSuccess(data) {
+        console.log("User successfully logged in.")
+        //jump to next page: add emergency contacts page
+         this.props.history.push('/emergencyContact');
     }
 
     regError(jqXHR) {
@@ -263,7 +276,7 @@ class RegisterPage extends React.Component {
                         <Grid item xs={12} md={6} lg={3}>
                             <TextValidator
                                 id="email"
-                                label="Email"
+                                label="Email*"
                                 className={classes.textField}
                                 value={this.state.name}
                                 type="email"
@@ -321,7 +334,7 @@ class RegisterPage extends React.Component {
                             type="submit"
                             form= "theForm"
                         >
-                            Next
+                            Register
                         </Button>
                     </span>
                 </ValidatorForm>

@@ -62,7 +62,7 @@ class APIs {
             );
     }
 
-    login
+    
 
     login(loginData,success,error) {
         this.userName = loginData.userName;
