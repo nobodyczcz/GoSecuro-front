@@ -147,8 +147,11 @@ class UserProfile extends React.Component{
         console.log(window.serverUrl);
         console.log("Retrieving user profile");
         var apiRoute = 'api/UserProfiles/Retrieve';
-        if (this.props.isLogin)
-            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.retError);
+        if (this.props.isLogin) {
+            console.log("[INFO]already login")
+            this.apis.callApi(apiRoute, '', this.retrieveSuccess.bind(this), this.retError);
+        }
+            
     }
 
     retrieveSuccess(reply) {
