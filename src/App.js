@@ -183,6 +183,7 @@ class App extends Component {
         if (window.cordova) {
             this.locationSharing.initialize();
         }
+        this.tempLinks = {};
 
         /*
         Map related attributes:
@@ -251,7 +252,6 @@ class App extends Component {
         
         
         this.state = {  // state of react component
-            tempLinks: {},
             tracking: false,
             sharing:false,
             left: false,
@@ -312,33 +312,73 @@ class App extends Component {
             var data = null;
             this.apis.callApi(theApi, data, this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
         }
+
+        if (this.tempLinks.length > 0) {
+            var theApi = 'api/TempLinks/updateLocations'
+            var data = []
+            for (var key in this.tempLinks) {
+                if (this.tempLinks[key].journey) {
+                    var locations = this.tempLinks[key].locations
+                    var theTemp = {
+                        tempLink: key,
+                        lastLocTime: locations.length > 0 ? locations[locations.length - 1].Time : this.tempLinks[key].journey.StartTime
+                    }
+                    data.push(theTemp)
+                }
+                
+            } 
+            //this.apis.callApi(theApi, tempLinks.keys(), this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
+        }
         
     }
 
     receiveLinks = (data) => {
         console.log(data)
-        var results = JSON.stringify(JSON.stringify(data).data);
-        var tempLinks = this.state.tempLinks;
+        var results = JSON.parse(JSON.parse(data).data);
+        var tempLinks = this.tempLinks;
+        var linkList=[];
+        for (var key in results) {
+            linkList.push(results[key].tempLink)
+        }
+        console.log(tempLinks)
+        console.log(linkList)
+
         for (var key in tempLinks) {
-            if (!results.includes(tempLinks[key])) {
+            if (!linkList.includes(key)) {
                 delete tempLinks[key]
             }
         }
         for (var key in results) {
-            if (!this.state[tempLinks[key]]) {
+            if (!tempLinks[results[key].tempLink]) {
                 tempLinks[results[key].tempLink] = {
                     firstName: results[key].firstName,
                     lastName: results[key].lastName,
-                    journey:null,
+                    journey: null,
+                    locations:[]
                 }
+                var theApi = "api/Journey/EmergencyRetrieve"
+                var data = results[key].tempLink
+                this.serverApi.callApi(theApi, data, this.getJourneySuccess.bind(this),this.getJourneyError.bind(this))
             }
         }
 
-        console.log("[INFO] update templinks " + JSON.stringify(tempLinks))
-        this.setState({ 'tempLinks': tempLinks });
+        console.log("[INFO] update templinks " + JSON.stringify(tempLinks));
+        this.tempLinks = tempLinks;
+        
     }
     receiveLinksError = (error)=>{
         console.log('[ERROR]'+error)
+    }
+    getJourneySuccess = (data) => {
+        var results = JSON.parse(JSON.parse(data).data);
+        for (var key in results) {
+            this.tempLinks[results[key].tempLink].journey = results[key];
+        }
+        console.log(data)
+    }
+
+    getJourneyError = (error) => {
+        console.log(error)
     }
 
     componentDidMount() { //start loading crime rate data when this page is rendered
