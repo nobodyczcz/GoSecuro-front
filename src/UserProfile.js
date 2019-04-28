@@ -134,14 +134,12 @@ class UserProfile extends React.Component{
         this.retrieveUserProfile();
     }
 
-    handleEditCancel(){
-        this.state.isreadOnly = true;
-        this.state.showButtons = 'none';
+    handleEditCancel() {
+        this.setState({ isreadOnly: true, showButtons: 'none' })     
+
     }
     handleEditClick(){
-                
-        this.state.isreadOnly = false;
-        this.state.showButtons = 'inherit';
+        this.setState({ isreadOnly: false, showButtons: 'inherit'})     
     }
     retrieveUserProfile(){
         console.log(window.serverUrl);
@@ -218,7 +216,7 @@ class UserProfile extends React.Component{
                                 color="secondary"
                                 fill="secondary"
                                 float="right"
-                                onClick={this.handleEditClick} 
+                                onClick={this.handleEditClick.bind(this)} 
                             >
                             </EditIcon>
                             <Card className={classes.contCard} >
@@ -303,7 +301,7 @@ class UserProfile extends React.Component{
                                 variant="contained"
                                 className={classes.button}
                                 color="secondary"
-                                onClick={this.handleEditCancel}
+                                onClick={this.handleEditCancel.bind(this)}
                             >
                                 Cancel
                             </Button>
