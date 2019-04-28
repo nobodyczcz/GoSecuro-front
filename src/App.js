@@ -357,7 +357,7 @@ class App extends Component {
                     locations:[]
                 }
                 var theApi = "api/Journey/EmergencyRetrieve"
-                var data = results[key].tempLink
+                var data = { templinkId: results[key].tempLink }
                 this.serverApi.callApi(theApi, data, this.getJourneySuccess.bind(this),this.getJourneyError.bind(this))
             }
         }
