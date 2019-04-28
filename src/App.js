@@ -22,8 +22,10 @@ import { createBrowserHistory, createHashHistory } from 'history';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
-import ContactsPage from './contactsPage.js'
+import ContactsPage from './contactsPage.js';
+import EmergencyContacts from './emergencyContactsPage.js';
 import AboutUs from './AboutUs.js';
+import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
@@ -1248,6 +1250,17 @@ class App extends Component {
                     </ListItem>
                     <Divider/>
                     <ListItem button key='Navigation3'>
+                        
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/userProfile'
+                            >
+                                User Profile
+                        </Link>
+                        
+                    </ListItem>
+                    <ListItem button key='Navigation4'>
                         {this.state.isLogin ?
                             <Link
                                 className={classes.sideContent}
@@ -1294,11 +1307,13 @@ class App extends Component {
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
-                    <Route exact path="/contacts" component={ContactsPage} />
-                    <Route exact path="/register" component={() => <RegisterPage history={history} />} />
+                    <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} userLocation={this.state.userLocation} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path="/userProfile" component={UserProfile} />
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} isLogin={this.state.isLogin}/>} />
                     
                 </Router>  
           </MuiThemeProvider>

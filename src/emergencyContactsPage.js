@@ -1,23 +1,35 @@
 import React, { Component } from 'react';
-import Card from '@material-ui/core/Card';
 import Paper from '@material-ui/core/Paper';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import APIs from './apis.js';
+import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import APIs from './apis.js';
-import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
-
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
+
 import IconButton from '@material-ui/core/IconButton';
 
+import { createBrowserHistory, createHashHistory } from 'history';
+import { Router, Route, Link } from "react-router-dom";
 import { withStyles } from '@material-ui/core/styles';
 
+
+var history;
+if (window.cordova) {
+    history = new createHashHistory();
+}
+else {
+    history = new createBrowserHistory();
+}
 
 function getModalStyle() {
   
@@ -42,24 +54,60 @@ function EditIcon(props) {
 }
 
 const styles = theme => ({
+    paper: {
+        position:'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 1100,
+        width: "100%",
+        height:"100%",
+    },
     addNewButton:{
         left:`calc( 100% - 125px )`
     },
-
+    buttons: {
+        position: "fixed",
+        bottom: 0,
+        width:"90%",
+        padding: "5%",
+        justifyItems:"space-between"
+    },
+    button: {
+        minWidth: "100px",
+    },
+    content: {
+        marginTop: "10px",
+        padding: '3%',
+    },
+    cont: {
+        width: '100%'
+    },
+    contacts: {
+        height:"100%",
+        overflowY: "scroll",
+        paddingLeft: '3%',
+        paddingRight: '3%',
+    },
+    contactPaper: {
+        position: 'fixed',
+        width: '100%',
+        height: '100%',
+        top: `calc( 100% - 54% )`,
+        left: '0',
+        zIndex: 900,
+        },    
     customLeftButton:{
         left:`calc( 100% - 90% )`,
         minWidth: '70px',
         height: '40px',
         width: '100px'
     },
-
     customRightButton:{
         left:`calc( 50% - 10% )`,
         minWidth: '70px',
         height: '40px',
         width: '100px'
     },
-
     deleteIconButton:{
         float: 'right',
         top: `calc( 100% - 90% )`,
@@ -75,41 +123,10 @@ const styles = theme => ({
         paddingLeft: '20px'
 
     },
-
-    paper: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%',
-        top: '0',
-        left: '0',
-        zIndex: 900,
-    },
-    content: {
-        marginTop: "140px",
-        padding: '3%',
-    },
-    contacts: {
-        height:"100%",
-        overflowY: "scroll",
-        paddingLeft: '3%',
-        paddingRight: '3%',
-    },
-    contCard: {
-        width: '100%',
-        height:"100px",
-        marginBottom:theme.spacing.unit * 2,
-    },
-    cont: {
-        width: '100%'
-    },
     textField: {
         marginTop: 0,
         marginRight:'1%',
         width:'49%'
-    },
-    mainText:{
-        color:'#FF7504',
-        justifyContent: 'center',
     },
     modalPaper: {
         position: 'absolute',
@@ -117,17 +134,14 @@ const styles = theme => ({
         boxShadow: theme.shadows[5],
         padding: '10px',
         outline: 'none',
-      },
-      contactPaper: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%',
-        top: `calc( 100% - 54% )`,
-        left: '0',
-        zIndex: 900,
-      }
+    },
+    toolbar: {
+        justifyContent: "center",
+        marginTop:"20px",
+    },
+
 });
-class ContactsPage extends React.Component {
+class EmergencyContacts extends React.Component{
     constructor(props) {
         super(props);
         this.apis = new APIs();
@@ -136,11 +150,15 @@ class ContactsPage extends React.Component {
             mobile: '',
             userName:'',
             open:false,
+            logining:true,
+            isLogin:true,
             contactList:[],
             errors:[]
         };
 
     }
+
+    
 
     handleOpen = () => {
         this.setState({ open: true });
@@ -163,25 +181,8 @@ class ContactsPage extends React.Component {
     };
 
     componentDidMount() {
-        if(this.props.isLogin){
-            this.retrieveEmergencies();
-            if (localStorage.localUserName) {
-                this.setState({ userName: localStorage.userName })
-            }
-            else {
-                localStorage.setItem('localUserName','')
-            }
-
-        }
-        else{
-            if (localStorage.userName) {
-                this.setState({ userName: localStorage.userName })
-            }
-            else {
-                localStorage.setItem('userName','')
-            }
-
-        }        
+        this.retrieveEmergencies();
+        
     }
 
     handleChange = name => event => {
@@ -199,101 +200,44 @@ class ContactsPage extends React.Component {
 
     };
 
-    handleUserNameChange = event => {
-        this.setState({ userName: event.target.value });
-        localStorage.userName = event.target.value
-    };
-
     handleAddNew = () => {
         if (this.state.name.length === 0 || this.state.mobile.length === 0) {
-            console.log("empty")
+            console.log("emergencyContactsPage: Name or Mobile empty.")
             return
         }
         console.log(window.serverUrl);
-
-        if(this.props.isLogin){
-            var contdata = {
-                EmergencyContactPhone: this.state.mobile,
-                ECname: this.state.name,
-            };
-            var apiRoute = 'api/UserEmergency/create';
-            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
-            
-        }
-        else{
-            if (!localStorage.contactList) {
-                console.log('create new contact list')
-                var list = JSON.stringify([]);
-                localStorage.setItem('contactList', list);
-            };
-            console.log(localStorage['contactList'])
-            
-            var list = JSON.parse(localStorage.contactList)
-            list.push({
-                name: this.state.name,
-                mobile: this.state.mobile
-            });
-    
-            localStorage.contactList = JSON.stringify(list)
-            this.updateContactList()
-            this.setState({ name: '', mobile: '' });
-        }
-
+        var contdata = {
+            name: this.state.name,
+            mobile: this.state.mobile,
+        };
+        //console.log("add contact:" + contdata);
+        var apiRoute = 'api/UserEmergency/create';
+        this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
         //close the popup
         this.handleClose();
     };
 
-    addSuccess(data) {
-        console.log("Success")
-        this.retrieveEmergencies();
-        //jump to next page
-    }
-
-    updateContactList() {
-        
-        if (localStorage.getItem('contactList')) {
-            console.log(localStorage.getItem('contactList'));
-            this.setState({ contactList: JSON.parse(localStorage.contactList) })
-        }
-        else {
-            this.setState({ contactList: [] })
-        }
-        
-    }
-
     handleEdit(index) {
 
-        if(this.props.isLogin){
-            var contData = {
-                pre: {
-                    name: this.state.activeItemName,
-                    mobile: this.state.activeMobile,
-                },
-                now: {
-                    name: this.state.name,
-                    mobile: this.state.mobile,
-                }
-            };
-            console.log("contData:" + contData);
-            var apiRoute = 'api/UserEmergency/edit';
-            this.apis.callApi(apiRoute,contData,this.editSuccess.bind(this),this.regError.bind(this))
-        }
-        else{
-            var list = JSON.parse(localStorage.contactList)
-            list.splice(index, 1,{
+        console.log(window.serverUrl);
+        var contData = {
+            pre: {
+                name: this.state.activeItemName,
+                mobile: this.state.activeMobile,
+            },
+            now: {
                 name: this.state.name,
-                mobile: this.state.mobile
-            });
-            localStorage.contactList = JSON.stringify(list);
-            this.updateContactList();
-        }
-
+                mobile: this.state.mobile,
+            }
+        };
+        console.log("contData:" + contData);
+        var apiRoute = 'api/UserEmergency/edit';
+        this.apis.callApi(apiRoute,contData,this.editSuccess.bind(this),this.regError.bind(this))
         //close the popup
         this.handleEditClose();
 
     }
     handleDelete(index) {
-        
         console.log(window.serverUrl);
         var list = JSON.parse(localStorage.localContactList)
         var result = list.splice(index, 1);
@@ -301,27 +245,16 @@ class ContactsPage extends React.Component {
         localStorage.localContactList = JSON.stringify(list);
         this.updateContactList();
 
-    }
-    retrieveEmergencies() {
+        // var contdata = {
+        //     name: this.state.name,
+        //     mobile: this.state.mobile,
+        // };
+        // //console.log("add contact:" + contdata);
+        // var apiRoute = 'api/UserEmergency/create';
+        // this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+        // this.retrieveEmergencies();
+        
 
-        console.log(window.serverUrl);
-        console.log("Retrieving emergency contacts");
-        var apiRoute = 'api/UserEmergency/retrieveEmergencies';
-        if (this.props.isLogin)
-            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError);
-    
-        else
-            this.updateContactList();
-    }
-
-    retrieveSuccess(reply) {
-        console.log("Success")
-        if (this.props.isLogin){
-            this.state.contactList = JSON.parse(JSON.parse(reply).data)
-            localStorage.setItem("localContactList",this.state.contactList);
-        }
-            
-        //jump to next page
     }
 
     editSuccess(data) {
@@ -329,6 +262,17 @@ class ContactsPage extends React.Component {
         this.retrieveEmergencies();
         //jump to next page
     }
+    
+    addSuccess(data) {
+        console.log("Success")
+        this.retrieveEmergencies();
+        //jump to next page
+    }
+    regSuccess(data) {
+        console.log("Success")
+        //jump to next page
+    }
+
     regError(jqXHR) {
         this.state.errors = [];
         var response = jqXHR.responseJSON;
@@ -351,28 +295,57 @@ class ContactsPage extends React.Component {
         console.log(this.state.errors)
     }
 
+    retrieveEmergencies() {
+        console.log(window.serverUrl);
+        var apiRoute = 'api/UserEmergency/retrieveEmergencies';
+        if (this.props.isLogin)
+            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError.bind(this));
+    
+        else
+            this.state.contactList=[]
+        }
+
+    retrieveSuccess(reply) {
+        console.log("Success")
+        if (this.props.isLogin){
+            this.state.contactList = JSON.parse(JSON.parse(reply).data)
+            localStorage.setItems("localContactList",this.state.contactList);
+        }
+            
+        //jump to next page
+    }
+
+    updateContactList() {
+        
+        if (localStorage.getItem('localContactList')) {
+            console.log(localStorage.getItem('contactList'));
+            this.setState({ contactList: JSON.parse(localStorage.localContactList) })
+        }
+        else {
+            this.setState({ contactList: [] })
+        }
+        
+    }
+
 
 
     render() {
         const { classes } = this.props;
+        
         return (
             <Paper className={classes.paper}>
+                <AppBar color="secondary" position="static">
+                    <Toolbar className={classes.toolbar}>
+                        <Typography
+                            variant="h6"
+                            color="inherit"
+                            >
+                            Emergency Contacts
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
                 <div className={classes.content}>
-                    
-                    <TextField
-                        id="userName"
-                        label="Your Name"
-                        className={classes.textField}
-                        value={this.state.userName}
-                        onChange={this.handleUserNameChange}
-                        type='text'
-                        inputProps={{maxlength:'10'}}
-                        margin="normal"
-                    />
-                    <Typography id='headerText' className={classes.mainText} gutterBottom align='left' variant='h5'>
-                        Emergency Contacts
-                    </Typography> 
-                    
+                                        
                     <Fab
                         variant="extended"
                         size="medium"
@@ -440,7 +413,6 @@ class ContactsPage extends React.Component {
                 </div>
 
                 <div className={classes.contacts}>
-                        
                         <Grid
                             container
                             direction="row"
@@ -448,6 +420,7 @@ class ContactsPage extends React.Component {
                             alignItems="center"
                             spacing={8}
                         >
+                            
                             {this.state.contactList.map(function (item, i) {
                                 return (
                                     <Grid key={i} item xs={12} md={6} lg={3}>
@@ -538,15 +511,36 @@ class ContactsPage extends React.Component {
                                     </Grid>
                                             );
                             }.bind(this))}
+                            
+                        
                         </Grid>
-                    </div>              
+                    </div>
+                    <span className={classes.buttons}>
+                        <Button
+                            variant="contained"
+                            className={classes.button}
+                            color="secondary"
+                            onClick={()=>{this.props.history.push('/')}}
+                        >
+                            Skip
+                        </Button>
+                        <Button
+                            style={{ float: "right" }}
+                            variant="contained"
+                            className={classes.button}
+                            color="secondary"
+                            onClick={()=>{this.props.history.push('/')}}
+                        >
+                            Done
+                        </Button>
+                    </span>              
             </Paper>
 
         );
     }
 }
 
-ContactsPage.propTypes = {
+EmergencyContacts.propTypes = {
     classes: PropTypes.object.isRequired,
   };
-export default withStyles(styles)(ContactsPage);
+export default withStyles(styles)(EmergencyContacts);
