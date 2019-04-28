@@ -312,7 +312,7 @@ class ContactsPage extends React.Component {
     
         else
             this.updateContactList();
-        }
+    }
 
     retrieveSuccess(reply) {
         console.log("Success")

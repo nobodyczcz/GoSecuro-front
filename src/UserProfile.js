@@ -14,6 +14,7 @@ import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import APIs from './apis.js';
 
 import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
@@ -113,6 +114,7 @@ const styles = theme => ({
 class UserProfile extends React.Component{
     constructor(props) {
         super(props);
+        this.apis = new APIs();
         this.state = {
             username: 'Sushmitha',
             contact: '111',
@@ -128,15 +130,55 @@ class UserProfile extends React.Component{
 
     }
 
+    componentDidMount(){
+        this.retrieveUserProfile();
+    }
+
     handleEditCancel(){
         this.state.isreadOnly = true;
+        this.state.showButtons = 'none';
     }
     handleEditClick(){
                 
         this.state.isreadOnly = false;
         this.state.showButtons = 'inherit';
-
     }
+    retrieveUserProfile(){
+        console.log(window.serverUrl);
+        console.log("Retrieving user profile");
+        var apiRoute = 'api/UserProfiles/Retrieve';
+        if (this.props.isLogin)
+            this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.retError);
+    }
+
+    retrieveSuccess(reply) {
+        console.log("User profile successfully retrieved")
+        console.log("user profile: " + JSON.parse(JSON.parse(reply).data))          
+        //jump to next page
+    }
+
+    retError(jqXHR) {
+        this.state.errors = [];
+        var response = jqXHR.responseJSON;
+        if (response) {
+            if (response.Message) this.state.errors.push(response.Message);
+            if (response.ModelState) {
+                var modelState = response.ModelState;
+                for (var prop in modelState) {
+                    if (modelState.hasOwnProperty(prop)) {
+                        var msgArr = modelState[prop]; // expect array here
+                        if (msgArr.length) {
+                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                        }
+                    }
+                }
+            }
+            if (response.error) this.state.errors.push(response.error);
+            if (response.error_description) this.state.errors.push(response.error_description);
+        }
+        console.log(this.state.errors)
+    }
+
     render(){
         const { classes,theme } = this.props;
         
@@ -273,11 +315,7 @@ class UserProfile extends React.Component{
                             </Button>
                         </span>  
                     </div>
-                    
-                   
 
-                    
-                    
             </Paper>
         );
     }
