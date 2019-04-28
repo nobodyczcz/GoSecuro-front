@@ -52,7 +52,6 @@ else {
 }
 
 
-
 const styles = theme => ({
     list: {
         width: 250,
@@ -77,10 +76,23 @@ const styles = theme => ({
     sharingFab: {
         position: 'absolute',
         width:'140px',
-        left: 'calc(100% - 150px)',
+        left: 'calc(100% - 140px)',
         top: 'calc(100% - 130px)',
         display: 'flex',
         zIndex: 1100,
+        padding:'0'
+    },
+    shareIcon:{
+        zIndex:3000,
+        width:'10px'
+    },
+    buttonText:{
+        fontSize: '10px',
+        padding:'0'
+    },
+    switchButton:{
+        padding:'0',
+        float:'right'
     },
     menu: {
         display: 'flex',
@@ -1237,17 +1249,19 @@ class App extends Component {
                 </Fab>
 
                 <Fab variant="extended" className={classes.sharingFab} color="primary">
-                    <Typography variant='body2' color="secondary">
+                    <Typography variant='body2' color="secondary" className={classes.buttonText}>
                         Share location
                     </Typography>
+                    {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
+                             */}
                     <Switch
                         checked={this.state.sharing}
                         onChange={this.handleSwitch('sharing')}
                         value="sharing"
+                        className={classes.switchButton}
                     />
-                </Fab>
-               
-
+                </Fab> 
+                
                 {!this.state.searchResponse ? (
                     <div className={classes.panicPosition}>
                         <PanicButton getLocation={this.getLocation.bind(this)} />
