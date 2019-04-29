@@ -89,7 +89,7 @@ class PanicButton extends React.Component {
                             console.error('Error:', error)
                         });
             }
-            alert('Panic Button trigerd! Emergency messages and your location have been sent to your Emergency contacts!')
+            alert('Panic Button triggerd! Emergency messages and your location have been sent to your Emergency contacts!')
 
 
 
