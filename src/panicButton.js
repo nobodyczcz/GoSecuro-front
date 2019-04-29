@@ -77,7 +77,7 @@ class PanicButton extends React.Component {
                         method: 'POST',
                         body: jsonData,
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json; charset=utf-8'
                         }
                     }).then(res => res.json())
                         .then(response => {
@@ -113,8 +113,7 @@ class PanicButton extends React.Component {
                     : null}
                 {this.state.disabled ?
                     <Typography variant="subtitle2">
-                        No emergency contacts.
-                        Panic button disabled
+                        No Emergency Contacts
                     </Typography>
                     :
                     <img className={classes.siren} src='img/siren.png'></img>}

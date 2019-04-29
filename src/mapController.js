@@ -2,6 +2,10 @@
 
 class MapController {
     constructor() {
+        this.heatmap = null;
+        this.cameras = [];
+        this.icon = null;
+
         this.cameraLocations = [
             [-37.814050, 144.944293, 'Security - Safe City - Camera # 48:' + "<br>" + 'Harbour ESP SE Corner West Wharf'],
             [-37.814915, 144.944658, 'Security - Safe City - Camera # 47:' + "<br>" + 'Corner Latrobe St/ Harbour Esp'],
@@ -70,48 +74,80 @@ class MapController {
 
     };
     showLight(map, data) {
-        var heatmapData = []
-        var lightData = data
-        for (var i in lightData) {
-            var lat = lightData[i]['lat']
-            var log = lightData[i]['log']
-            var lux = lightData[i]['lux']
-            if (lux > 10) {
-                lux = 10
-            }
-            var temp = { location: new window.google.maps.LatLng(lat, log), weight: lux }
-
-            heatmapData.push(temp)
+        if (this.heatmap) {
+            this.heatmap.setMap(map);
         }
-    var heatmapData = data
-        var heatmap = new window.google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-        opacity: 0.6
-    });
-    heatmap.setMap(map);
-}
+        else {
+            var heatmapData = []
+            var lightData = data
+            for (var i in lightData) {
+                var lat = lightData[i]['lat']
+                var log = lightData[i]['log']
+                var lux = lightData[i]['lux']
+                if (lux > 10) {
+                    lux = 10
+                }
+                var temp = { location: new window.google.maps.LatLng(lat, log), weight: lux }
+
+                heatmapData.push(temp)
+            }
+            //var heatmapData = data
+            this.heatmap = new window.google.maps.visualization.HeatmapLayer({
+                data: heatmapData,
+                opacity: 0.6
+            });
+            this.heatmap.setMap(map);
+        }
+       
+    }
+
+    clearLight() {
+        if (this.heatmap) {
+            this.heatmap.setMap(null)
+
+        }
+    }
 
     ShowCamera(map, data) {
-    var locations = data
+        this.cameras=[]
+        var locations = data
         var infowindow = new window.google.maps.InfoWindow();
-
-    var marker, i;
-    //var image = '<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
-    for (i = 0; i < locations.length; i++) {
-        marker = new window.google.maps.Marker({
-            position: new window.google.maps.LatLng(locations[i][0], locations[i][1]),
-            map: map,
-            //icon: image
-        });
-
-        window.google.maps.event.addListener(marker, 'click', (function (marker, i) {
-            return function () {
-                infowindow.setContent(locations[i][2])
-                infowindow.open(map, marker);
+        if (!this.icon) {
+            this.icon = {
+                path: 'M16 3.33c2.58 0 4.67 2.09 4.67 4.67H22c0-3.31-2.69-6-6-6v1.33M16 6c1.11 0 2 .89 2 2h1.33c0-1.84-1.49-3.33-3.33-3.33V6.M17 9c0-1.11-.89-2-2-2V4H9L7.17 6H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9h-5zm-5 10c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z',
+                fillColor: '#ff7504',
+                fillOpacity: 1,
+                strokeWeight: 1,
+                strokeColor: '#ffffff',
+                strokeOpacity: 1,
+                size: new window.google.maps.Size(14, 14),
+                origin: new window.google.maps.Point(0, 0),
+                anchor: new window.google.maps.Point(7, 7),
             }
-        })(marker, i));
+        }
+        //var image = '<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
+        for (var i = 0; i < locations.length; i++) {
+            var marker
+            marker = new window.google.maps.Marker({
+                position: new window.google.maps.LatLng(locations[i][0], locations[i][1]),
+                map: map,
+                icon: this.icon
+            });
+
+            window.google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                return function () {
+                    infowindow.setContent(locations[i][2])
+                    infowindow.open(map, marker);
+                }
+            })(marker, i));
+            this.cameras.push(marker)
+        }
     }
-}
+    clearCamera() {
+        this.cameras.forEach(function (camera){
+            camera.setMap(null)
+        })
+    }
 
     clearMap(map) {
         //Clear all crime rate from map

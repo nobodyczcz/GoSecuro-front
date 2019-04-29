@@ -143,6 +143,8 @@ const styles = theme => ({
 
 class ResultCard extends Component {
     constructor(props) {
+        
+        
         super(props);
         this.state = {
             open: true,
@@ -170,6 +172,7 @@ class ResultCard extends Component {
     }
     
     render() {
+       
         console.log('render result: ',this.props.currentRoute);
         const { classes, theme } = this.props;
         return (
