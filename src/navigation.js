@@ -5,12 +5,15 @@ import Card from '@material-ui/core/Card';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
+
 import APIs from './apis.js';
 import PanicButton from './panicButton.js';
 import Grid from '@material-ui/core/Grid';
 import geolib from 'geolib';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import Fab from '@material-ui/core/Fab';
+import { Divider } from '@material-ui/core';
 
 
 
@@ -24,8 +27,7 @@ const styles = theme => ({
         zIndex: 1100,
         width: '94%',
         zIndex:1200,
-        height: "20%",
-        minHeight:'120px'
+        minHeight: '120px',
     },
     toolbar: {
         justifyContent: "center",
@@ -34,13 +36,14 @@ const styles = theme => ({
     foot: {
         position: "fixed",
         zIndex: 1200,
-        minHeight:"80px",
+        minHeight:"60px",
         height: "10%",
         bottom:0,
     },
     footBar: {
         display: 'flex',
-        justifyContents:"space-between"
+        justifyContents: "space-between",
+        alignItems:"flex-end"
     },
     panicButton: {
         zIndex: 1300,
@@ -50,7 +53,7 @@ const styles = theme => ({
         left: 'calc( 50% - 40px)',
     },
     grid: {
-        padding:"10px",
+        padding:"15px",
     },
     myPositionIcon: {
         position: 'absolute',
@@ -58,7 +61,25 @@ const styles = theme => ({
         top: 'calc(100% - 120px)',
         display: 'flex',
         zIndex: 1100,
+    },
+    header: {
+        width: "100%",
+        minHeight: "20px",
+        backgroundColor:"#ff7504",
+    },
+    transit: {
+        display: 'flex',
+        justifyContent: "space-between",
+        padding:"5px"
+    },
+    contentCard: {
+        width: "100%",
+        height:"100%"
+    },
+    gridItem: {
+        padding:"5px"
     }
+
 
 });
 class NavigationPage extends React.Component {
@@ -120,6 +141,7 @@ class NavigationPage extends React.Component {
     handleStartTracking() {
         console.log("Start tracking. start location:" + JSON.stringify(this.props.userLocation));
         if (window.cordova) {
+            this.props.locationSharing.navigationRoute = JSON.stringify(this.props.currentRoute);
             this.props.locationSharing.startTracking(this.props.userLocation);
 
         }
@@ -211,67 +233,111 @@ class NavigationPage extends React.Component {
         
         return (
             <div>
-                <Card className={classes.appBar} color="primary" position="static">
+                <Paper className={classes.appBar} position="static">
+
+                    
+
                     <Grid
                         container
                         direction="row"
                         justify="center"
                         alignItems="center"
-                        spacing={5}
+                        spacing={8}
                         className={classes.grid}
                     >
-                        {currentStep.father ?
-                            <Grid xs={12}>
+                        <Grid item xs={12}>
+                            <Card className={classes.header} color="secondary">
+                            {currentStep.father ?
                                 <Typography
                                     variant="body1"
+                                    align="center"
+                                    color="primary"
                                 >
-                                    Now <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
+                                    <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
                                 </Typography>
+
+                                : null
+                            }
+                            </Card>
                             </Grid>
-                            : null
-                        }
+                        
+                        
                         
                         {currentStep.travel_mode == "TRANSIT" ? 
-                            <div>
-                                <Grid xs={12}>
-                                    <Typography
-                                        variant="h5"
-                                    >
-                                        Take {currentStep.transit.line.vehicle.name} {currentStep.transit.line.short_name} Heading  {currentStep.transit.headsign}
-                                    </Typography>
-                                </Grid>
+                            <Grid item xs={12}>
+                                <Grid container
+                                    justify="space-between"
+                                    alignItems="stretch"
+                                    direction="row"
+                                    spacing={8}>
+                                    <Grid item xs={5} className={classes.transit}>
+                                        <Card className={classes.contentCard}>>
+                                        <Typography
+                                            variant="h5"
+                                        
+                                        >
+                                            Take {currentStep.transit.line.vehicle.name} {currentStep.transit.line.short_name} 
+                                        </Typography>
+                                        <Typography
+                                            variant="h5"
 
-                                <Grid xs={12}>
-                                    <Typography
-                                        variant="body1"
-                                    >
-                                        Departure stop {currentStep.transit.departure_stop.name}. Arrival stop {currentStep.transit.departure_stop.name}.
-                                    </Typography>
-                                </Grid>
-                            </div>
+                                        >
+                                            Heading  {currentStep.transit.headsign}
+                                            </Typography>
+                                            </Card>
+                                    </Grid>
+
+                                    <Grid item xs={7} className={classes.gridItem}>
+                                        <Card className={classes.contentCard} >
+                                        <Typography
+                                            variant="body1"
+                                        >
+                                            Departure stop {currentStep.transit.departure_stop.name}. Arrival stop {currentStep.transit.departure_stop.name}.
+                                        </Typography>
+                                            </Card>
+                                        </Grid>
+                                    </Grid>
+                            </Grid>
                             :
-                            <div>
-                                <Grid xs={12}>
-                                    <Typography
-                                        variant="h5"
-                                    >
-                                        After {toNext}, {nextStep.maneuver}
-                                    </Typography>
+                            <Grid item xs={12}>
+                                <Grid container
+                                    justify="space-between"
+                                    alignItems="stretch"
+                                    direction="row"
+                                    spacing={8}>
+                                <Grid item xs={5} className={classes.transit}>
+                                    <Card className={classes.contentCard}>
+                                        <Typography
+                                            variant="h5"
+                                        >
+                                            After {toNext}
+                                        </Typography>
+                                        <Typography
+                                            variant="h5"
+                                        >
+                                            {nextStep.maneuver}
+                                        </Typography>
+                                    </Card>
                                 </Grid>
+                                
 
-                                <Grid xs={12}>
-                                    <Typography
-                                        variant="h6"
-                                    >
-                                        Now <a dangerouslySetInnerHTML={{ __html: currentStep.instructions }} />
-                                    </Typography>
+                                
+                                    <Grid item xs={7} className={classes.gridItem} >
+                                    <Card className={classes.contentCard}>
+                                        <Typography
+                                            variant="h6"
+                                        >
+                                            Now <a dangerouslySetInnerHTML={{ __html: currentStep.instructions }} />
+                                            </Typography>
+                                    </Card>
                                 </Grid>
-                            </div>
+                                </Grid>
+                            </Grid>
                         }
-                        
-
                     </Grid>
-                </Card>
+                    
+                </Paper>
+
                 <Fab onClick={this.props.handleMyLocationClick} color="primary" size="small" className={classes.myPositionIcon}>
                     <MyLocationIcon />
                 </Fab>
@@ -281,7 +347,21 @@ class NavigationPage extends React.Component {
                         <PanicButton getLocation={this.props.getLocation} />
                     </div>
                     <Toolbar className={classes.footBar}>
-                        <Button variant='extended' onClick={this.handleCancelNav.bind(this)} >Cancel</Button>
+                        <Grid container
+                            justify="space-between"
+                            alignItems="center"
+                            direction="row"
+                            spacing={8}>
+                            <Grid item xs={4}>
+                                <Fab variant='extended' onClick={this.handleCancelNav.bind(this)} color="secondary" >Cancel</Fab>
+                            </Grid>
+                            <Grid item xs={8}>
+                                <a>Navigation route and locations are sharing now</a>
+                            </Grid>
+
+                        </Grid>
+                        
+                        
                     </Toolbar>
                     </AppBar>
             </div>

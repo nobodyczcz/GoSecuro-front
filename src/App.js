@@ -31,10 +31,13 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
+import LightLocation from './LightLocation.json';
+
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
 import APIs from './apis.js';
 import LocationSharing from './locationSharing.js';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
@@ -162,6 +165,13 @@ const styles = theme => ({
         marginTop: '10px',
         width: "60px",
         height:"60px"
+    },
+    menuItem: {
+        display: 'flex',
+        justifyContent: "space-between",
+        fontSize: '10px',
+        fontWeight: "bold",
+        padding:"8px"
     }
 
 });
@@ -214,6 +224,16 @@ class App extends Component {
         }
         this.tempLinks = {};
         this.friendPath = null;
+        this.friendMarkers = {
+            start: null,
+            current: null,
+            planFinish: null,
+        }
+        this.friendMarkersInfo = {
+            startInfo: null,
+            currentInfo: null,
+            planFinish:null
+        }
 
         /*
         Map related attributes:
@@ -225,6 +245,14 @@ class App extends Component {
         this.directionsService = null;
         this.directionsDisplay = null;
 
+        if (localStorage.crimeTable) {
+            this.crimeTable = JSON.parse(localStorage.crimeTable);
+        }
+        else {
+            this.crimeTable = {};
+        }
+
+        
         this.focusUser = true;
 
         this.markers = null;
@@ -274,7 +302,7 @@ class App extends Component {
         if (document.getElementById('mapdiv').childNodes.length === 0) {
             //load map script from server. and render map when script is loaded
             console.log('download map scripts')
-            postscribe('#mapdiv', '<script language="javascript" src=' + this.mapurl + '&libraries=places></script>', {
+            postscribe('#mapdiv', '<script language="javascript" src=' + this.mapurl + '&libraries=places,visualization></script>', {
                 done: this.renderMap.bind(this),
             });
         }  
@@ -282,6 +310,11 @@ class App extends Component {
         
         
         this.state = {  // state of react component
+            highCrime: false,
+            midiumCrime: false,
+            displayLight: false,
+            displayCameras: false,
+            crimeSwitch:true,
             tempLinks:[],
             tracking: false,
             sharing:false,
@@ -374,6 +407,14 @@ class App extends Component {
             if (data[key].locationListJson != "[]") {
                 this.tempLinks[data[key].TempLinkId].locations = this.tempLinks[data[key].TempLinkId].locations.concat(JSON.parse(data[key].locationListJson));
                 console.log(this.tempLinks[data[key].TempLinkId].locations)
+                if (this.state.friendDisplay) {
+                    var latlngs = this.convertLocations(JSON.parse(data[key].locationListJson))
+                    this.friendPath.push(latlngs)
+                    this.friendMarkers.current.setPosition(latlngs[latlngs.length-1])
+
+                    
+                }
+
             }
             
         }
@@ -441,22 +482,65 @@ class App extends Component {
 
     handleAvatar = (e) => {
         
-        var tempLink = e.target.key
+        var tempLink = e
 
-        if (this.state.firendDisplay == tempLink) {
-            this.directionsDisplay.setDirections(null)
+        if (this.state.friendDisplay == tempLink) {
+            console.log("canceel display")
+            this.directionsDisplay.setMap(null)
+            this.friendMarkers.start.setMap(null)
+            this.friendMarkers.current.setMap(null)
+            this.friendPath.setMap(null);
+
+
+            this.setState({
+                friendDisplay: null
+            })
         }
         else {
+            console.log("display friend")
             var navRoute = this.tempLinks[tempLink].journey.NavigateRoute
             if (navRoute) {
-                this.directionsDisplay.setDirections(navRoute)
+                this.directionsDisplay.setDirections(JSON.parse(navRoute))
+                //this.friendMarkers.planFinish.setPosition()
             }
+            this.displayTracking(this.tempLinks[tempLink].locations);
+            this.friendMarkers.start.setPosition({ lat: this.tempLinks[tempLink].journey.SCoordLat, lng: this.tempLinks[tempLink].journey.SCoordLog})
+            this.friendMarkers.start.setMap(this.map)
+            this.friendMarkersInfo.startInfo.setContent("Start time: " + this.tempLinks[tempLink].journey.StartTime)
+
+            if (this.tempLinks[tempLink].locations.length) {
+
+            }
+            this.friendMarkers.current.setPosition({ lat: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLat, lng: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLog })
+            this.friendMarkers.current.setMap(this.map)
+            this.friendMarkersInfo.currentInfo.setContent("Current location : " + this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].Time);
+
+
             this.setState({
-                firendDisplay: e.target.key
+                friendDisplay: tempLink
             })
         }
 
         
+    }
+
+    displayTracking(locations) {
+        var coords = []
+        var lastLatLng = {}
+        for (var key in locations) {
+            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
+            lastLatLng = { lat: locations[key].CoordLat, lng: locations[key].CoordLog }
+        }
+        this.friendPath.setPath(coords);
+        this.friendPath.setMap(this.map);
+        this.map.setCenter(lastLatLng);
+    }
+    convertLocations(locations) {
+        var coords = []
+        for (var key in locations) {
+            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
+        }
+        return coords
     }
 
     componentDidMount() { //start loading crime rate data when this page is rendered
@@ -589,15 +673,20 @@ class App extends Component {
                     crime.geometry = JSON.parse(response[i].boundary.replace(/'/g, '"'));
                     this.crimeData.features.push(crime);
                     newRateData.features.push(crime);
+                    this.crimeTable[response[i].suburbname] = response[i].crimeRate
                 }
-                if (this.state.mapLayer === 'all') {
-                    this.mapController.displayAllCrime(this.map, newRateData);
+                if (this.state.midiumCrime && this.state.crimeSwitch) {
+                    this.mapController.displayMediumToHighCrime(this.map, this.crimeData);
                 }
-                else if (this.state.mapLayer === 'high') {
+                else if (this.state.highCrime && this.state.crimeSwitch) {
                     this.mapController.displayHighCrimeOnly(this.map, newRateData);
+                }
+                else if (this.state.crimeSwitch){
+                    this.mapController.displayAllCrime(this.map, newRateData);
                 }
 
                 if (this.crimeData.features.length > 415) {
+                    localStorage.setItem("crimeTable", JSON.stringify(this.crimeTable));
                     if (window.cordova) {
                         this.saveCrimateRateJson();
                     }
@@ -680,7 +769,6 @@ class App extends Component {
         this.mapController.displayAllCrime(this.map, this.crimeData);
 
         this.handleMobileMenuClose();
-        this.handleMobileMenuClose();
         this.setState({ mapLayer: 'all' });
     }
     handleHighCrime() {
@@ -688,7 +776,6 @@ class App extends Component {
         this.mapController.clearMap(this.map)
         this.mapController.displayHighCrimeOnly(this.map, this.crimeData);
 
-        this.handleMobileMenuClose();
         this.handleMobileMenuClose();
         this.setState({ mapLayer: 'high' });
 
@@ -701,6 +788,85 @@ class App extends Component {
         this.setState({ mapLayer: 'off' });
 
     }
+    handleCrimeSwitch() {
+        if (!this.state.crimeSwitch) {
+            this.mapController.clearMap(this.map);
+
+            if (this.state.highCrime) {
+                this.mapController.displayHighCrimeOnly(this.map, this.crimeData);
+
+            }
+            else if (this.state.midiumCrime) {
+                this.mapController.displayMediumToHighCrime(this.map, this.crimeData);
+
+            }
+            else {
+                this.mapController.displayAllCrime(this.map, this.crimeData);
+
+            }
+
+
+
+            this.handleMobileMenuClose();
+            this.setState({ crimeSwitch: !this.state.crimeSwitch });
+        }
+        else {
+            this.mapController.clearMap(this.map)
+
+            this.handleMobileMenuClose();
+            this.setState({ crimeSwitch: !this.state.crimeSwitch });
+        }
+    }
+    handleCrimeChange = name => event => {
+        if (name == "highCrime") {
+            if (event.target.checked && this.state.crimeSwitch) {
+                this.mapController.clearMap(this.map)
+                this.mapController.displayHighCrimeOnly(this.map, this.crimeData);
+
+            }
+            else if (this.state.crimeSwitch){
+                this.mapController.clearMap(this.map)
+                this.mapController.displayAllCrime(this.map, this.crimeData);
+            }
+            
+            this.setState({ [name]: event.target.checked, "midiumCrime": false });
+        }
+        else if (name == "midiumCrime") {
+            if (event.target.checked && this.state.crimeSwitch) {
+                this.mapController.clearMap(this.map)
+                this.mapController.displayMediumToHighCrime(this.map, this.crimeData);
+
+            }
+            else if (this.state.crimeSwitch) {
+                this.mapController.clearMap(this.map)
+                this.mapController.displayAllCrime(this.map, this.crimeData);
+            }
+
+            this.setState({ [name]: event.target.checked, "highCrime": false });
+
+        }
+        else if (name == "displayCameras") {
+            if (event.target.checked && this.state.crimeSwitch) {
+                this.mapController.ShowCamera(this.map, this.mapController.cameraLocations)
+
+            }
+            else {
+                this.mapController.clearCamera()
+            }
+            this.setState({ [name]: event.target.checked });
+        }
+        else if (name == "displayLight") {
+            if (event.target.checked && this.state.crimeSwitch) {
+                this.mapController.showLight(this.map, LightLocation)
+
+            }
+            else {
+                this.mapController.clearLight()
+            }
+            this.setState({ [name]: event.target.checked });
+        }
+        
+    };
 
     regError(jqXHR) {
         this.state.errors = [];
@@ -768,11 +934,32 @@ class App extends Component {
         //initialize direction service
         this.directionsService = new window.google.maps.DirectionsService();
         this.directionsDisplay = new window.google.maps.DirectionsRenderer();
+        this.geoCoder = new window.google.maps.Geocoder()
         this.friendPath = new window.google.maps.Polyline({
             strokeColor: '#ff7504',
             strokeOpacity: 1.0,
-            strokeWeight: 3
+            strokeWeight: 6
         });
+        this.friendMarkers = {
+            start: new window.google.maps.Marker(),
+            current: new window.google.maps.Marker(),
+            planFinish: new window.google.maps.Marker(),
+        }
+        this.friendMarkersInfo = {
+            startInfo: new window.google.maps.InfoWindow(),
+            currentInfo: new window.google.maps.InfoWindow(),
+            planFinish: new window.google.maps.InfoWindow()
+        }
+        this.friendMarkers.start.addListener('click', function () {
+            this.friendMarkersInfo.startInfo.open(this.map, this.friendMarkers.start);
+        }.bind(this));
+        this.friendMarkers.current.addListener('click', function () {
+            this.friendMarkersInfo.currentInfo.open(this.map, this.friendMarkers.current);
+        }.bind(this));
+        this.friendMarkers.planFinish.addListener('click', function () {
+            this.friendMarkersInfo.planFinish.open(this.map, this.friendMarkers.planFinish);
+        }.bind(this));
+
 
         this.mainBar.current.setupAutoComplete();
         console.log('set auto complete done')
@@ -786,6 +973,18 @@ class App extends Component {
             this.focusUser = false;
             console.log('focus user off')
             document.getElementById('searchInput').blur();
+            this.handleMobileMenuClose()
+
+        }.bind(this));
+
+        this.map.addListener('click', function () {
+            // 3 seconds after the center of the map has changed, pan back to the
+            // marker.
+            this.focusUser = false;
+            console.log('focus user off')
+            document.getElementById('searchInput').blur();
+            this.handleMobileMenuClose()
+
 
         }.bind(this));
 
@@ -795,6 +994,19 @@ class App extends Component {
     currentLocation() {
         //set the current location and user marker after user open the app.
         console.log('focus current location')
+        if (localStorage.lastLocation) {
+            this.userLocationImage.rotation = this.basicHeading
+            this.userLocation = JSON.parse(localStorage.lastLocation);
+            console.log("location cache:" + JSON.parse(localStorage.lastLocation))
+            this.userMarker = new window.google.maps.Marker({
+                position: JSON.parse(localStorage.lastLocation),
+                map: this.map,
+                icon: this.userLocationImage,
+            });
+            this.userMarker.setMap(this.map)
+        }
+        
+
         navigator.geolocation.getCurrentPosition(function (position) {
             var thelat = position.coords.latitude;
             var thelng = position.coords.longitude;
@@ -860,6 +1072,7 @@ class App extends Component {
         console.log('heading:' + this.heading)
 
         this.userLocation = { lat: thelat, lng: thelng };
+        localStorage.setItem( "lastLocation" , JSON.stringify(this.userLocation) )
         if (this.naviPage.current) {
             this.mainBar.current.setupAutoComplete(this.userLocation);
             
@@ -1057,31 +1270,68 @@ class App extends Component {
         }.bind(this));
     };
 
+    getSuburbs(route) {
+        var routes = route.routes[0].legs[0]
+        var steps = [];
+        for (var i = 0; i < routes.steps.length; i++) {
+            if (routes.steps[i].steps) {
+                for (var x = 0; x < routes.steps[i].steps.length; x++) {
+                    routes.steps[i].steps[x].father = routes.steps[i]
+                    steps.push(routes.steps[i].steps[x])
+                }
+            }
+            else {
+                steps.push(routes.steps[i])
+            }
+        }
+        for (var key in steps) {
+            var location = {
+                lat: steps[key].end_location.lat(),
+                lng: steps[key].end_location.lng()
+            }
+            console.log("geocode")
+            console.log(location)
+            this.geoCoder.geocode({ 'location ': location }, function (results, status) {
+                if (status == 'OK') {
+                    var address = results[0].address_components
+                    for (key in address) {
+
+                    }
+                }
+            })
+        }
+        
+    }
     setNavMode(mode) {
         console.log('set transit mode: ' + mode)
         this.directionsDisplay.setMap(this.map);
         if (mode === 'walking') {
             console.log(this.navRoutes.walking);
             this.navValue = 0
-            this.setState({ currentRoute: this.navRoutes.walking }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+            this.setState({ currentRoute: this.navRoutes.walking }, this.displayCurrent.bind(this));
         }
         else if (mode === 'transit') {
             console.log(this.navRoutes.transit)
             this.navValue = 1
 
-            this.setState({ currentRoute: this.navRoutes.transit }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+            this.setState({ currentRoute: this.navRoutes.transit }, this.displayCurrent.bind(this));
         }
         else if (mode === 'driving') {
             console.log(this.navRoutes.driving)
             this.navValue = 2
 
-            this.setState({ currentRoute: this.navRoutes.driving }, function () { this.directionsDisplay.setDirections(this.state.currentRoute) });
+            this.setState({ currentRoute: this.navRoutes.driving }, this.displayCurrent.bind(this));
+            
         }
 
 
 
     };
 
+    displayCurrent() {
+        this.directionsDisplay.setDirections(this.state.currentRoute)
+        
+    }
     /*Map search related functions
      * 
      * finish
@@ -1118,17 +1368,56 @@ class App extends Component {
                     {this.state.mapLayer === "off" ? null : <img src="img/legend.png" className={classes.legend}></img>}
 
                     {this.state.layerMenu ? (
-                        <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} onTouchEnd={this.handleClickAway.bind(this)}>
+                        <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} >
                             <Paper className={classes.layerMenu}>
-                                <MenuItem onClick={this.handleCrimeOff.bind(this)} onTouchEnd={this.handleCrimeOff.bind(this)}>
-                                    <p>Heatmap OFF</p>
+                                <MenuItem className={classes.menuItem}>
+                                    Crime Rate
+                                    <Switch
+                                        checked={this.state.crimeSwitch}
+                                        onChange={this.handleCrimeSwitch.bind(this)}
+                                        value="checkedB"
+                                        color="secondary"
+                                    />
                                 </MenuItem>
-                                <MenuItem onClick={this.handleAllCrime.bind(this)} onTouchEnd={this.handleAllCrime.bind(this)}>
-                                    <p>Full Heatmap</p>
+                                <MenuItem className={classes.menuItem}>
+                                    High only
+                                    <Checkbox
+                                        checked={this.state.highCrime}
+                                        onChange={this.handleCrimeChange('highCrime')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
                                 </MenuItem>
 
-                                <MenuItem onClick={this.handleHighCrime.bind(this)} onTouchEnd={this.handleHighCrime.bind(this)}>
-                                    <p>High Crime Only</p>
+                                <MenuItem className={classes.menuItem}>
+                                    Medium-High
+                                    <Checkbox
+                                        checked={this.state.midiumCrime}
+                                        onChange={this.handleCrimeChange('midiumCrime')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
+                                </MenuItem>
+                                <Divider />
+
+                                <MenuItem className={classes.menuItem}>
+                                    Street Light
+                                    <Checkbox
+                                        checked={this.state.displayLight}
+                                        onChange={this.handleCrimeChange('displayLight')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
+                                </MenuItem>
+
+                                <MenuItem className={classes.menuItem}>
+                                    Cameras
+                                    <Checkbox
+                                        checked={this.state.displayCameras}
+                                        onChange={this.handleCrimeChange('displayCameras')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
                                 </MenuItem>
                             </Paper>
                         </ClickAwayListener>
@@ -1155,7 +1444,7 @@ class App extends Component {
                         }
 
                         return (
-                            <Fab className={classes.avatar} color={this.state.firendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                            <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
                     } > { displayName }</Fab>
                     )
             }.bind(this))}
@@ -1188,14 +1477,17 @@ class App extends Component {
                 }
 
                 {this.state.searchResponse ? (
-                    <ResultCard history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                    <ResultCard crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
             </div>
         );
     }
 
     handleMobileMenuClose = () => {
-        this.setState({ mobileMoreAnchorEl: null, layerMenu: false });
+        if (this.state.layerMenu) {
+            this.setState({ mobileMoreAnchorEl: null, layerMenu: false });
+
+        }
     };
 
     handleClickAway() {
