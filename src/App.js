@@ -1459,7 +1459,7 @@ class App extends Component {
                         Share location
                     </Typography>
                     {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
-                             */}
+                              */}
                     <Switch
                         checked={this.state.sharing}
                         onChange={this.handleSwitch('sharing')}
