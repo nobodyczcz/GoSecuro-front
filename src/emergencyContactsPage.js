@@ -175,10 +175,13 @@ class EmergencyContacts extends React.Component{
     };
 
     handleEditOpen = (index,item) => {
+        console.log(item)
         this.setState({ isOpen: true,
                         activeItemName: item.name,
                         activeMobile: item.mobile,
-                        activeIndex:index
+                        activeIndex:index,
+                        name:item.name,
+                        mobile:item.mobile,
         });
     };
 
@@ -314,9 +317,10 @@ class EmergencyContacts extends React.Component{
 
     retrieveSuccess(reply) {
         console.log("Success")
-        if (this.props.isLogin) {
-            this.setState({ contactList: JSON.parse(JSON.parse(reply).data)})
-            localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
+        if (this.props.isLogin){
+            this.state.contactList = JSON.parse(JSON.parse(reply).data)
+            localStorage.setItem("localContactList",JSON.stringify(this.state.contactList));
+            this.updateContactList();
         }
             
         //jump to next page

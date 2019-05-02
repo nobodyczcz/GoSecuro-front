@@ -171,6 +171,12 @@ const styles = theme => ({
         fontSize: '10px',
         fontWeight: "bold",
         padding:"8px"
+    },
+    mainBar:{
+        height: "400px",
+        zIndex: 1000,
+        backgroundColor: "#ff7504"
+
     }
 
 });
@@ -333,7 +339,8 @@ class App extends Component {
             startUpPageLayer: true,
             isLogin: this.serverApi.isLogin(),
             welcomeImgContainer:true,
-            error:[]
+            error:[],
+            barColor: 'secondary'
         };
         
         this.interval= null;
@@ -1568,7 +1575,7 @@ class App extends Component {
                     </Typography>
                     
                     {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
-                             */}
+                              */}
                     <Switch
                         checked={this.state.sharing}
                         onChange={this.handleSwitch('sharing')}
@@ -1692,6 +1699,7 @@ class App extends Component {
                 setNavMode={this.setNavMode.bind(this)}
                 tabValue={this.state.currentPage}
                 navValue={this.navValue}
+                style={this.barColor}
             >
             </MainBar>
         );
@@ -1818,6 +1826,7 @@ class App extends Component {
                     </SwipeableDrawer>
                     <div className='mapStyle' id='MAP'>
                     </div>
+                    
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />

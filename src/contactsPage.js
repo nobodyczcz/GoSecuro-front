@@ -81,12 +81,12 @@ const styles = theme => ({
         position: 'fixed',
         width: '100%',
         height: '100%',
-        top: '0',
+        top: '20%',
         left: '0',
-        zIndex: 900,
+        zIndex: 899,
     },
     content: {
-        marginTop: "140px",
+        marginTop: "0px",
         padding: '3%',
     },
     contacts: {
@@ -309,14 +309,25 @@ class ContactsPage extends React.Component {
         this.handleEditClose();
 
     }
-    handleDelete(index) {
+    handleDelete(index,mobileNumber) {
         
         console.log(window.serverUrl);
+
+        if(this.props.isLogin){
+            var contdata = {
+                EmergencyContactPhone: mobileNumber,
+            };
+            var apiRoute = 'api/UserEmergency/delete';
+            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+            
+        }
+        else{
         var list = JSON.parse(localStorage.localContactList)
         var result = list.splice(index, 1);
         console.log("splice result:" + result);
         localStorage.localContactList = JSON.stringify(list);
         this.updateContactList();
+        }
 
     }
     retrieveEmergencies() {
@@ -545,7 +556,7 @@ class ContactsPage extends React.Component {
                                                     className={classes.deleteIconButton}
                                                     aria-label="Delete"
                                                     color="secondary"
-                                                    onClick={function(){ this.handleDelete(i) }.bind(this)}
+                                                    onClick={function(){ this.handleDelete(i,item.EmergencyContactPhone) }.bind(this)}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>

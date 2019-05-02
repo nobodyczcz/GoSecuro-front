@@ -30,6 +30,26 @@ import Paper from '@material-ui/core/Paper';
 
 
 const styles = theme => ({
+    mainBar:{
+        position:'fixed',
+        height:"129px",
+        width:'100%',
+        left:0,
+        top:0,
+        zIndex:900,
+        backgroundColor:"#ff7504"
+    },
+    mainBarMap: {
+        position:'fixed',
+        height:"129px",
+        width:'100%',
+        left:0,
+        top:0,
+        zIndex:900,
+        backgroundColor:"#ff5603",
+        opacity:0.7,
+
+    },
     root: {
         position: 'fixed',
         left: '3%',
@@ -44,7 +64,7 @@ const styles = theme => ({
 
     },
     tabs: {
-        position: 'absolute',
+        position: 'fixed',
         left: '3%',
         top: '5%',
         zIndex: 1000,
@@ -143,13 +163,15 @@ class MainBar extends React.Component {
             navValue: this.props.navValue ? this.props.navValue : 0,
             searching: null,
             searchCoord: [0, 0],
-            searchPlaceHolder:"Search a location..."
+            searchPlaceHolder:"Search a destination..."
         };
   
     }
     
     handleTabChange = (event, value) => {
+        console.log("tab value:" + value)
         this.setState({ tabValue:value });
+        
     };
     handleNavChange = (event, value) => {
         this.setState({ navValue: value });
@@ -216,7 +238,7 @@ class MainBar extends React.Component {
             }
         }
         else {
-            this.setState({searchPlaceHolder:"You must input something for search..."})
+            this.setState({searchPlaceHolder:"Search a destination.."})
         }
 
     }
@@ -239,6 +261,8 @@ class MainBar extends React.Component {
 
         return (
           <div>
+                    <div className={this.state.tabValue == 1? classes.mainBarMap :classes.mainBar}>
+                    </div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
                       {this.props.displayBack ? 
@@ -279,7 +303,7 @@ class MainBar extends React.Component {
                   <Tabs
                       variant="fullWidth"
                       value={this.state.navValue}
-                      indicatorColor="secondary"
+                      indicatorColor="primary"
                       textColor="inherit"
                       onChange={this.handleNavChange}
                       className={classes.tabs}
@@ -299,19 +323,19 @@ class MainBar extends React.Component {
                   <Tabs
                       variant="fullWidth"
                       value={this.state.tabValue}
-                      indicatorColor="secondary"
-                      textColor="inherit"
+                      indicatorColor="primary"
+                      textColor="primary"
                       onChange={this.handleTabChange}
                       className={classes.tabs}
 
                   >
-                        <Tab icon={<HomeIcon />} onClick={() => {
+                      <Tab icon={<HomeIcon color="primary"/>} onClick={() => {
                           this.props.history.push('/')
                       }} />
-                        <Tab icon={<MapIcon />} id='mapIcon' onClick={() => {
+                      <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
                           this.props.history.push('/map')
                       }} />
-                        <Tab icon={<ContactsIcon />} onClick={() => {
+                      <Tab icon={<ContactsIcon color="primary"/>} onClick={() => {
                           this.props.history.push('/contacts')
                       }} />
                   </Tabs>
