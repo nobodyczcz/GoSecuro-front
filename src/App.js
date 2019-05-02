@@ -9,7 +9,6 @@ import TurnedInIon from '@material-ui/icons/TurnedIn';
 import Switch from '@material-ui/core/Switch';
 import Avatar from '@material-ui/core/Avatar';
 
-
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
 import { Router, Route, Link } from "react-router-dom";
@@ -227,12 +226,14 @@ class App extends Component {
         this.friendMarkers = {
             start: null,
             current: null,
-            planFinish: null,
+            navFinish: null,
+            navStart:null,
         }
         this.friendMarkersInfo = {
             startInfo: null,
             currentInfo: null,
-            planFinish:null
+            navFinish: null,
+            navStart: null,
         }
 
         /*
@@ -351,6 +352,7 @@ class App extends Component {
      * app initialize and load data from server
      */
     loginSuccess() {
+        this.retrieveTemplinks();
         this.getLinksTimer = setInterval(this.retrieveTemplinks.bind(this), 15000); //retrieve the templink from server eveery 15 s
         this.setState({ isLogin: true });
     }
@@ -377,6 +379,11 @@ class App extends Component {
             this.apis.callApi(theApi, data, this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
         }
 
+        
+        
+    }
+
+    updateLocations() {
         if (Object.keys(this.tempLinks).length > 0) {
             console.log("[info]length >0")
             var theApi = 'api/TempLinks/updateLocations'
@@ -391,7 +398,7 @@ class App extends Component {
                     }
                     data.push(theTemp)
                 }
-                
+
             }
             if (data.length > 0) {
                 console.log("[INFO] request locations")
@@ -399,17 +406,21 @@ class App extends Component {
 
             }
         }
-        
     }
+
     receiveLocations = (data) => {
         console.log(data)
         for (var key in data) {
             if (data[key].locationListJson != "[]") {
                 this.tempLinks[data[key].TempLinkId].locations = this.tempLinks[data[key].TempLinkId].locations.concat(JSON.parse(data[key].locationListJson));
                 console.log(this.tempLinks[data[key].TempLinkId].locations)
-                if (this.state.friendDisplay) {
+                if (this.state.friendDisplay == data[key].TempLinkId) {
                     var latlngs = this.convertLocations(JSON.parse(data[key].locationListJson))
-                    this.friendPath.push(latlngs)
+                    var path = this.friendPath.getPath()
+                    for (var i in latlngs) {
+                        path.push(latlngs[i])
+
+                    }
                     this.friendMarkers.current.setPosition(latlngs[latlngs.length-1])
 
                     
@@ -437,6 +448,9 @@ class App extends Component {
         var updated = false;
         for (var key in tempLinks) {
             if (!linkList.includes(key)) {
+                if (this.state.friendDisplay == key) {
+                    this.handleAvatar(key)
+                }
                 delete tempLinks[key]
                 updated = true;
             }
@@ -456,12 +470,15 @@ class App extends Component {
             }
         }
 
-        console.log("[INFO] update templinks " + JSON.stringify(tempLinks));
+        console.log("[INFO] update templinks.");
+        console.log(tempLinks);
         this.tempLinks = tempLinks;
         if (updated) {
             console.log("[INFO] temp link list chaged");
             this.setState({ "tempLinks": Object.keys(this.tempLinks) });
         }
+
+        this.updateLocations()
         
     }
     receiveLinksError = (error)=>{
@@ -469,11 +486,9 @@ class App extends Component {
     }
     getJourneySuccess = (data) => {
         var results = JSON.parse(JSON.parse(data).data);
-        console.log(results)
             
         this.tempLinks[results.TempLinkId].journey = results;
-
-        console.log(data)
+        this.updateLocations()
     }
 
     getJourneyError = (error) => {
@@ -481,39 +496,67 @@ class App extends Component {
     }
 
     handleAvatar = (e) => {
+        //click the round avatar that corresponding the people who are sharing location
         
         var tempLink = e
 
         if (this.state.friendDisplay == tempLink) {
+            //if the one which is displaying clicked, cancel dispaly
             console.log("canceel display")
-            this.directionsDisplay.setMap(null)
-            this.friendMarkers.start.setMap(null)
-            this.friendMarkers.current.setMap(null)
-            this.friendPath.setMap(null);
-
+            this.clearFriendPath()
 
             this.setState({
                 friendDisplay: null
             })
         }
         else {
-            console.log("display friend")
+            //display the route of the one who are clicked
+            this.clearFriendPath()
+
+            if (!this.tempLinks[tempLink].journey) {
+                setTimeout(function () { this.handleAvatar(e) }.bind(this), 1000);
+                return
+            }
+            console.log("display friend"+e)
             var navRoute = this.tempLinks[tempLink].journey.NavigateRoute
             if (navRoute) {
-                this.directionsDisplay.setDirections(JSON.parse(navRoute))
+                var routes = JSON.parse(navRoute);
+                this.friendNavPath.setPath(routes.overview_path)
+                this.friendNavPath.setMap(this.map)
+                this.friendMarkers.navFinish.setPosition(new window.google.maps.LatLng(routes.destination.lat, routes.destination.lng))
+                this.friendMarkersInfo.navFinish.setContent("Planed destination");
+                this.friendMarkers.navFinish.setMap(this.map);
                 //this.friendMarkers.planFinish.setPosition()
             }
-            this.displayTracking(this.tempLinks[tempLink].locations);
-            this.friendMarkers.start.setPosition({ lat: this.tempLinks[tempLink].journey.SCoordLat, lng: this.tempLinks[tempLink].journey.SCoordLog})
+            var coords = this.convertLocations(this.tempLinks[tempLink].locations);
+            this.friendPath.setPath(coords);
+            this.friendPath.setMap(this.map);
+
+            var startlatlng = new window.google.maps.LatLng(this.tempLinks[tempLink].journey.SCoordLat, this.tempLinks[tempLink].journey.SCoordLog)
+            this.friendMarkers.start.setPosition(startlatlng)
             this.friendMarkers.start.setMap(this.map)
             this.friendMarkersInfo.startInfo.setContent("Start time: " + this.tempLinks[tempLink].journey.StartTime)
 
-            if (this.tempLinks[tempLink].locations.length) {
+            var length = this.tempLinks[tempLink].locations.length;
+            console.log("[INFO]locations list length: "+length)
+
+            if (length) {
+                var latlng = new window.google.maps.LatLng(this.tempLinks[tempLink].locations[length - 1].CoordLat, this.tempLinks[tempLink].locations[length - 1].CoordLog)
+                this.friendMarkers.current.setPosition(latlng)
+                this.friendMarkersInfo.currentInfo.setContent("Current location : " + this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].Time);
+                this.friendMarkers.current.setMap(this.map)
+            }
+
+            
+
+
+            if (coords.length > 0) {
+                this.map.setCenter(coords[coords.length - 1]);
 
             }
-            this.friendMarkers.current.setPosition({ lat: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLat, lng: this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].CoordLog })
-            this.friendMarkers.current.setMap(this.map)
-            this.friendMarkersInfo.currentInfo.setContent("Current location : " + this.tempLinks[tempLink].locations[this.tempLinks[tempLink].locations.length - 1].Time);
+            else {
+                this.map.setCenter(startlatlng);
+            }
 
 
             this.setState({
@@ -524,12 +567,29 @@ class App extends Component {
         
     }
 
+    clearFriendPath() {
+        this.directionsDisplay.setMap(null)
+
+        this.friendMarkers.start.setMap(null)
+        this.friendMarkers.current.setMap(null)
+        this.friendMarkers.navFinish.setMap(null)
+
+        this.friendMarkers.current.setPosition(null)
+        this.friendMarkers.start.setPosition(null)
+        this.friendMarkers.navFinish.setPosition(null)
+
+        this.friendPath.setPath([]);
+        this.friendNavPath.setPath([])
+
+        this.friendPath.setMap(null);
+        this.friendNavPath.setMap(null)
+    }
+
     displayTracking(locations) {
+        var lastLatLng = null;
         var coords = []
-        var lastLatLng = {}
         for (var key in locations) {
-            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
-            lastLatLng = { lat: locations[key].CoordLat, lng: locations[key].CoordLog }
+            coords.push(new window.google.maps.LatLng(locations[key].CoordLat, locations[key].CoordLog))
         }
         this.friendPath.setPath(coords);
         this.friendPath.setMap(this.map);
@@ -538,7 +598,7 @@ class App extends Component {
     convertLocations(locations) {
         var coords = []
         for (var key in locations) {
-            coords.push({ lat: locations[key].CoordLat, lng: locations[key].CoordLog })
+            coords.push(new window.google.maps.LatLng(locations[key].CoordLat, locations[key].CoordLog))
         }
         return coords
     }
@@ -924,6 +984,29 @@ class App extends Component {
             anchor: new window.google.maps.Point(14, 14),
             rotation: this.basicHeading+this.heading,
         }
+        this.startLocImage = {
+            path: "M2.5 19h19v2h-19zm19.57-9.36c-.21-.8-1.04-1.28-1.84-1.06L14.92 10l-6.9-6.43-1.93.51 4.14 7.17-4.97 1.33-1.97-1.54-1.45.39 1.82 3.16.77 1.33 1.6-.43 5.31-1.42 4.35-1.16L21 11.49c.81-.23 1.28-1.05 1.07-1.85z",
+            fillColor: '#ff7504',
+            fillOpacity: 1,
+            fillWeight:6,
+            strokeWeight: 1,
+            strokeColor: '#ffffff',
+            strokeOpacity: 1,
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(14, 14),
+            scale:2
+        }
+        this.currentLocImage = {
+            path: 'M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21.71.33 1.47.33 2.26 0 4.41-3.59 8-8 8z',
+            fillColor: '#ff7504',
+            fillOpacity: 1,
+            strokeWeight: 1,
+            strokeColor: '#ffffff',
+            strokeOpacity: 1,
+            origin: new window.google.maps.Point(0, 0),
+            anchor: new window.google.maps.Point(14, 14),
+            scale:2
+        }
         console.log('render map done');
         this.currentLocation(); //Set user location marker and initial location when map loaded.
         console.log('set current location done')
@@ -936,19 +1019,37 @@ class App extends Component {
         this.directionsDisplay = new window.google.maps.DirectionsRenderer();
         this.geoCoder = new window.google.maps.Geocoder()
         this.friendPath = new window.google.maps.Polyline({
-            strokeColor: '#ff7504',
+            strokeColor: '#43a047',
             strokeOpacity: 1.0,
-            strokeWeight: 6
+            strokeWeight: 3
+        });
+
+        var lineSymbol = {
+            path: 'M 0,-1 0,1',
+            strokeOpacity: 1,
+            scale: 4,
+            strokeColor: '#00b0ff',
+
+        };
+        this.friendNavPath = new window.google.maps.Polyline({
+            strokeOpacity: 0,
+            icons: [{
+                icon: lineSymbol,
+                offset: '0',
+                repeat: '20px'
+            }],
         });
         this.friendMarkers = {
-            start: new window.google.maps.Marker(),
-            current: new window.google.maps.Marker(),
-            planFinish: new window.google.maps.Marker(),
+            start: new window.google.maps.Marker({ icon: this.startLocImage}),
+            current: new window.google.maps.Marker({ icon: this.currentLocImage }),
+            navStart: new window.google.maps.Marker(),
+            navFinish: new window.google.maps.Marker(),
         }
         this.friendMarkersInfo = {
             startInfo: new window.google.maps.InfoWindow(),
             currentInfo: new window.google.maps.InfoWindow(),
-            planFinish: new window.google.maps.InfoWindow()
+            navStart: new window.google.maps.InfoWindow(),
+            navFinish: new window.google.maps.InfoWindow()
         }
         this.friendMarkers.start.addListener('click', function () {
             this.friendMarkersInfo.startInfo.open(this.map, this.friendMarkers.start);
@@ -956,8 +1057,11 @@ class App extends Component {
         this.friendMarkers.current.addListener('click', function () {
             this.friendMarkersInfo.currentInfo.open(this.map, this.friendMarkers.current);
         }.bind(this));
-        this.friendMarkers.planFinish.addListener('click', function () {
-            this.friendMarkersInfo.planFinish.open(this.map, this.friendMarkers.planFinish);
+        this.friendMarkers.navFinish.addListener('click', function () {
+            this.friendMarkersInfo.navFinish.open(this.map, this.friendMarkers.navFinish);
+        }.bind(this));
+        this.friendMarkers.navStart.addListener('click', function () {
+            this.friendMarkersInfo.navStart.open(this.map, this.friendMarkers.navStart);
         }.bind(this));
 
 
@@ -994,16 +1098,19 @@ class App extends Component {
     currentLocation() {
         //set the current location and user marker after user open the app.
         console.log('focus current location')
-        if (localStorage.lastLocation) {
+        if (!this.userMarker && localStorage.lastLocation) {
             this.userLocationImage.rotation = this.basicHeading
             this.userLocation = JSON.parse(localStorage.lastLocation);
             console.log("location cache:" + JSON.parse(localStorage.lastLocation))
-            this.userMarker = new window.google.maps.Marker({
-                position: JSON.parse(localStorage.lastLocation),
-                map: this.map,
-                icon: this.userLocationImage,
-            });
-            this.userMarker.setMap(this.map)
+            if (!this.userMarker) {
+                this.userMarker = new window.google.maps.Marker({
+                    position: JSON.parse(localStorage.lastLocation),
+                    map: this.map,
+                    icon: this.userLocationImage,
+                });
+                this.userMarker.setMap(this.map)
+            }
+            
         }
         
 
@@ -1017,7 +1124,6 @@ class App extends Component {
             console.log(thelng)
             console.log(this.heading)
             this.userLocation = { lat: thelat, lng: thelng }
-            this.setState({ userLocation : this.userLocation})
             this.map.setCenter({ lat: thelat, lng: thelng })
             this.map.setZoom(15)
             if (!this.userMarker) {
@@ -1074,7 +1180,7 @@ class App extends Component {
         this.userLocation = { lat: thelat, lng: thelng };
         localStorage.setItem( "lastLocation" , JSON.stringify(this.userLocation) )
         if (this.naviPage.current) {
-            this.mainBar.current.setupAutoComplete(this.userLocation);
+            this.naviPage.current.updateLocation(this.userLocation);
             
         }
         
@@ -1424,7 +1530,8 @@ class App extends Component {
                     ) : null}
                 </div>
                 <div className={classes.friendsBoard}>
-                    {this.state.tempLinks.map(function (item, index) {
+                    {
+                        this.state.tempLinks.map(function (item, index) {
 
                         var journey = this.tempLinks[item];
                         var fullName = (journey.firstName ? journey.firstName : "") + (journey.lastName ? journey.lastName : "")
@@ -1444,10 +1551,11 @@ class App extends Component {
                         }
 
                         return (
-                            <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
-                    } > { displayName }</Fab>
-                    )
-            }.bind(this))}
+                                    <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                            } > { displayName }</Fab>
+                            )
+                        }.bind(this))
+                    }
                 </div>
 
                 <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
@@ -1458,6 +1566,7 @@ class App extends Component {
                     <Typography variant='body2' color="secondary" className={classes.buttonText}>
                         Share location
                     </Typography>
+                    
                     {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
                              */}
                     <Switch
@@ -1477,7 +1586,7 @@ class App extends Component {
                 }
 
                 {this.state.searchResponse ? (
-                    <ResultCard crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                    <ResultCard alreadyTracking={this.state.tracking} locationSharing={this.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
             </div>
         );
@@ -1514,6 +1623,7 @@ class App extends Component {
                 this.interval = setTimeout(function() {
                     if (this.state.sharing) {
                         console.log("[INFO]3 seconds reach, switch still on. start sharing.")
+                        this.locationSharing.navigationRoute = null;
                         this.locationSharing.startTracking(this.userLocation);
                         this.setState({tracking:true})
                         
@@ -1666,13 +1776,13 @@ class App extends Component {
                     </ListItem>
                     <ListItem button key='Navigation4'>
                         {this.state.isLogin ?
-                            <Link
-                                className={classes.sideContent}
-                                variant='h6'
-                                onClick={this.handleLogout.bind(this)}
-                            >
-                                Logout
-                        </Link>
+                            <div
+                                    className={classes.sideContent}
+                                    variant='h6'
+                                    onClick={this.handleLogout.bind(this)}
+                                >
+                                    Logout
+                                 </div>
                             :
                             <Link
                                 className={classes.sideContent}
@@ -1714,10 +1824,10 @@ class App extends Component {
                     <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} userLocation={this.state.userLocation} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
-                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} isLogin={this.state.isLogin}/>} />
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin}/>} />
                     
                 </Router>  
           </MuiThemeProvider>

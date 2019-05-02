@@ -3,8 +3,9 @@
     "",
     "\\public",
     "\\public\\img",
-    "\\src"
+    "\\src",
+    "\\src\\svg"
   ],
-  "SelectedNode": "\\public\\index.html",
+  "SelectedNode": "\\src\\searchResult.js",
   "PreviewInSolutionExplorer": false
 }

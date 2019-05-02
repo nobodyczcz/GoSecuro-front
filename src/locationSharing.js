@@ -26,7 +26,7 @@ class LocationSharing {
         });
         this.BackgroundGeolocation.on('location', function (location) {
             // handle your locations here
-            console.log("[INFO] on location update")
+            console.log("[INFO] on location update " + location.latitude +" "+ location.longitude)
             var theApi = "api/JTracking/Create";
             this.currentLat = location.latitude;
             this.currentLng = location.longitude;
@@ -53,26 +53,12 @@ class LocationSharing {
 
         this.BackgroundGeolocation.on('start', function () {
             console.log('[INFO] BackgroundGeolocation service has been started');
-            var theApi = 'api/Journey/create';
-            var data = {
-                NavigateRoute: this.getNavigationRoute(),
-                SCoordLat: this.getCurrentLat(),
-                SCoordLog: this.getCurrentLng(),
-            }
-            console.log("send data:" + JSON.stringify(data));
-            this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
+
         }.bind(this));
 
         this.BackgroundGeolocation.on('stop', function () {
             console.log('[INFO] BackgroundGeolocation service has been stopped');
-            var theApi = 'api/Journey/journeyFinish';
-            var data = {
-                JourneyId: this.getJourneyId(),
-                ECoordLat: this.getCurrentLat(),
-                ECoordLog: this.getCurrentLng(),
-            }
-            console.log("[INFO] ask server stop: " + JSON.stringify(data));
-            this.api.callApi(theApi, data, this.stopSuccess.bind(this), this.stopError.bind(this))
+            
         }.bind(this));
 
         this.BackgroundGeolocation.on('authorization', function (status) {
@@ -122,6 +108,7 @@ class LocationSharing {
         console.log("[INFO]" + reply);
         this.journeyId = reply.journeyID;
         this.tempLinkID = reply.tempLinkID;
+        this.BackgroundGeolocation.start();
         
     }
 
@@ -164,11 +151,28 @@ class LocationSharing {
     startTracking(coord) {
         this.currentLat = coord.lat;
         this.currentLng = coord.lng;
-        this.BackgroundGeolocation.start();
+        var theApi = 'api/Journey/create';
+        var data = {
+            NavigateRoute: this.getNavigationRoute(),
+            SCoordLat: this.getCurrentLat(),
+            SCoordLog: this.getCurrentLng(),
+        }
+        console.log("send data:" + JSON.stringify(data));
+        this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
+
+        
     }
 
     stopTracking() {
         this.BackgroundGeolocation.stop();
+        var theApi = 'api/Journey/journeyFinish';
+        var data = {
+            JourneyId: this.getJourneyId(),
+            ECoordLat: this.getCurrentLat(),
+            ECoordLog: this.getCurrentLng(),
+        }
+        console.log("[INFO] ask server stop: " + JSON.stringify(data));
+        this.api.callApi(theApi, data, this.stopSuccess.bind(this), this.stopError.bind(this))
     }
 
 

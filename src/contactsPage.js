@@ -143,7 +143,8 @@ class ContactsPage extends React.Component {
             open:false,
             contactList:[],
             loading: true,
-            errors:[]
+            errors: [],
+            isOpen:false,
         };
 
     }
@@ -386,7 +387,7 @@ class ContactsPage extends React.Component {
                         value={this.state.userName}
                         onChange={this.handleUserNameChange}
                         type='text'
-                        inputProps={{maxlength:'10'}}
+                        inputProps={{maxLength:'10'}}
                         margin="normal"
                     />
                     <Typography id='headerText' className={classes.mainText} gutterBottom align='left' variant='h5'>

@@ -18,6 +18,7 @@ import { Router, Route, Link } from "react-router-dom";
 import { ValidatorForm, SelectValidator,TextValidator } from 'react-material-ui-form-validator';
 import { withStyles } from '@material-ui/core/styles';
 
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 var history;
 if (window.cordova) {
@@ -55,7 +56,9 @@ const styles = theme => ({
         bottom: 0,
         width:"90%",
         padding: "5%",
-        justifyItems:"space-between"
+        display:"flex",
+        alignItems: "center",
+        justifyContent: "space-between"
     },
     button: {
         minWidth: "100px",
@@ -74,7 +77,9 @@ class RegisterPage extends React.Component {
             gender: '',
             password: "",
             confirmPassword: "",
-            error:[],
+            error: false,
+            errorMsg: "",
+            loading:false
 
         };
 
@@ -123,7 +128,9 @@ class RegisterPage extends React.Component {
             Password: this.state.password,
             ConfirmPassword: this.state.password,
         };
-        this.apis.register(regdata,this.regSuccess.bind(this),this.regError.bind(this))
+        this.apis.register(regdata, this.regSuccess.bind(this), this.regError.bind(this))
+        
+        this.setState({ error: false,loading:true });
 
         //jump to next page: 
         
@@ -144,29 +151,32 @@ class RegisterPage extends React.Component {
     loginSuccess(data) {
         console.log("User successfully logged in.")
         //jump to next page: add emergency contacts page
+        this.props.handleLogin() //tell app.js that we successful login
          this.props.history.push('/emergencyContact');
     }
 
     regError(jqXHR) {
-        this.state.errors = [];
+        var errors = [];
         var response = jqXHR.responseJSON;
         if (response) {
-            if (response.Message) this.state.errors.push(response.Message);
+            if (response.Message) errors.push(response.Message);
             if (response.ModelState) {
                 var modelState = response.ModelState;
                 for (var prop in modelState) {
                     if (modelState.hasOwnProperty(prop)) {
                         var msgArr = modelState[prop]; // expect array here
                         if (msgArr.length) {
-                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                            for (var i = 0; i < msgArr.length; ++i) errors.push(msgArr[i]);
                         }
                     }
                 }
             }
-            if (response.error) this.state.errors.push(response.error);
-            if (response.error_description) this.state.errors.push(response.error_description);
+            if (response.error) errors.push(response.error);
+            if (response.error_description) errors.push(response.error_description);
         }
-        console.log(this.state.errors)
+
+        this.setState({ error: true, errorMsg: JSON.stringify(errors).replace("Name","Phone"), loading: false})
+        console.log(errors)
     }
 
     handleChange = name => event => {
@@ -315,6 +325,9 @@ class RegisterPage extends React.Component {
                         <Grid>
                             <Typography variant="body2">Password must contain at least one number, one letter and one special charactor.The length must longer than 6.</Typography>
                         </Grid>
+                        {this.state.error ? <Grid>
+                            <Typography variant="body2" color='secondary'>{this.state.errorMsg}</Typography>
+                        </Grid>:null}
                     </Grid>
                 
                     <span className={classes.buttons}>
@@ -326,6 +339,7 @@ class RegisterPage extends React.Component {
                         >
                             Cancel
                         </Button>
+                        {this.state.loading ? <CircularProgress size={30} color="secondary" /> : null}
                         <Button
                             style={{ float: "right" }}
                             variant="contained"

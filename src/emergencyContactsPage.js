@@ -314,9 +314,9 @@ class EmergencyContacts extends React.Component{
 
     retrieveSuccess(reply) {
         console.log("Success")
-        if (this.props.isLogin){
-            this.state.contactList = JSON.parse(JSON.parse(reply).data)
-            localStorage.setItems("localContactList",this.state.contactList);
+        if (this.props.isLogin) {
+            this.setState({ contactList: JSON.parse(JSON.parse(reply).data)})
+            localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
             
         //jump to next page

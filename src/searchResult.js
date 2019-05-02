@@ -170,6 +170,25 @@ class ResultCard extends Component {
     handleNavClick = (index) => {
         this.props.navigateTo(this.props.results[index].geometry.location);
     }
+    handleStartNav() {
+        if (window.cordova) {
+            console.log("Start tracking. start location:" + JSON.stringify(this.props.getLocation()));
+            if (!this.props.alreadyTracking) {
+                this.props.locationSharing.navigationRoute = JSON.stringify({
+                    overview_path: this.props.currentRoute.routes[0].overview_path,
+                    origin: this.props.currentRoute.request.origin.location,
+                    destination: this.props.currentRoute.request.destination.location,
+                });
+                this.props.locationSharing.startTracking(this.props.getLocation());
+            }
+
+
+
+        }
+        else { console.log("tracking do not work in broswer emviroment") }
+
+        this.props.history.push('/navigation')
+    }
     
     render() {
        
@@ -210,8 +229,8 @@ class ResultCard extends Component {
                                 Results
                             </IconButton>
                             {
-                                this.props.currentRoute ? 
-                                <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={() => { this.props.history.push('/navigation') }}>
+                            this.props.currentRoute ?
+                                <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={this.handleStartNav.bind(this)}>
                                         Start
                                         <NavigationIcon /> 
                                     </Fab>

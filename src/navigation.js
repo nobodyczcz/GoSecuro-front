@@ -120,39 +120,30 @@ class NavigationPage extends React.Component {
                 lat: this.steps[0].end_location.lat(),
                 lng: this.steps[0].end_location.lng()
             },
+            tracking: false,
         };
 
     }
 
     componentDidMount() {
-        if (!this.props.alreadyTracking) {
-            this.handleStartTracking()
 
-        }
     }
 
     componentWillUnmount() {
-        if (!this.props.alreadyTracking) {
-            this.handleStopTracking()
 
-        }
     }
 
     handleStartTracking() {
-        console.log("Start tracking. start location:" + JSON.stringify(this.props.userLocation));
-        if (window.cordova) {
-            this.props.locationSharing.navigationRoute = JSON.stringify(this.props.currentRoute);
-            this.props.locationSharing.startTracking(this.props.userLocation);
-
-        }
-        else { console.log("tracking do not work in broswer emviroment")}
+        
+        
 
     }
 
     handleStopTracking() {
-        console.log("Stop tracking. stop location:" + JSON.stringify(this.props.userLocation));
 
         if (window.cordova) {
+            console.log("Stop tracking. stop location:" + JSON.stringify(this.props.userLocation));
+
             this.props.locationSharing.stopTracking();
 
         }
@@ -162,6 +153,9 @@ class NavigationPage extends React.Component {
 
 
     handleCancelNav() {
+        if (!this.props.alreadyTracking) {
+            this.handleStopTracking()
+        }
         this.handleStopTracking();
         this.props.history.goBack();
         
@@ -204,6 +198,7 @@ class NavigationPage extends React.Component {
                 theFinish = true;
             }
         }
+        console.log("update: " + distance + " " + "theCurrent");
 
         this.setState({
             toNext: distance,
