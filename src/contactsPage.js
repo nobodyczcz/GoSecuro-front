@@ -77,7 +77,7 @@ const styles = theme => ({
         top: `calc( 100% - 90% )`,
         transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         opacity: '1',
-        fill: '#FF7504',
+        fill: '#4f6c98',
         paddingLeft: '20px'
 
     },
@@ -89,10 +89,10 @@ const styles = theme => ({
         top: '0',
         left: '0',
         zIndex: 899,
-        marginTop: '35%'
+        marginTop: '130px'
     },
     content: {
-        marginTop: "35%",
+        marginTop: "0",
         padding: '3%',
     },
     contacts: {
