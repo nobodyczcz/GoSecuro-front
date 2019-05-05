@@ -118,7 +118,7 @@ const styles = theme => ({
         marginTop: theme.spacing.unit * 5,
     },
     sideContent: {
-        color:'#FF7504',
+        color:'#4f6c98',
         textDecoration:'none'
     },
     legend: {
@@ -190,12 +190,16 @@ const theme = createMuiTheme({
         light: '#ffffff',
         main: '#ffffff',
         dark: '#bdbdbd',
-        contrastText: '#ff7504',
+        //contrastText: '#ff7504',
+        contrastText: '#4f6c98'
     },
-    secondary: {
-        light: '#ff8a65',
-        main: '#ff7504',
-      dark: '#ffa733',
+      secondary: {
+          light: '#238BC3',
+          main: '#4f6c98',
+          dark: '#074A8F',
+      //  light: '#ff8a65',
+      //  main: '#ff7504',
+      //dark: '#ffa733',
       contrastText: '#fff',
       },
     error: {

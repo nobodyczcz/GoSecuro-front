@@ -16,13 +16,17 @@ class LocationSharing {
 
     initialize() {
         this.BackgroundGeolocation.configure({
-            locationProvider: this.BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
+            //locationProvider: this.BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
+            locationProvider: this.BackgroundGeolocation.ACTIVITY_PROVIDER,
             desiredAccuracy: this.BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 20,
             distanceFilter: 20,
             notificationTitle: 'Gosafe background tracking',
             notificationText: 'enabled',
-            debug: true,
+            debug: false,
+            interval: 15000,
+            fastestInterval: 10000,
+            activitiesInterval: 10000,
         });
         this.BackgroundGeolocation.on('location', function (location) {
             // handle your locations here

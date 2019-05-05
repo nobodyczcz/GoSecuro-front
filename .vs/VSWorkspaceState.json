@@ -2,10 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\public",
-    "\\public\\img",
-    "\\src",
-    "\\src\\svg"
+    "\\src"
   ],
-  "SelectedNode": "\\src\\searchResult.js",
+  "SelectedNode": "\\src\\App.js",
   "PreviewInSolutionExplorer": false
 }

@@ -81,16 +81,16 @@ const styles = theme => ({
         position: 'fixed',
         width: '100%',
         height: '100%',
-        top: '20%',
+        top: '0',
         left: '0',
         zIndex: 899,
     },
     content: {
-        marginTop: "0px",
+        marginTop: "35%",
         padding: '3%',
     },
     contacts: {
-        height:"100%",
+        height:"45%",
         overflowY: "scroll",
         paddingLeft: '3%',
         paddingRight: '3%',
@@ -108,8 +108,8 @@ const styles = theme => ({
         marginRight:'1%',
         width:'49%'
     },
-    mainText:{
-        color:'#FF7504',
+    mainText: {
+        fontWeight:'bold',
         justifyContent: 'center',
     },
     modalPaper: {
@@ -172,11 +172,13 @@ class ContactsPage extends React.Component {
     componentDidMount() {
         if(this.props.isLogin){
             this.retrieveEmergencies();
-            if (localStorage.localUserName) {
+            if (localStorage.userName) {
                 this.setState({ userName: localStorage.userName })
             }
             else {
-                localStorage.setItem('localUserName','')
+                localStorage.setItem('localUserName', '')
+                this.setState({ userName: localStorage.userName })
+
             }
 
         }
@@ -401,7 +403,7 @@ class ContactsPage extends React.Component {
                         inputProps={{maxLength:'10'}}
                         margin="normal"
                     />
-                    <Typography id='headerText' className={classes.mainText} gutterBottom align='left' variant='h5'>
+                    <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
                     </Typography> 
                     

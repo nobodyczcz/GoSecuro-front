@@ -32,21 +32,21 @@ import Paper from '@material-ui/core/Paper';
 const styles = theme => ({
     mainBar:{
         position:'fixed',
-        height:"129px",
+        height: `calc(5% + 100px)`,
         width:'100%',
         left:0,
         top:0,
         zIndex:900,
-        backgroundColor:"#ff7504"
+        backgroundColor: "#4f6c98"
     },
     mainBarMap: {
         position:'fixed',
-        height:"129px",
+        height:`calc(5% + 100px)`,
         width:'100%',
         left:0,
         top:0,
         zIndex:900,
-        backgroundColor:"#ff5603",
+        backgroundColor:"#074A8F",
         opacity:0.7,
 
     },
@@ -304,18 +304,18 @@ class MainBar extends React.Component {
                       variant="fullWidth"
                       value={this.state.navValue}
                       indicatorColor="primary"
-                      textColor="inherit"
+                      textColor="primary"
                       onChange={this.handleNavChange}
                       className={classes.tabs}
                   >
 
-                      <Tab icon={<WalkIcon />} onClick={() => {
+                      <Tab icon={<WalkIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('walking')
                       }} />
-                        <Tab icon={<BusIcon />} onClick={() => {
+                        <Tab icon={<BusIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('transit')
                       }} />
-                        <Tab icon={<DriveIcon />} onClick={() => {
+                        <Tab icon={<DriveIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('driving')
                       }}/>
                   </Tabs>
