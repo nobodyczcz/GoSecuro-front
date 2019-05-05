@@ -177,7 +177,7 @@ class LoginPage extends React.Component {
                             {this.state.displayError ? <Typography color="secondary" variant="body2">The user name or password is incorrect.</Typography> : null}
                         </Grid>
 
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Fab
                                 variant="extended"
                                 className={classes.button}
@@ -190,7 +190,7 @@ class LoginPage extends React.Component {
                                 
                         </Fab>
                         </Grid>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <div className={classes.signup}>
                                 <a>Don't have an account?</a>
                                 <Link to="/register"> Sign Up</Link>
@@ -199,11 +199,11 @@ class LoginPage extends React.Component {
 
                             
                         </Grid>
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Typography variant="body2"></Typography>
                         </Grid>
 
-                        <Grid xs={12}>
+                        <Grid item xs={12}>
                             <Button size="small" className={classes.button} onClick={() => { this.props.history.push("/")}}>
                                 SKIP FOR NOW
                             </Button>

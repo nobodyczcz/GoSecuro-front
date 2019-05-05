@@ -33,7 +33,7 @@ class PanicButton extends React.Component {
             showProgress:false,
             completed: 0,
             progressCoord: [0, 0],
-            disabled: JSON.parse(localStorage.contactList).length === 0 ? true:false,
+            disabled: localStorage.contactList ? (JSON.parse(localStorage.contactList).length === 0 ? true:false) : false,
         };
 
     }

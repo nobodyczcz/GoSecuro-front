@@ -281,7 +281,6 @@ class MainBar extends React.Component {
                     <div className={classes.search}>
                             <InputBase
                               placeholder={this.state.searchPlaceHolder}
-                              inputProps={{ maxlength: "10" }}
                                 id="searchInput"
                                 onKeyPress={this.handleInputChange.bind(this)}
                                 classes={{
@@ -310,13 +309,13 @@ class MainBar extends React.Component {
                       className={classes.tabs}
                   >
 
-                      <Tab icon={<WalkIcon />} onTouchEnd={() => {
+                      <Tab icon={<WalkIcon />} onClick={() => {
                           this.props.setNavMode('walking')
                       }} />
-                      <Tab icon={<BusIcon />} onTouchEnd={() => {
+                        <Tab icon={<BusIcon />} onClick={() => {
                           this.props.setNavMode('transit')
                       }} />
-                      <Tab icon={<DriveIcon />} onTouchEnd={() => {
+                        <Tab icon={<DriveIcon />} onClick={() => {
                           this.props.setNavMode('driving')
                       }}/>
                   </Tabs>
@@ -330,13 +329,13 @@ class MainBar extends React.Component {
                       className={classes.tabs}
 
                   >
-                      <Tab icon={<HomeIcon color="primary"/>} onTouchEnd={() => {
+                      <Tab icon={<HomeIcon color="primary"/>} onClick={() => {
                           this.props.history.push('/')
                       }} />
-                      <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onTouchEnd={() => {
+                      <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
                           this.props.history.push('/map')
                       }} />
-                      <Tab icon={<ContactsIcon color="primary"/>} onTouchEnd={() => {
+                      <Tab icon={<ContactsIcon color="primary"/>} onClick={() => {
                           this.props.history.push('/contacts')
                       }} />
                   </Tabs>
