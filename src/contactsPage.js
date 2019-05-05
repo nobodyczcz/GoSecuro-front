@@ -46,7 +46,12 @@ const styles = theme => ({
     addNewButton:{
         left:`calc( 100% - 125px )`
     },
-
+    avatar: {
+        marginTop: '0px',
+        width: "60px",
+        height:"60px",
+        fontSize: "20px"
+    },
     customLeftButton:{
         left:`calc( 100% - 90% )`,
         minWidth: '70px',
@@ -81,27 +86,39 @@ const styles = theme => ({
         position: 'fixed',
         width: '100%',
         height: '100%',
-        top: '20%',
+        top: '0',
         left: '0',
         zIndex: 899,
+        marginTop: '35%'
     },
     content: {
         marginTop: "0px",
         padding: '3%',
     },
     contacts: {
-        height:"100%",
+        height:"45%",
         overflowY: "scroll",
         paddingLeft: '3%',
         paddingRight: '3%',
     },
     contCard: {
         width: '100%',
-        height:"100px",
+        height:"63px",
         marginBottom:theme.spacing.unit * 2,
     },
-    cont: {
-        width: '100%'
+    cardContent:{
+        padding: '0px'
+    },
+    contName: {
+        width: '50%',
+        float: 'right',
+        fontSize:'medium'
+    },
+    contMobile: {
+        width: '50%',
+        float: 'right',
+        fontSize:'medium',
+        fontColor: '#bdbdbd'
     },
     textField: {
         marginTop: 0,
@@ -171,11 +188,12 @@ class ContactsPage extends React.Component {
     componentDidMount() {
         if(this.props.isLogin){
             this.retrieveEmergencies();
-            if (localStorage.localUserName) {
+            if (localStorage.userName) {
                 this.setState({ userName: localStorage.userName })
             }
             else {
                 localStorage.setItem('localUserName','')
+                this.setState({ userName: localStorage.userName })
             }
 
         }
@@ -208,9 +226,11 @@ class ContactsPage extends React.Component {
     handleUserNameChange = event => {
         this.setState({ userName: event.target.value });
         localStorage.userName = event.target.value
+        
     };
 
     handleAddNew = () => {
+        this.setState({ loading: true });
         if (this.state.name.length === 0 || this.state.mobile.length === 0) {
             console.log("empty")
             return
@@ -224,7 +244,7 @@ class ContactsPage extends React.Component {
                 ECname: this.state.name,
             };
             var apiRoute = 'api/UserEmergency/create';
-            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.addError.bind(this))
             
         }
         else{
@@ -253,6 +273,8 @@ class ContactsPage extends React.Component {
     addSuccess(data) {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
+
+        this.setState({ loading: false });
         //jump to next page
     }
 
@@ -381,7 +403,27 @@ class ContactsPage extends React.Component {
         }
         console.log(this.state.errors)
     }
-
+    addError(jqXHR) {
+        this.setState({ errors : []});
+        var response = jqXHR.responseJSON;
+        if (response) {
+            if (response.Message) this.state.errors.push(response.Message);
+            if (response.ModelState) {
+                var modelState = response.ModelState;
+                for (var prop in modelState) {
+                    if (modelState.hasOwnProperty(prop)) {
+                        var msgArr = modelState[prop]; // expect array here
+                        if (msgArr.length) {
+                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                        }
+                    }
+                }
+            }
+            if (response.error) this.state.errors.push(response.error);
+            if (response.error_description) this.state.errors.push(response.error_description);
+        }
+        console.log(this.state.errors)
+    }
 
 
     render() {
@@ -483,10 +525,18 @@ class ContactsPage extends React.Component {
                             {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
                      
                             {this.state.contactList.map(function (item, i) {
+                                var displayName = "";
+                                displayName = (item.ECname ? item.ECname[0] : "") + (item.ECname ? item.ECname[1] : "");
+                                if (displayName == "") {
+                                    displayName = "None"
+                                }                                
                                 return (
                                     <Grid key={i} item xs={12} md={6} lg={3}>
                                         <Card className={classes.contCard} >
-                                            <CardContent >
+                                            <CardContent className={classes.cardContent} >
+                                            <Fab className={classes.avatar} color="secondary" >
+                                             { displayName }
+                                             </Fab>
                                                 <EditIcon
                                                     className={classes.editIconButton}
                                                     color="secondary"
@@ -559,14 +609,15 @@ class ContactsPage extends React.Component {
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
-                                                <Typography className={classes.cont} gutterBottom align='left' variant="h6">
-                                                    Name: {item.ECname}
+                                                <Typography className={classes.contName} gutterBottom align='left' variant="h6">
+                                                    {item.ECname}<br/>
+                                                    {item.EmergencyContactPhone}
                                                 </Typography>
     
-                                                <Typography className={classes.cont} gutterBottom align='left' variant="subtitle2">
-                                                    Mobile:  {item.EmergencyContactPhone}
+                                                {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
+                                                    {item.EmergencyContactPhone}
                                                 </Typography>    
-    
+     */}
                                             </CardContent>
                                         </Card>
                                     </Grid>

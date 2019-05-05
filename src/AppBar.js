@@ -305,7 +305,7 @@ class MainBar extends React.Component {
                       variant="fullWidth"
                       value={this.state.navValue}
                       indicatorColor="primary"
-                      textColor="inherit"
+                      textColor="primary"
                       onChange={this.handleNavChange}
                       className={classes.tabs}
                   >
