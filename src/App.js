@@ -193,12 +193,15 @@ const theme = createMuiTheme({
         light: '#ffffff',
         main: '#ffffff',
         dark: '#bdbdbd',
+        contrastText: '#4f6c98',
         //contrastText: '#ff7504',
-        contrastText: '#4f6c98'
+        //contrastText: '#616161'
     },
       secondary: {
           light: '#238BC3',
+          //main: '#616161',
           main: '#4f6c98',
+          //dark :'#424242',
           dark: '#074A8F',
       //  light: '#ff8a65',
       //  main: '#ff7504',
@@ -1740,7 +1743,7 @@ class App extends Component {
         return(
             <div className={this.props.classes.startUpPageLayer} >
                 <div className={this.props.classes.welcomeImgContainer} >
-                    <img src="img/icon.png" className={this.props.classes.welcomeImg} alt='GoSafe'/> 
+                    <img src="img/SafeTrip-logo.png" className={this.props.classes.welcomeImg} alt='SafeTrip'/> 
                 </div>
             </div>
         );

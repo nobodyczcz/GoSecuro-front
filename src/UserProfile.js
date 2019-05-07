@@ -141,7 +141,8 @@ class UserProfile extends React.Component{
             isreadOnly: true,
             showButtons: 'none',
             userProfile:[],
-            isLoading: true
+            isLoading: true,
+            error: false
         };
 
     }
@@ -171,7 +172,7 @@ class UserProfile extends React.Component{
             Email: this.state.email
             };
             console.log("[INFO]already login")
-            this.apis.callApi(apiRoute, userData, this.editSuccess.bind(this), this.retError);
+            this.apis.callApi(apiRoute, userData, this.editSuccess.bind(this), this.retError.bind(this));
         }
     }
 
@@ -204,7 +205,7 @@ class UserProfile extends React.Component{
         var apiRoute = 'api/UserProfiles/Retrieve';
         if (this.props.isLogin) {
             console.log("[INFO]already login")
-            this.apis.callApi(apiRoute, '', this.retrieveSuccess.bind(this), this.retError);
+            this.apis.callApi(apiRoute, '', this.retrieveSuccess.bind(this), this.retError.bind(this));
         }
             
     }
@@ -228,25 +229,27 @@ class UserProfile extends React.Component{
     }
 
     retError(jqXHR) {
-        this.setState({ errors : []});
+        var errors = [];
         var response = jqXHR.responseJSON;
         if (response) {
-            if (response.Message) this.state.errors.push(response.Message);
+            if (response.Message) errors.push(response.Message);
             if (response.ModelState) {
                 var modelState = response.ModelState;
                 for (var prop in modelState) {
                     if (modelState.hasOwnProperty(prop)) {
                         var msgArr = modelState[prop]; // expect array here
                         if (msgArr.length) {
-                            for (var i = 0; i < msgArr.length; ++i) this.state.errors.push(msgArr[i]);
+                            for (var i = 0; i < msgArr.length; ++i) errors.push(msgArr[i]);
                         }
                     }
                 }
             }
-            if (response.error) this.state.errors.push(response.error);
-            if (response.error_description) this.state.errors.push(response.error_description);
+            if (response.error) errors.push(response.error);
+            if (response.error_description) errors.push(response.error_description);
         }
-        console.log(this.state.errors)
+
+        this.setState({ error: true});
+        console.log(errors)
     }
 
     render(){

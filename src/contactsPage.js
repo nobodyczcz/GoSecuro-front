@@ -77,7 +77,7 @@ const styles = theme => ({
         top: `calc( 100% - 90% )`,
         transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         opacity: '1',
-        fill: '#FF7504',
+        fill: '#4f6c98',
         paddingLeft: '20px'
 
     },
@@ -89,10 +89,10 @@ const styles = theme => ({
         top: '0',
         left: '0',
         zIndex: 899,
-        marginTop: '35%'
+        marginTop: '130px'
     },
     content: {
-        marginTop: "35%",
+        marginTop: "0",
         padding: '3%',
     },
     contacts: {
@@ -162,6 +162,9 @@ class ContactsPage extends React.Component {
             loading: true,
             errors: [],
             isOpen:false,
+            activeItemName: '',
+            activeMobile: '',
+            activeIndex:'',
         };
 
     }
@@ -178,17 +181,26 @@ class ContactsPage extends React.Component {
         this.setState({ isOpen: true,
                         activeItemName: item.name,
                         activeMobile: item.mobile,
-                        activeIndex:index
+                        activeIndex:index,
+                        name:item.name,
+                        mobile:item.mobile,
         });
     };
 
     handleEditClose = () => {
-        this.setState({ isOpen: false});
+        this.setState({ isOpen: false,
+            activeItemName: '',
+            activeMobile: '',
+            activeIndex:'',
+            name:'',
+            mobile: '',
+});
     };
 
     componentDidMount() {
+        this.retrieveEmergencies();
         if(this.props.isLogin){
-            this.retrieveEmergencies();
+            
             if (localStorage.userName) {
                 this.setState({ userName: localStorage.userName })
             }
@@ -222,12 +234,6 @@ class ContactsPage extends React.Component {
         }
 
 
-    };
-
-    handleUserNameChange = event => {
-        this.setState({ userName: event.target.value });
-        localStorage.userName = event.target.value
-        
     };
 
     handleAddNew = () => {
@@ -297,6 +303,7 @@ class ContactsPage extends React.Component {
                 this.setState({ contactList: [] })
             }
         }
+        this.setState({ loading: false });
         
     }
 
@@ -326,11 +333,10 @@ class ContactsPage extends React.Component {
             localStorage.contactList = JSON.stringify(list);
             this.updateContactList();
         }
-
         //close the popup
         this.handleEditClose();
-
     }
+
     handleDelete(index,mobileNumber) {
         
         console.log(window.serverUrl);
@@ -433,16 +439,6 @@ class ContactsPage extends React.Component {
             <Paper className={classes.paper}>
                 <div className={classes.content}>
                     
-                    <TextField
-                        id="userName"
-                        label="Your Name"
-                        className={classes.textField}
-                        value={this.state.userName}
-                        onChange={this.handleUserNameChange}
-                        type='text'
-                        inputProps={{maxLength:'10'}}
-                        margin="normal"
-                    />
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
                     </Typography> 
