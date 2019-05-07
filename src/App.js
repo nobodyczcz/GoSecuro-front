@@ -1740,7 +1740,7 @@ class App extends Component {
         return(
             <div className={this.props.classes.startUpPageLayer} >
                 <div className={this.props.classes.welcomeImgContainer} >
-                    <img src="img/icon.png" className={this.props.classes.welcomeImg} alt='GoSafe'/> 
+                    <img src="img/SafeTrip-logo.png" className={this.props.classes.welcomeImg} alt='SafeTrip'/> 
                 </div>
             </div>
         );

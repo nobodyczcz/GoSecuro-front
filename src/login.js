@@ -129,7 +129,7 @@ class LoginPage extends React.Component {
             <Paper className={classes.paper}>
 
                 <div className={classes.logoarea}>
-                    <img className={classes.logo} src="img/icon.png"/>
+                    <img className={classes.logo} src="img/SafeTrip-logo.png"/>
                 </div>
                 <ValidatorForm
                     ref="theForm"

@@ -86,7 +86,7 @@ class AboutUs extends React.Component{
                     </AppBar>
                     <div className={classes.content}>
                     <Typography className={classes.contentText} variant='h6'>
-                        GoSafe is developed with your safety in mind.
+                        SafeTrip is developed with your safety in mind.
                         <br/><br/>
                         Knowing newcomers to Melbourne, like you are not familiar with the suburbs, 
                         and how to get around.
