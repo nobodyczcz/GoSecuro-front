@@ -18,7 +18,6 @@ import MyLocationIcon from '@material-ui/icons/MyLocation';
 import Fab from '@material-ui/core/Fab';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
-import Background from './backgroundPage';
 import { createBrowserHistory, createHashHistory } from 'history';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
