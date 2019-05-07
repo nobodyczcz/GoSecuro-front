@@ -28,7 +28,7 @@ const styles = theme => ({
         width: '100%',
         zIndex:1200,
         minHeight: '120px',
-        backgroundColor:'4f6c98',
+        backgroundColor:'#4f6c98',
     },
     toolbar: {
         justifyContent: "center",
