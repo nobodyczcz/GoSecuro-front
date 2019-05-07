@@ -77,8 +77,10 @@ const styles = theme => ({
         position: 'absolute',
         width:'140px',
         left: 'calc(100% - 140px)',
-        top: 'calc(100% - 130px)',
+        top: 'calc(100% - 80px)',
+        height:'48px',
         display: 'flex',
+        alignItems:'center',
         zIndex: 1100,
         padding:'0'
     },
@@ -110,7 +112,7 @@ const styles = theme => ({
     },
     panicPosition: {
         position: 'fixed',
-        top: 'calc( 100% - 150px)',
+        top: 'calc( 100% - 120px)',
         left: 'calc( 50% - 40px)',
         zIndex:1200,
     },
@@ -123,12 +125,13 @@ const styles = theme => ({
     },
     legend: {
         position: "absolute",
-        top: 'calc( 100% - 120px)',
+        top: 'calc( 100% - 80px)',
         width: "30%",
         left:"2%",
         zIndex: 1100,
         borderRadius: "5px",
-        opacity:0.8
+        opacity: 0.8,
+        height:'48px'
 
     },
     startUpPageLayer: {

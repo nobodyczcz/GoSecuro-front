@@ -91,7 +91,7 @@ const styles = theme => ({
         }),
         overflowY: 'hidden',
         overflowX: 'hidden',
-        height: "10%",
+        height: "100px",
     },
     '@global': {
         '*::-webkit-scrollbar': {
@@ -125,7 +125,7 @@ const styles = theme => ({
         zIndex: 1300,
 
         position: 'fixed',
-        top: 'calc( 100% - 120px)',
+        top: 'calc( 100% - 100px)',
         left: 'calc( 50% - 40px)',
         transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
