@@ -74,12 +74,14 @@ const styles = theme => ({
         padding:"5px"
     },
     contentCard: {
+        backgroundColor: "#ff7504",
         width: "100%",
-        height:"100%"
+        height: "100%",
+        padding:"5px"
     },
     gridItem: {
-        padding:"5px"
-    }
+    },
+
 
 
 });
@@ -127,11 +129,13 @@ class NavigationPage extends React.Component {
     }
 
     componentDidMount() {
+    }
+    componentWillMount() {
+        this.props.hideAppBar(true)
+
 
     }
-
     componentWillUnmount() {
-
     }
 
     handleStartTracking() {
@@ -157,8 +161,8 @@ class NavigationPage extends React.Component {
         if (!this.props.alreadyTracking) {
             this.handleStopTracking()
         }
-        this.handleStopTracking();
         this.props.history.goBack();
+
         
     }
 
@@ -241,24 +245,25 @@ class NavigationPage extends React.Component {
                         spacing={8}
                         className={classes.grid}
                     >
-                        <Grid item xs={12}>
-                            <Card className={classes.header} color="secondary">
-                            {currentStep.father ?
-                                <Typography
-                                    variant="body1"
-                                    align="center"
-                                    color="primary"
-                                >
-                                    <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
-                                </Typography>
-
-                                : null
-                            }
-                            </Card>
+                        
+                        {currentStep.father ?
+                            <Grid item xs={12}>
+                                <Card className={classes.header}>
+                                    <Typography
+                                        variant="body1"
+                                        align="center"
+                                        color="primary"
+                                    >
+                                        <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
+                                    </Typography>
+                                </Card>
                             </Grid>
-                        
-                        
-                        
+                            : null
+                                    }
+        
+                                
+                                
+                                
                         {currentStep.travel_mode == "TRANSIT" ? 
                             <Grid item xs={12}>
                                 <Grid container
@@ -269,13 +274,15 @@ class NavigationPage extends React.Component {
                                     <Grid item xs={5} className={classes.transit}>
                                         <Card className={classes.contentCard}>>
                                         <Typography
-                                            variant="h5"
+                                                variant="h5"
+                                                color="primary"
                                         
                                         >
                                             Take {currentStep.transit.line.vehicle.name} {currentStep.transit.line.short_name} 
                                         </Typography>
                                         <Typography
-                                            variant="h5"
+                                                variant="h5"
+                                                color="primary"
 
                                         >
                                             Heading  {currentStep.transit.headsign}
@@ -286,7 +293,8 @@ class NavigationPage extends React.Component {
                                     <Grid item xs={7} className={classes.gridItem}>
                                         <Card className={classes.contentCard} >
                                         <Typography
-                                            variant="body1"
+                                                variant="body1"
+                                                color="primary"
                                         >
                                             Departure stop {currentStep.transit.departure_stop.name}. Arrival stop {currentStep.transit.departure_stop.name}.
                                         </Typography>
@@ -304,14 +312,16 @@ class NavigationPage extends React.Component {
                                 <Grid item xs={5} className={classes.transit}>
                                     <Card className={classes.contentCard}>
                                         <Typography
-                                            variant="h5"
+                                                variant="h5"
+                                                color="primary"
                                         >
                                             After {toNext}
                                         </Typography>
                                         <Typography
-                                            variant="h5"
+                                                variant="h5"
+                                                color="primary"
                                         >
-                                            {nextStep.maneuver}
+                                                {nextStep ? nextStep.maneuver.toUpperCase():null}
                                         </Typography>
                                     </Card>
                                 </Grid>
@@ -321,9 +331,10 @@ class NavigationPage extends React.Component {
                                     <Grid item xs={7} className={classes.gridItem} >
                                     <Card className={classes.contentCard}>
                                         <Typography
-                                            variant="h6"
+                                                variant="h6"
+                                                color="primary"
                                         >
-                                            Now <a dangerouslySetInnerHTML={{ __html: currentStep.instructions }} />
+                                                {nextStep ? <a dangerouslySetInnerHTML={{ __html: nextStep.instructions }} /> : "You will reach the destination"}
                                             </Typography>
                                     </Card>
                                 </Grid>

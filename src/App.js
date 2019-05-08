@@ -43,6 +43,7 @@ import LoginPage from './login.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
+import LocShareIcon from './locShareIcon';
 var history;
 if (window.cordova) {
     history = new createHashHistory();
@@ -75,14 +76,13 @@ const styles = theme => ({
     },
     sharingFab: {
         position: 'absolute',
-        width:'140px',
-        left: 'calc(100% - 140px)',
+        left: 'calc(100% - 60px)',
         top: 'calc(100% - 80px)',
-        height:'48px',
         display: 'flex',
-        alignItems:'center',
+        width: '40px',
+        height: '40px',
+        justifyContent:'center',
         zIndex: 1100,
-        padding:'0'
     },
     shareIcon:{
         zIndex:3000,
@@ -350,7 +350,8 @@ class App extends Component {
             isLogin: this.serverApi.isLogin(),
             welcomeImgContainer:true,
             error:[],
-            barColor: 'secondary'
+            barColor: 'secondary',
+            hideAppBar:false,
         };
         
         this.interval= null;
@@ -1465,6 +1466,7 @@ class App extends Component {
      * 
      */ 
     mapPage() {
+        this.hideAppBar(false);
         //define the appearance of map 
         console.log('render home page')
         const { classes } = this.props;
@@ -1579,19 +1581,11 @@ class App extends Component {
                     <MyLocationIcon />
                 </Fab>
 
-                <Fab variant="extended" className={classes.sharingFab} color="primary">
-                    <Typography variant='body2' color="secondary" className={classes.buttonText}>
-                        Share location
-                    </Typography>
+                <Fab className={classes.sharingFab} color={this.state.sharing ? 'secondary' :'primary'} onClick={this.handleSwitch('sharing')}>
                     
-                    {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
-                              */}
-                    <Switch
-                        checked={this.state.sharing}
-                        onChange={this.handleSwitch('sharing')}
-                        value="sharing"
-                        className={classes.switchButton}
+                    <LocShareIcon
                     />
+
                 </Fab> 
                 
                 {!this.state.searchResponse ? (
@@ -1635,7 +1629,7 @@ class App extends Component {
 
     handleSwitch = name => event => {
         if (name == 'sharing' && window.cordova) {
-            if (event.target.checked) {
+            if (!this.state[name]) {
                 console.log("[INFO]Sharing location on, count 3 seconds")
                 this.interval = setTimeout(function() {
                     if (this.state.sharing) {
@@ -1657,12 +1651,28 @@ class App extends Component {
             }
             
         }
-        this.setState({ [name]: event.target.checked });
+        console.log("[INFO] sharing state:"+ this.state[name])
+        this.setState({ [name]:!this.state[name] });
     };
     /* The buttons and icons on map page
      * 
      * finish
      */
+
+    hideAppBar(hide) {
+        if (hide) {
+            if (!this.state.hideAppBar) {
+                this.setState({ hideAppBar: true })
+            }
+        }
+        else {
+            if (this.state.hideAppBar) {
+                this.setState({ hideAppBar: false })
+                //this.state.hideAppBar=false
+            }
+        }
+
+    }
 
 
     toggleDrawer = (side, open) => () => {
@@ -1697,7 +1707,8 @@ class App extends Component {
 
     theBar = () => {
         // search and navigate bar
-        return (
+
+        return (this.state.hideAppBar ? null :
             <MainBar
                 toggleDrawer={this.toggleDrawer}
                 handleInputSearch={this.handleInputSearch.bind(this)}
@@ -1843,7 +1854,7 @@ class App extends Component {
                     <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin}/>} />

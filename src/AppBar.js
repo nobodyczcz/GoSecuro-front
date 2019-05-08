@@ -32,8 +32,8 @@ import Paper from '@material-ui/core/Paper';
 const styles = theme => ({
     mainBar:{
         position:'fixed',
-        //height: `calc(5% + 100px)`,
-        height: '129px',
+        height: `calc(5% + 100px)`,
+        //height: '129px',
         width:'100%',
         left:0,
         top:0,
@@ -43,8 +43,8 @@ const styles = theme => ({
     },
     mainBarMap: {
         position:'fixed',
-        //height:`calc(5% + 100px)`,
-        height: '129px',
+        height:`calc(5% + 100px)`,
+        //height: '129px',
         width:'100%',
         left:0,
         top:0,
