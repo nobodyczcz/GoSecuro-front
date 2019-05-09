@@ -32,7 +32,6 @@ const styles = theme => ({
     },
     toolbar: {
         justifyContent: "center",
-        marginTop: "20px",
     },
     foot: {
         position: "fixed",
@@ -54,6 +53,8 @@ const styles = theme => ({
         left: 'calc( 50% - 40px)',
     },
     grid: {
+        marginTop: "20px",
+
         padding:"15px",
     },
     myPositionIcon: {
@@ -75,9 +76,9 @@ const styles = theme => ({
     },
     contentCard: {
         backgroundColor: "#ff7504",
-        width: "100%",
-        height: "100%",
-        padding:"5px"
+        width: "96%",
+        height: "96%",
+        padding:"2%"
     },
     gridItem: {
     },
@@ -225,10 +226,10 @@ class NavigationPage extends React.Component {
         var nextStep = this.state.steps[this.state.next];
         var toNext;
         if (this.state.toNextStep > 1000) {
-            toNext = this.state.toNext / 1000 + " km"
+            toNext = this.state.toNextStep / 1000 + " km"
         }
         else {
-            toNext = this.state.toNext + ' m'
+            toNext = this.state.toNextStep + ' m'
         }
         
         return (

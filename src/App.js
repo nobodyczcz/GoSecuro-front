@@ -43,6 +43,8 @@ import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
 import LocShareIcon from './locShareIcon';
+import DropPin from './dropPin';
+import Pin from './pinSvg';
 var history;
 if (window.cordova) {
     history = new createHashHistory();
@@ -69,18 +71,28 @@ const styles = theme => ({
     myPositionIcon: {
         position: 'absolute',
         left: 'calc(100% - 60px)',
-        top:'calc(100% - 180px)',
+        top:'calc(100% - 220px)',
         display: 'flex',
         zIndex: 1100,
     },
     sharingFab: {
         position: 'absolute',
         left: 'calc(100% - 60px)',
-        top: 'calc(100% - 80px)',
+        top: 'calc(100% - 100px)',
         display: 'flex',
         width: '40px',
         height: '40px',
         justifyContent:'center',
+        zIndex: 1100,
+    },
+    dropPin: {
+        position: 'absolute',
+        left: 'calc(100% - 60px)',
+        top: 'calc(100% - 160px)',
+        display: 'flex',
+        width: '40px',
+        height: '40px',
+        justifyContent: 'center',
         zIndex: 1100,
     },
     shareIcon:{
@@ -124,7 +136,7 @@ const styles = theme => ({
     },
     legend: {
         position: "absolute",
-        top: 'calc( 100% - 80px)',
+        top: 'calc( 100% - 100px)',
         width: "30%",
         left:"2%",
         zIndex: 1100,
@@ -187,31 +199,37 @@ const theme = createMuiTheme({
     typography: {
         useNextVariants: true,
     },
-  palette: {
-    primary: {
-        light: '#ffffff',
-        main: '#ffffff',
-        dark: '#bdbdbd',
-        contrastText: '#4f6c98',
-        //contrastText: '#ff7504',
-        //contrastText: '#616161'
+    palette: {
+        primary: {
+            light: '#ffffff',
+            main: '#ffffff',
+            dark: '#bdbdbd',
+            contrastText: '#4f6c98',
+            //contrastText: '#ff7504',
+            //contrastText: '#616161'
+        },
+        secondary: {
+            light: '#238BC3',
+            //main: '#616161',
+            main: '#4f6c98',
+            //dark :'#424242',
+            dark: '#074A8F',
+            //  light: '#ff8a65',
+            //  main: '#ff7504',
+            //dark: '#ffa733',
+            contrastText: '#fff',
+        },
+        error: {
+            main: '#ff8a65',
+            contrastText: '#000',
+        },
+        action: {
+            light: '#ff8a65',
+            main: '#ff7504',
+            dark: '#ffa733',
+            contrastText: '#fff',
+        }
     },
-      secondary: {
-          light: '#238BC3',
-          //main: '#616161',
-          main: '#4f6c98',
-          //dark :'#424242',
-          dark: '#074A8F',
-      //  light: '#ff8a65',
-      //  main: '#ff7504',
-      //dark: '#ffa733',
-      contrastText: '#fff',
-      },
-    error: {
-        main: '#ff8a65',
-        contrastText: '#000',
-    }
-  },
 });
 
 class App extends Component {
@@ -487,8 +505,6 @@ class App extends Component {
             }
         }
 
-        console.log("[INFO] update templinks.");
-        console.log(tempLinks);
         this.tempLinks = tempLinks;
         if (updated) {
             console.log("[INFO] temp link list chaged");
@@ -1093,7 +1109,10 @@ class App extends Component {
             // marker.
             this.focusUser = false;
             console.log('focus user off')
-            document.getElementById('searchInput').blur();
+            var input = document.getElementById('searchInput')
+            if (input) {
+                input.blur();
+            }
             this.handleMobileMenuClose()
 
         }.bind(this));
@@ -1102,8 +1121,10 @@ class App extends Component {
             // 3 seconds after the center of the map has changed, pan back to the
             // marker.
             this.focusUser = false;
-            console.log('focus user off')
-            document.getElementById('searchInput').blur();
+            var input = document.getElementById('searchInput')
+            if (input) {
+                input.blur();
+            }
             this.handleMobileMenuClose()
 
 
@@ -1580,6 +1601,11 @@ class App extends Component {
                     <MyLocationIcon />
                 </Fab>
 
+                <Fab className={classes.dropPin} color='primary' onClick={this.handleDropPin.bind(this)}>
+                    <Pin />
+
+                </Fab> 
+
                 <Fab className={classes.sharingFab} color={this.state.sharing ? 'secondary' :'primary'} onClick={this.handleSwitch('sharing')}>
                     
                     <LocShareIcon
@@ -1671,6 +1697,11 @@ class App extends Component {
             }
         }
 
+    }
+
+    handleDropPin() {
+        this.map.setCenter(this.userLocation);
+        history.push('/dropPin');
     }
 
 
@@ -1856,8 +1887,8 @@ class App extends Component {
                     <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
-                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin}/>} />
-                    
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
+                    <Route exact path="/dropPin" component={() => <DropPin hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
                 </Router>  
           </MuiThemeProvider>
         );
