@@ -46,6 +46,7 @@ const styles = theme => ({
 class DropPin extends React.Component {
     constructor(props) {
         super(props);
+        this.mapCenter = null;
 
         this.state = {
 
@@ -62,7 +63,53 @@ class DropPin extends React.Component {
     }
 
     handleConfirm() {
-        
+        console.log(this.props.map)
+        this.mapCenter = this.props.map.getCenter();
+        this.props.geoCoder.geocode({ 'location': this.mapCenter }, function (results, status) {
+            if (status == 'OK') {
+                console.log(results)
+                var pinLocation = {
+                    location: { lat: this.mapCenter.lat(), lng: this.mapCenter.lng() },
+                    street: null,
+                    suburb: null,
+                    state: null,
+                    city: null,
+                    country:null,
+                    postCode:null,
+                }
+                var address_components = results[0].address_components;
+                for (var key in address_components) {
+                   
+                    if (address_components[key].types[0] == 'route') {
+                        pinLocation.street = address_components[key].long_name
+                    }
+                    else if (address_components[key].types[0] == 'locality') {
+                        pinLocation.suburb = address_components[key].long_name
+                    }
+                    else if (address_components[key].types[0] == 'administrative_area_level_2') {
+                        pinLocation.city = address_components[key].long_name
+
+                    }
+                    else if (address_components[key].types[0] == 'administrative_area_level_1') {
+                        pinLocation.state = address_components[key].long_name
+
+                    }
+                    else if (address_components[key].types[0] == 'country') {
+                        pinLocation.country = address_components[key].long_name
+
+                    }
+                    else if (address_components[key].types[0] == 'postal_code') {
+                        pinLocation.postCode = address_components[key].long_name
+
+                    }
+                }
+
+                this.props.setPinLocation(pinLocation);
+                console.log(pinLocation);
+                this.props.history.push('/pinSurvey')
+                
+            }
+        }.bind(this))
     }
 
 

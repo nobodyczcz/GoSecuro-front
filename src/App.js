@@ -292,6 +292,7 @@ class App extends Component {
         this.markers = null;
         this.service = null; // google map places services
         this.suburbSet = new Set();
+        this.pinLocation = null;
 
         this.userLocation = null;
         this.heading = null; // direction of user heading
@@ -1684,6 +1685,24 @@ class App extends Component {
      * finish
      */
 
+
+    /*Pin related functions
+     * 
+     * 
+     */
+    getPinLocation() {
+        return this.pinLocation;
+    }
+
+    setPinLocation(pinLocation) {
+        this.pinLocation = pinLocation;
+    }
+
+
+    /*Pin related functions
+     * 
+     * finish
+     */
     hideAppBar(hide) {
         if (hide) {
             if (!this.state.hideAppBar) {
@@ -1888,7 +1907,7 @@ class App extends Component {
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
-                    <Route exact path="/dropPin" component={() => <DropPin hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
+                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
                 </Router>  
           </MuiThemeProvider>
         );
