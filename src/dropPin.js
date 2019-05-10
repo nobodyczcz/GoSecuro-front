@@ -74,12 +74,13 @@ class DropPin extends React.Component {
                     suburb: null,
                     state: null,
                     city: null,
-                    country:null,
-                    postCode:null,
+                    country: null,
+                    postCode: null,
+                    formatted_address: results[0].formatted_address,
                 }
                 var address_components = results[0].address_components;
                 for (var key in address_components) {
-                   
+
                     if (address_components[key].types[0] == 'route') {
                         pinLocation.street = address_components[key].long_name
                     }
@@ -107,7 +108,10 @@ class DropPin extends React.Component {
                 this.props.setPinLocation(pinLocation);
                 console.log(pinLocation);
                 this.props.history.push('/pinSurvey')
-                
+
+            }
+            else {
+                alert("can't geocode current location, please try another location")
             }
         }.bind(this))
     }
