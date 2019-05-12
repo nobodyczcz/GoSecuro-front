@@ -15,6 +15,13 @@ import NavigationIcon from '@material-ui/icons/Navigation';
 import Fab from '@material-ui/core/Fab';
 import PanicButton from './panicButton.js';
 import { Link } from "react-router-dom";
+import classnames from 'classnames';
+import CardActions from '@material-ui/core/CardActions';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import Collapse from '@material-ui/core/Collapse';
+import CardHeader from '@material-ui/core/CardHeader';
+import Avatar from '@material-ui/core/Avatar';
+import Switch from '@material-ui/core/Switch';
 
 
 
@@ -29,19 +36,31 @@ const styles = theme => ({
     contentCard: {
         padding:5,
         display:'flex',
+        justifyContent:'space-between',
         minHeight: 100,
         height:100,
+        marginTop: theme.spacing.unit * 1,
+    },
+    routeInfoCard: {
+        minHeight: 100,
         marginTop: theme.spacing.unit * 1
+    },
+    routeInfoHeader:{
+        paddingTop:'8px',
+        paddingLeft:'8px',
+        paddingRight:'8px',
+        paddingBottom:0,
     },
     media: {
         minHeight: 100,
         height: 100,
         minWidth: 100,
-        width: 100,
+        width: '25%',
         borderRadius: 5,
     },
     cardContent: {
-        flexDirection: 'column',
+        width:'65%',
+        flexDirection: 'row',
     },
     hide: {
         display: 'none',
@@ -50,6 +69,12 @@ const styles = theme => ({
         display: 'flex',
         width:"100%",
         justifyContent: 'stretch',
+        alignItems:"center",
+    },
+    subToolbar: {
+        display: 'flex',
+        width:"100%",
+        justifyContent: 'flex-end',
         alignItems:"center",
     },
     drawerTriger: {
@@ -66,6 +91,8 @@ const styles = theme => ({
 
         boarderRadius: 10,
         flexShrink: 0,
+    },
+    drawerPaper:{
     },
     drawerOpen: {
         paddingLeft: '3%',
@@ -140,7 +167,35 @@ const styles = theme => ({
     },
     showDetails:{
         color:'gray'
-    }
+    },
+    expand: {
+        transform: 'rotate(0deg)',
+        marginLeft: 'auto',
+        transition: theme.transitions.create('transform', {
+          duration: theme.transitions.duration.shortest,
+        }),
+      },
+      expandOpen: {
+        transform: 'rotate(180deg)',
+      },
+      actions: {
+        display: 'flex',
+        height:'48px',
+      },
+      highCrime:{
+        backgroundColor:'#f44336'
+      },
+      mediumCrime:{
+        backgroundColor:'#fb8c00'
+      },
+      lowCrime:{
+        backgroundColor:'#43a047'
+
+      },
+      details:{
+          display:'flex',
+          justifyContent:'space-between',
+      }
 });
 
 class ResultCard extends Component {
@@ -150,8 +205,22 @@ class ResultCard extends Component {
         super(props);
         this.state = {
             open: true,
+            Hexpanded: false,
+            Mexpanded: false,
+            Lexpanded: false,
+            navWithShare:false,
+
         };
     };
+    componentDidMount(){
+        if(this.props.currentRoute){
+            var mode = this.props.currentRoute.request.travelMode.toLowerCase()
+            var suburbs = this.props.routeAnalysis[mode].suburbs
+            if(suburbs.highCrime.length>0){
+                this.setState({navWithShare:true})
+            }
+        }
+    }
 
     handleDrawerOpen = () => {
         this.setState({ open: true });
@@ -175,26 +244,36 @@ class ResultCard extends Component {
     handleStartNav() {
         if (window.cordova) {
             console.log("Start tracking. start location:" + JSON.stringify(this.props.getLocation()));
-            if (!this.props.alreadyTracking) {
+            
+            if(this.state.navWithShare){
+                if (this.props.alreadyTracking) {
+                    this.props.locationSharing.stopTracking()
+                }
                 this.props.locationSharing.navigationRoute = JSON.stringify({
                     overview_path: this.props.currentRoute.routes[0].overview_path,
                     origin: this.props.currentRoute.request.origin.location,
                     destination: this.props.currentRoute.request.destination.location,
+                    duration: this.props.currentRoute.routes[0].legs[0].duration.value,
                 });
                 this.props.locationSharing.startTracking(this.props.getLocation());
             }
-
-
-
+            
         }
-        else { console.log("tracking do not work in broswer emviroment") }
+        else { console.log("tracking do not work in broswer enviroment") }
 
         this.props.history.push('/navigation')
     }
+
+    handleExpandClick = (name) => {
+        this.setState(state => ({ [name]: !state[name] }));
+      };
+
+      handleChange = name => event => {
+        this.setState({ [name]: event.target.checked });
+      };
     
     render() {
        
-        console.log('render result: ',this.props.currentRoute);
         const { classes, theme } = this.props;
         if(this.props.currentRoute){
             var mode = this.props.currentRoute.request.travelMode.toLowerCase()
@@ -220,7 +299,7 @@ class ResultCard extends Component {
                         [classes.drawerClose]: !this.state.open,
                     })}
                     classes={{
-                        paper: classNames({
+                        paper: classNames(classes.drawerPaper,{
                             [classes.drawerOpen]: this.state.open,
                             [classes.drawerClose]: !this.state.open,
                         }),
@@ -238,24 +317,252 @@ class ResultCard extends Component {
                                 <Fab variant="extended" color="secondary" className={classes.startNavi} onClick={this.handleStartNav.bind(this)}>
                                         Start
                                         <NavigationIcon /> 
-                                    </Fab>
+                                </Fab>
                                     : null
                             }
                     </div>
+                    {
+                        this.props.currentRoute ?
+                        <div className={classes.subToolbar}>
+                            <Typography variant="body1">
+                                Share location when navigating
+                            </Typography>
+                            <Switch
+                                checked={this.state.navWithShare}
+                                onChange={this.handleChange('navWithShare')}
+                                value="navWithShare"
+                            />
+
+                        </div>
+                            : null
+                    }
                     <div className={classes.contentPaper}>
                         {
                         this.props.currentRoute ?
                             <div>
                                 {
-                                    suburbs.highCrime.length>0 ? <p>You will pass through {suburbs.highCrime.length} high crime rate suburbs. We suggest you use location share function when navigating</p>:null
+                                    suburbs.highCrime.length>0 ? <p className={classes.warning}>You will pass through {suburbs.highCrime.length} high crime rate suburbs. We suggest you use location share function when navigating</p>:null
                                 }
-                                <Link 
-                                    className={classes.showDetails}
-                                    variant='h6'
-                                    to='/routeDetail'
-                                    >
-                                    View Route Details
-                                </Link>
+                                {
+                                    suburbs.highCrime.length>0 ? 
+                                    <Card className={classes.routeInfoCard}>
+                                    <CardHeader 
+                                    className={classes.routeInfoHeader}
+                                    avatar={
+                                        <Avatar aria-label="High Crime Rate" className={classes.highCrime}>
+                                          H
+                                        </Avatar>
+                                      }
+                                    title={suburbs.highCrime.length+' High Crime Rate Suburbs'}
+                                    titleTypographyProps={{variant:'h5'}}
+                                     />
+                                        
+                                    <CardActions className={classes.actions} disableActionSpacing>
+                                        <Typography variant="body2">
+                                            Details
+                                        </Typography>
+                                        <IconButton
+                                            className={classnames(classes.expand, {
+                                            [classes.expandOpen]: this.state.Hexpanded,
+                                            })}
+                                            onClick={()=>{this.handleExpandClick('Hexpanded')}}
+                                            aria-expanded={this.state.Hexpanded}
+                                            aria-label="Show more"
+                                        >
+                                            <ExpandMoreIcon />
+                                        </IconButton>
+                                    </CardActions>
+                                    <Collapse in={this.state.Hexpanded} timeout="auto" unmountOnExit>
+                                    <CardContent>
+                                        <div className={classes.details} >
+                                            <Typography variant='h6' >
+                                                Suburb
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                Crime Rate
+                                            </Typography>
+                                        </div>
+                                        {suburbs.highCrime.map((item,index)=>{
+
+                                            return(
+                                                <div className={classes.details} key={item.properties.suburb} >
+                                                    <Typography variant='body1' >
+                                                        {item.properties.suburb}
+                                                    </Typography>
+                                                    <Typography variant='body1' >
+                                                        {item.properties.crimeRate}
+                                                    </Typography>
+                                                </div>
+
+                                            )
+                                        })}
+                                       
+                                    </CardContent>
+                                    </Collapse>
+                                    </Card>
+                                    : null
+                                }
+                                {
+                                    suburbs.mediumCrime.length>0 ? 
+                                    <Card className={classes.routeInfoCard}>
+                                    <CardHeader 
+                                    className={classes.routeInfoHeader}
+                                    avatar={
+                                        <Avatar aria-label="Medium Crime Rate" className={classes.mediumCrime}>
+                                          M
+                                        </Avatar>
+                                      }
+                                    title={suburbs.mediumCrime.length+' Medium Crime Rate Suburbs'}
+                                    titleTypographyProps={{variant:'h5'}}
+                                     />
+                                        
+                                    <CardActions className={classes.actions} disableActionSpacing>
+                                        <Typography variant="body2">
+                                            Details
+                                        </Typography>
+                                        <IconButton
+                                            className={classnames(classes.expand, {
+                                            [classes.expandOpen]: this.state.Mexpanded,
+                                            })}
+                                            onClick={()=>{this.handleExpandClick('Mexpanded')}}
+                                            aria-expanded={this.state.Mexpanded}
+                                            aria-label="Show more"
+                                        >
+                                            <ExpandMoreIcon />
+                                        </IconButton>
+                                    </CardActions>
+                                    <Collapse in={this.state.Mexpanded} timeout="auto" unmountOnExit>
+                                    <CardContent>
+                                        <div className={classes.details} >
+                                            <Typography variant='h6' >
+                                                Suburb
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                Crime Rate
+                                            </Typography>
+                                        </div>
+                                        {suburbs.mediumCrime.map((item,index)=>{
+
+                                            return(
+                                                <div className={classes.details} key={item.properties.suburb}>
+                                                    <Typography variant='body1' >
+                                                        {item.properties.suburb}
+                                                    </Typography>
+                                                    <Typography variant='body1' >
+                                                        {item.properties.crimeRate}
+                                                    </Typography>
+                                                </div>
+                                            )
+                                        })}
+                                       
+                                    </CardContent>
+                                    </Collapse>
+                                    </Card>
+                                    : null
+                                }
+                                {
+                                    suburbs.lowCrime.length>0 ? 
+                                    <Card className={classes.routeInfoCard}>
+                                    <CardHeader 
+                                    className={classes.routeInfoHeader}
+                                    avatar={
+                                        <Avatar aria-label="Low Crime Rate" className={classes.lowCrime}>
+                                          L
+                                        </Avatar>
+                                      }
+                                    title={suburbs.lowCrime.length+' Low Crime Rate Suburbs'}
+                                    titleTypographyProps={{variant:'h5'}}
+                                     />
+                                        
+                                    <CardActions className={classes.actions} disableActionSpacing>
+                                        <Typography variant="body2">
+                                            Details
+                                        </Typography>
+                                        <IconButton
+                                            className={classnames(classes.expand, {
+                                            [classes.expandOpen]: this.state.Lexpanded,
+                                            })}
+                                            onClick={()=>{this.handleExpandClick('Lexpanded')}}
+                                            aria-expanded={this.state.Lexpanded}
+                                            aria-label="Show more"
+                                        >
+                                            <ExpandMoreIcon />
+                                        </IconButton>
+                                    </CardActions>
+                                    <Collapse in={this.state.Lexpanded} timeout="auto" unmountOnExit>
+                                    <CardContent>
+                                        <div className={classes.details} >
+                                            <Typography variant='h6' >
+                                                Suburb
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                Crime Rate
+                                            </Typography>
+                                        </div>
+                                        {suburbs.lowCrime.map((item,index)=>{
+
+                                            return(
+                                                <div className={classes.details} key={item.properties.suburb}>
+                                                    <Typography variant='body1' >
+                                                        {item.properties.suburb}
+                                                    </Typography>
+                                                    <Typography variant='body1' >
+                                                        {item.properties.crimeRate}
+                                                    </Typography>
+                                                </div>
+                                            )
+                                        })}
+                                       
+                                    </CardContent>
+                                    </Collapse>
+                                    </Card>
+                                    : null
+                                }
+                                {
+                                <Card className={classes.routeInfoCard}>
+                                    <CardHeader 
+                                        className={classes.routeInfoHeader}
+                                        avatar={
+                                            <Avatar aria-label="Route Info" className={classes.lowCrime}>
+                                            R
+                                            </Avatar>
+                                        }
+                                        title='Route Information'
+                                        titleTypographyProps={{variant:'h5'}}
+                                     />
+
+                                    <CardContent >
+                                        <div className={classes.details}>
+                                            <Typography variant='h6' >
+                                                Distance
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                {this.props.currentRoute.routes[0].legs[0].distance.text}
+                                            </Typography>
+                                         </div>
+                                         <div className={classes.details}>
+                                            <Typography variant='h6' >
+                                                Duration
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                {this.props.currentRoute.routes[0].legs[0].duration.text}
+                                            </Typography>
+                                         </div>
+                                        
+                                    </CardContent>
+                                        
+                                        <CardActions className={classes.actions} disableActionSpacing>
+                                        <Link 
+                                            className={classes.showDetails}
+                                            to='/routeDetail'
+                                            >
+                                            View Route Details
+                                        </Link>
+                                    </CardActions>
+
+                                </Card>
+                                }
+                                
                             </div>
                             
                             :
@@ -297,14 +604,13 @@ class ResultCard extends Component {
                                                 </CardContent>
                                             </div>
                                         <Fab
-                                            variant="extended"
                                             size="small"
                                             color="primary"
                                             aria-label="Add"
                                             className={classes.navButton}
                                             onClick={() => { this.handleNavClick(i) }}
                                         >
-                                            <NavigationIcon className={classes.extendedIcon} />
+                                            <NavigationIcon />
                                         </Fab>
                                     </Card>
                                 )

@@ -208,7 +208,7 @@ class BuddyPage extends React.Component {
     retrieveSuccess(reply) {
         console.log("Success")
         if (this.props.isLogin) {
-            this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
+            this.setState({ contactList: JSON.parse(reply.data) });
             //localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
 
@@ -264,10 +264,23 @@ class BuddyPage extends React.Component {
                      
                             {this.state.contactList.map(function (item, i) {
                                 var displayName = "";
-                                displayName = (item.ECname ? item.ECname[0] : "") + (item.ECname ? item.ECname[1] : "");
+                                var phone = item.phone;
+                                var details = item.userDetails;
+                                var fullName = (details.FirstName ? details.FirstName : "") +' '+ (details.LastName ? details.LastName : "")
+                                var displayName = "";
+                                if (fullName.length <= 5) {
+                                    displayName = fullName;
+                                }
+                                else if (details.FirstName && details.FirstName.length <= 5) {
+                                    displayName = details.FirstName;
+                                }
+                                else {
+                                    displayName = (details.FirstName ? details.FirstName[0] : "") + (details.LastName ? details.LastName[0] : "");
+                                }
+
                                 if (displayName == "") {
                                     displayName = "None"
-                                }                                
+                                }                               
                                 return (
                                     <Grid key={i} item xs={12} md={6} lg={3}>
                                         <Card className={classes.contCard} >
@@ -276,8 +289,8 @@ class BuddyPage extends React.Component {
                                              { displayName }
                                              </Fab>
                                             <Typography className={classes.contName} gutterBottom align='left' variant="h6">
-                                                    {item.ECname}<br/>
-                                                    {item.EmergencyContactPhone}
+                                                    {fullName?fullName : 'No Name'}<br/>
+                                                    {phone}
                                                 </Typography>
     
                                                 {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
