@@ -6,7 +6,8 @@ import ListItem from '@material-ui/core/ListItem';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 import RouteDetails from './routeDetail';
-
+import BuddyPage from './BuddyPage';
+import PinSurvey from './pinQuestionnaire'; 
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
 import { Router, Route, Link } from "react-router-dom";
@@ -1981,7 +1982,7 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
-                    <Route exact path="/pinSurvey" component={PinSurvey} getPinLocation={this.getPinLocation.bind(this)}/>
+                    <Route exact path="/pinSurvey" component={()=><PinSurvey getPinLocation={this.getPinLocation.bind(this)}/>} />
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
