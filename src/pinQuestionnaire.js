@@ -114,7 +114,7 @@ class PinSurvey extends React.Component {
     
 
     handleSubmit = () => {
-        var pinLocation = this.props.getPinLocation;
+        var pinLocation = this.props.getPinLocation();
         console.log("getPinLocation:" + pinLocation)
         var pin = {
             Time: new Date(),
