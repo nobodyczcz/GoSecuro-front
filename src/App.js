@@ -6,7 +6,8 @@ import ListItem from '@material-ui/core/ListItem';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 import RouteDetails from './routeDetail';
-
+import BuddyPage from './BuddyPage';
+import PinSurvey from './pinQuestionnaire'; 
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
 import { Router, Route, Link } from "react-router-dom";
