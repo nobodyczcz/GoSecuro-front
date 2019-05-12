@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 
 import { withStyles } from '@material-ui/core/styles';
+import { FormHelperText } from '@material-ui/core';
 
 
 
@@ -500,6 +501,7 @@ class ContactsPage extends React.Component {
                                 margin="normal"
                             />
 
+                            <FormHelperText>Emergency Contact will only be sent text messages in case of emergencies.</FormHelperText>
                             <Fab
                                 variant="extended"
                                 color="secondary"
