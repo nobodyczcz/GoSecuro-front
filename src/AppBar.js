@@ -297,10 +297,7 @@ class MainBar extends React.Component {
                         {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
                         <IconButton id="searchIcon" onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />
-                    </IconButton>
-                    
-                    
-                    
+                    </IconButton> 
                   </Toolbar>
               </AppBar>
               {this.props.displayNavRoutes ?
@@ -340,7 +337,7 @@ class MainBar extends React.Component {
                           this.props.history.push('/map')
                       }} />
                       <Tab icon={<ContactsIcon color="primary"/>} onClick={() => {
-                          this.props.history.push('/contacts')
+                          this.props.history.push('/contactsPage')
                       }} />
                   </Tabs>
               }

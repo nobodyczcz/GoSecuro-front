@@ -1891,13 +1891,27 @@ class App extends Component {
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
-                            to='/aboutUs'
+                            to='/pinSurvey'
                         >
-                            Settings
+                            Pin Questionnaire
                         </Link>
                     </ListItem>
                     <Divider/>
                     <ListItem button key='Navigation3'>
+                            {this.state.isLogin ?
+                                <Link
+                                    className={classes.sideContent}
+                                    variant='h6'
+                                    to='/buddy'
+                                >
+                                    Buddies
+                                </Link>
+                                :
+                                null
+                            }
+                        
+                    </ListItem>
+                    <ListItem button key='Navigation4'>
                             {this.state.isLogin ?
                                 <Link
                                     className={classes.sideContent}
@@ -1911,7 +1925,7 @@ class App extends Component {
                             }
                         
                     </ListItem>
-                    <ListItem button key='Navigation4'>
+                    <ListItem button key='Navigation5'>
                         {this.state.isLogin ?
                             <div
                                     className={classes.sideContent}
@@ -1959,11 +1973,13 @@ class App extends Component {
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
-                    <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path="/pinSurvey" component={PinSurvey} getPinLocation={this.getPinLocation.bind(this)}/>
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
