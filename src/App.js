@@ -44,6 +44,9 @@ import LoginPage from './login.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
+import LocShareIcon from './locShareIcon';
+import DropPin from './dropPin';
+import Pin from './pinSvg';
 var history;
 if (window.cordova) {
     history = new createHashHistory();
@@ -70,20 +73,29 @@ const styles = theme => ({
     myPositionIcon: {
         position: 'absolute',
         left: 'calc(100% - 60px)',
-        top:'calc(100% - 180px)',
+        top:'calc(100% - 220px)',
         display: 'flex',
         zIndex: 1100,
     },
     sharingFab: {
         position: 'absolute',
-        width:'140px',
-        left: 'calc(100% - 140px)',
-        top: 'calc(100% - 80px)',
-        height:'48px',
+        left: 'calc(100% - 60px)',
+        top: 'calc(100% - 100px)',
         display: 'flex',
-        alignItems:'center',
+        width: '40px',
+        height: '40px',
+        justifyContent:'center',
         zIndex: 1100,
-        padding:'0'
+    },
+    dropPin: {
+        position: 'absolute',
+        left: 'calc(100% - 60px)',
+        top: 'calc(100% - 160px)',
+        display: 'flex',
+        width: '40px',
+        height: '40px',
+        justifyContent: 'center',
+        zIndex: 1100,
     },
     shareIcon:{
         zIndex:3000,
@@ -126,7 +138,7 @@ const styles = theme => ({
     },
     legend: {
         position: "absolute",
-        top: 'calc( 100% - 80px)',
+        top: 'calc( 100% - 100px)',
         width: "30%",
         left:"2%",
         zIndex: 1100,
@@ -189,31 +201,37 @@ const theme = createMuiTheme({
     typography: {
         useNextVariants: true,
     },
-  palette: {
-    primary: {
-        light: '#ffffff',
-        main: '#ffffff',
-        dark: '#bdbdbd',
-        contrastText: '#4f6c98',
-        //contrastText: '#ff7504',
-        //contrastText: '#616161'
+    palette: {
+        primary: {
+            light: '#ffffff',
+            main: '#ffffff',
+            dark: '#bdbdbd',
+            contrastText: '#4f6c98',
+            //contrastText: '#ff7504',
+            //contrastText: '#616161'
+        },
+        secondary: {
+            light: '#238BC3',
+            //main: '#616161',
+            main: '#4f6c98',
+            //dark :'#424242',
+            dark: '#074A8F',
+            //  light: '#ff8a65',
+            //  main: '#ff7504',
+            //dark: '#ffa733',
+            contrastText: '#fff',
+        },
+        error: {
+            main: '#ff8a65',
+            contrastText: '#000',
+        },
+        action: {
+            light: '#ff8a65',
+            main: '#ff7504',
+            dark: '#ffa733',
+            contrastText: '#fff',
+        }
     },
-      secondary: {
-          light: '#238BC3',
-          //main: '#616161',
-          main: '#4f6c98',
-          //dark :'#424242',
-          dark: '#074A8F',
-      //  light: '#ff8a65',
-      //  main: '#ff7504',
-      //dark: '#ffa733',
-      contrastText: '#fff',
-      },
-    error: {
-        main: '#ff8a65',
-        contrastText: '#000',
-    }
-  },
 });
 
 class App extends Component {
@@ -276,6 +294,7 @@ class App extends Component {
         this.markers = null;
         this.service = null; // google map places services
         this.suburbSet = new Set();
+        this.pinLocation = null;
 
         this.userLocation = null;
         this.heading = null; // direction of user heading
@@ -351,7 +370,8 @@ class App extends Component {
             isLogin: this.serverApi.isLogin(),
             welcomeImgContainer:true,
             error:[],
-            barColor: 'secondary'
+            barColor: 'secondary',
+            hideAppBar:false,
         };
         
         this.interval= null;
@@ -488,8 +508,6 @@ class App extends Component {
             }
         }
 
-        console.log("[INFO] update templinks.");
-        console.log(tempLinks);
         this.tempLinks = tempLinks;
         if (updated) {
             console.log("[INFO] temp link list chaged");
@@ -1094,7 +1112,10 @@ class App extends Component {
             // marker.
             this.focusUser = false;
             console.log('focus user off')
-            document.getElementById('searchInput').blur();
+            var input = document.getElementById('searchInput')
+            if (input) {
+                input.blur();
+            }
             this.handleMobileMenuClose()
 
         }.bind(this));
@@ -1103,8 +1124,10 @@ class App extends Component {
             // 3 seconds after the center of the map has changed, pan back to the
             // marker.
             this.focusUser = false;
-            console.log('focus user off')
-            document.getElementById('searchInput').blur();
+            var input = document.getElementById('searchInput')
+            if (input) {
+                input.blur();
+            }
             this.handleMobileMenuClose()
 
 
@@ -1466,6 +1489,7 @@ class App extends Component {
      * 
      */ 
     mapPage() {
+        this.hideAppBar(false);
         //define the appearance of map 
         console.log('render home page')
         const { classes } = this.props;
@@ -1582,19 +1606,16 @@ class App extends Component {
                     <MyLocationIcon />
                 </Fab>
 
-                <Fab variant="extended" className={classes.sharingFab} color="primary">
-                    <Typography variant='body2' color="secondary" className={classes.buttonText}>
-                        Share location
-                    </Typography>
+                <Fab className={classes.dropPin} color='primary' onClick={this.handleDropPin.bind(this)}>
+                    <Pin />
+
+                </Fab> 
+
+                <Fab className={classes.sharingFab} color={this.state.sharing ? 'secondary' :'primary'} onClick={this.handleSwitch('sharing')}>
                     
-                    {/* <img src='img/locShareIcon.svg' alt='locationSharing icon' className={classes.shareIcon}/>
-                              */}
-                    <Switch
-                        checked={this.state.sharing}
-                        onChange={this.handleSwitch('sharing')}
-                        value="sharing"
-                        className={classes.switchButton}
+                    <LocShareIcon
                     />
+
                 </Fab> 
                 
                 {!this.state.searchResponse ? (
@@ -1638,7 +1659,7 @@ class App extends Component {
 
     handleSwitch = name => event => {
         if (name == 'sharing' && window.cordova) {
-            if (event.target.checked) {
+            if (!this.state[name]) {
                 console.log("[INFO]Sharing location on, count 3 seconds")
                 this.interval = setTimeout(function() {
                     if (this.state.sharing) {
@@ -1660,12 +1681,51 @@ class App extends Component {
             }
             
         }
-        this.setState({ [name]: event.target.checked });
+        console.log("[INFO] sharing state:"+ this.state[name])
+        this.setState({ [name]:!this.state[name] });
     };
     /* The buttons and icons on map page
      * 
      * finish
      */
+
+
+    /*Pin related functions
+     * 
+     * 
+     */
+    getPinLocation() {
+        return this.pinLocation;
+    }
+
+    setPinLocation(pinLocation) {
+        this.pinLocation = pinLocation;
+    }
+
+
+    /*Pin related functions
+     * 
+     * finish
+     */
+    hideAppBar(hide) {
+        if (hide) {
+            if (!this.state.hideAppBar) {
+                this.setState({ hideAppBar: true })
+            }
+        }
+        else {
+            if (this.state.hideAppBar) {
+                this.setState({ hideAppBar: false })
+                //this.state.hideAppBar=false
+            }
+        }
+
+    }
+
+    handleDropPin() {
+        this.map.setCenter(this.userLocation);
+        history.push('/dropPin');
+    }
 
 
     toggleDrawer = (side, open) => () => {
@@ -1700,7 +1760,8 @@ class App extends Component {
 
     theBar = () => {
         // search and navigate bar
-        return (
+
+        return (this.state.hideAppBar ? null :
             <MainBar
                 toggleDrawer={this.toggleDrawer}
                 handleInputSearch={this.handleInputSearch.bind(this)}
@@ -1861,12 +1922,12 @@ class App extends Component {
                     <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/pinSurvey" component={PinSurvey} getPinLocation={this.props.getPinLocation}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
-                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin}/>} />
-                    
+                    <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
+                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
                 </Router>  
           </MuiThemeProvider>
         );
