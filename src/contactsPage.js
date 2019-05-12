@@ -330,11 +330,11 @@ class ContactsPage extends React.Component {
             
         }
         else{
-        var list = JSON.parse(localStorage.localContactList)
-        var result = list.splice(index, 1);
-        console.log("splice result:" + result);
-        localStorage.localContactList = JSON.stringify(list);
-        this.updateContactList();
+            var list = JSON.parse(localStorage.localContactList)
+            var result = list.splice(index, 1);
+            console.log("splice result:" + result);
+            localStorage.localContactList = JSON.stringify(list);
+            this.updateContactList();
         }
 
     }
