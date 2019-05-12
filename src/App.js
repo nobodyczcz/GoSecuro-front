@@ -28,8 +28,6 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
-import BuddyPage from './BuddyPage.js';
-import PinSurvey from './pinQuestionnaire';
 
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
@@ -471,7 +469,7 @@ class App extends Component {
         if(newPins.length===0){
             return
         }
-        
+
         if(this.pins.length===0){
             this.pins =this.pins.concat(newPins);
         }
