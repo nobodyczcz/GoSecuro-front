@@ -35,6 +35,11 @@
     },
     "cordova-plugin-whitelist": {
       "PACKAGE_NAME": "com.fitech.gosafefront"
+    },
+    "phonegap-plugin-push": {
+      "ANDROID_SUPPORT_V13_VERSION": "27.+",
+      "FCM_VERSION": "11.6.2",
+      "PACKAGE_NAME": "com.fitech.gosafefront"
     }
   },
   "dependent_plugins": {
@@ -42,6 +47,12 @@
       "PACKAGE_NAME": "com.fitech.gosafefront"
     },
     "cordova-plugin-device": {
+      "PACKAGE_NAME": "com.fitech.gosafefront"
+    },
+    "cordova-support-google-services": {
+      "PACKAGE_NAME": "com.fitech.gosafefront"
+    },
+    "phonegap-plugin-multidex": {
       "PACKAGE_NAME": "com.fitech.gosafefront"
     }
   }

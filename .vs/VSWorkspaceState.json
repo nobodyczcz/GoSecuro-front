@@ -2,8 +2,10 @@
   "ExpandedNodes": [
     "",
     "\\public",
-    "\\src"
+    "\\public\\img",
+    "\\src",
+    "\\src\\svg"
   ],
-  "SelectedNode": "\\package-lock.json",
+  "SelectedNode": "\\src\\App.js",
   "PreviewInSolutionExplorer": false
 }

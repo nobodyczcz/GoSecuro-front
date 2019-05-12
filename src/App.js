@@ -3,11 +3,9 @@ import MainBar from './AppBar';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import {MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import TurnedInIon from '@material-ui/icons/TurnedIn';
 import Switch from '@material-ui/core/Switch';
-import Avatar from '@material-ui/core/Avatar';
+import RouteDetails from './routeDetail';
 
 import { withStyles } from '@material-ui/core/styles';
 import postscribe from 'postscribe';
@@ -27,7 +25,6 @@ import EmergencyContacts from './emergencyContactsPage.js';
 import AboutUs from './AboutUs.js';
 import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
-import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
 
@@ -45,6 +42,10 @@ import { Divider } from '@material-ui/core';
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
 import Pin from './pinSvg';
+
+
+var d3Geo = require("d3-geo")
+
 var history;
 if (window.cordova) {
     history = new createHashHistory();
@@ -293,6 +294,38 @@ class App extends Component {
         this.service = null; // google map places services
         this.suburbSet = new Set();
         this.pinLocation = null;
+        this.pins=[
+            {
+                pinDetails:{ 
+                    CoordLog:145.043976,
+                    CoordLat:-37.880276,
+                    StreetLight:'Low Light',
+                    CCTV:'No CCTV Cover the Location',
+                    ExperienceType:'Stalked',
+                    Experience:'no experience',
+                    OtherDetails:null,
+                    UserProfileId:null,
+                    State:'VIC',
+                    Street:'Queens Ave',
+                    SuburbSuburbName:'CAULFIELD EAST'
+                }
+            },
+            {
+                pinDetails:{
+                    CoordLog:145.043262,
+                    CoordLat:-37.882431,
+                    StreetLight:'Low Light',
+                    CCTV:'No CCTV Cover the Location',
+                    ExperienceType:'Stalked',
+                    Experience:'no experience',
+                    OtherDetails:null,
+                    UserProfileId:null,
+                    State:'VIC',
+                    Street:'Queens Ave',
+                    SuburbSuburbName:'CAULFIELD EAST'
+                }
+            }
+        ] //dumb data for pins
 
         this.userLocation = null;
         this.heading = null; // direction of user heading
@@ -304,7 +337,11 @@ class App extends Component {
             transit: null
 
         }; //Store navigation route at here
-
+        this.routeAnalysis = {
+            driving: {},
+            walking: {},
+            transit: {},
+        };
         this.navValue = 0; //dicide which tag (walking driving and publictransport) is activated when jump to navigate page, 
         //api to google's service
         this.api = null;
@@ -479,8 +516,6 @@ class App extends Component {
         for (var key in results) {
             linkList.push(results[key].TempLinkId)
         }
-        console.log(tempLinks)
-        console.log(linkList)
         var updated = false;
         for (var key in tempLinks) {
             if (!linkList.includes(key)) {
@@ -940,7 +975,7 @@ class App extends Component {
 
         }
         else if (name == "displayCameras") {
-            if (event.target.checked && this.state.crimeSwitch) {
+            if (event.target.checked ) {
                 this.mapController.ShowCamera(this.map, this.mapController.cameraLocations)
 
             }
@@ -950,12 +985,22 @@ class App extends Component {
             this.setState({ [name]: event.target.checked });
         }
         else if (name == "displayLight") {
-            if (event.target.checked && this.state.crimeSwitch) {
+            if (event.target.checked ) {
                 this.mapController.showLight(this.map, LightLocation)
 
             }
             else {
                 this.mapController.clearLight()
+            }
+            this.setState({ [name]: event.target.checked });
+        }
+        else if (name == "displayPins") {
+            if (event.target.checked ) {
+                this.mapController.showPins(this.map, this.pins)
+
+            }
+            else {
+                this.mapController.clearPins()
             }
             this.setState({ [name]: event.target.checked });
         }
@@ -1364,8 +1409,9 @@ class App extends Component {
 
         this.directionsService.route(drivingRequest, function (result, status) {
             console.log('get driving: ' + status)
-            if (status == 'OK') {
+            if (status === 'OK') {
                 this.navRoutes.driving = result
+                this.routeAnalysis.driving.suburbs = this.getSuburbs(result);
                 if (!this.state.displayNavRoutes) {
                     this.setState({ displayNavRoutes: true });
                     this.setNavMode('driving');
@@ -1387,6 +1433,8 @@ class App extends Component {
             if (status == 'OK') {
 
                 this.navRoutes.walking = result
+                this.routeAnalysis.walking.suburbs = this.getSuburbs(result);
+
                 if (!this.state.displayNavRoutes) {
                     this.setState({ displayNavRoutes: true });
                     this.setNavMode('walking');
@@ -1404,9 +1452,10 @@ class App extends Component {
         };
         this.directionsService.route(transitRequest, function (result, status) {
             console.log('get transit: ' + status)
-            if (status == 'OK') {
+            if (status === 'OK') {
 
                 this.navRoutes.transit = result
+                this.routeAnalysis.transit.suburbs = this.getSuburbs(result);
                 if (!this.state.displayNavRoutes) {
                     this.setState({ displayNavRoutes: true });
                     this.setNavMode('transit');
@@ -1416,61 +1465,62 @@ class App extends Component {
     };
 
     getSuburbs(route) {
-        var routes = route.routes[0].legs[0]
-        var steps = [];
-        for (var i = 0; i < routes.steps.length; i++) {
-            if (routes.steps[i].steps) {
-                for (var x = 0; x < routes.steps[i].steps.length; x++) {
-                    routes.steps[i].steps[x].father = routes.steps[i]
-                    steps.push(routes.steps[i].steps[x])
+
+        //analysis the route, get the suburbs that the route pass through
+        var path = route.routes[0].overview_path;
+        var currentSub = null;
+        var suburbs = {
+            all:[],
+            highCrime:[],
+            mediumCrime:[],
+            lowCrime:[]
+        };
+        path.forEach(data => {
+            if (currentSub){
+                if(d3Geo.geoContains(currentSub,[data.lng(),data.lat()])){
+                    return
                 }
             }
-            else {
-                steps.push(routes.steps[i])
-            }
-        }
-        for (var key in steps) {
-            var location = {
-                lat: steps[key].end_location.lat(),
-                lng: steps[key].end_location.lng()
-            }
-            console.log("geocode")
-            console.log(location)
-            this.geoCoder.geocode({ 'location ': location }, function (results, status) {
-                if (status == 'OK') {
-                    var address = results[0].address_components
-                    for (key in address) {
-
+            this.crimeData.features.forEach(feature=>{
+                if (d3Geo.geoContains(feature,[data.lng(),data.lat()])){
+                    currentSub = feature;
+                    if(!suburbs.all.includes(feature)){
+                        suburbs.all.push(feature);
+                        if(feature.properties.crimeRate>0.1){
+                            suburbs.highCrime.push(feature)
+                        }
+                        else if(feature.properties.crimeRate>0.0506){
+                            suburbs.mediumCrime.push(feature)
+                        }
+                        else{
+                            suburbs.lowCrime.push(feature)
+                        }
                     }
                 }
             })
-        }
-        
+        });
+        return suburbs;
     }
+
+    
+
     setNavMode(mode) {
         console.log('set transit mode: ' + mode)
         this.directionsDisplay.setMap(this.map);
         if (mode === 'walking') {
-            console.log(this.navRoutes.walking);
             this.navValue = 0
             this.setState({ currentRoute: this.navRoutes.walking }, this.displayCurrent.bind(this));
         }
         else if (mode === 'transit') {
-            console.log(this.navRoutes.transit)
             this.navValue = 1
 
             this.setState({ currentRoute: this.navRoutes.transit }, this.displayCurrent.bind(this));
         }
         else if (mode === 'driving') {
-            console.log(this.navRoutes.driving)
             this.navValue = 2
 
             this.setState({ currentRoute: this.navRoutes.driving }, this.displayCurrent.bind(this));
-            
         }
-
-
-
     };
 
     displayCurrent() {
@@ -1565,6 +1615,15 @@ class App extends Component {
                                         color="secondary"
                                     />
                                 </MenuItem>
+                                <MenuItem className={classes.menuItem}>
+                                    Comments
+                                    <Checkbox
+                                        checked={this.state.displayPins}
+                                        onChange={this.handleCrimeChange('displayPins')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
+                                </MenuItem>
                             </Paper>
                         </ClickAwayListener>
                     ) : null}
@@ -1623,7 +1682,7 @@ class App extends Component {
                 }
 
                 {this.state.searchResponse ? (
-                    <ResultCard alreadyTracking={this.state.tracking} locationSharing={this.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                    <ResultCard routeAnalysis={this.routeAnalysis} alreadyTracking={this.state.tracking} locationSharing={this.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
             </div>
         );
@@ -1905,6 +1964,7 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
                     <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 

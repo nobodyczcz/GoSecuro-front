@@ -4,7 +4,9 @@ class MapController {
     constructor() {
         this.heatmap = null;
         this.cameras = [];
+        this.pins=[];
         this.icon = null;
+        this.pinIcon=null;
 
         this.cameraLocations = [
             [-37.814050, 144.944293, 'Security - Safe City - Camera # 48:' + "<br>" + 'Harbour ESP SE Corner West Wharf'],
@@ -73,6 +75,60 @@ class MapController {
         ];
 
     };
+    showPins(map, data) {
+        this.pins=[]
+        var infowindow = new window.google.maps.InfoWindow();
+
+        if (!this.pinIcon) {
+            this.pinIcon = {
+                path: 'M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z',
+                fillColor: '#ff7504',
+                fillOpacity: 1,
+                strokeWeight: 1,
+                strokeColor: '#ffffff',
+                strokeOpacity: 1,
+                size: new window.google.maps.Size(24, 24),
+                origin: new window.google.maps.Point(0, 0),
+                anchor: new window.google.maps.Point(12, 12),
+            }
+        }
+        
+        for (var i = 0; i < data.length; i++) {
+            var marker
+            var details = data[i].pinDetails
+            var infoContent = `<div>
+            <p>
+                Street Light: ${details.StreetLight}
+            </p>
+            <p>
+                Surviliance cameras: ${details.CCTV}
+            </p>
+                ${details.experienceType ==='None'?'':details.experienceType}
+            </div>
+            `
+            marker = new window.google.maps.Marker({
+                position: {lat:details.CoordLat, lng:details.CoordLog},
+                icon: this.pinIcon
+            });
+
+            window.google.maps.event.addListener(marker, 'click', (function (marker, infoContent) {
+                return function () {
+                    infowindow.setContent(infoContent)
+                    infowindow.open(map, marker);
+                }
+            })(marker,infoContent));
+            this.pins.push(marker)
+        }
+
+        this.pinCluster = new window.MarkerClusterer(map,this.pins,
+                {imagePath: 'img/pins/p'}
+            );
+
+    }
+    clearPins(){
+        this.pinCluster.clearMarkers();
+    }
+
     showLight(map, data) {
         if (this.heatmap) {
             this.heatmap.setMap(map);
@@ -125,12 +181,12 @@ class MapController {
                 anchor: new window.google.maps.Point(7, 7),
             }
         }
+        
         //var image = '<div>Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" 			    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 			    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>'
         for (var i = 0; i < locations.length; i++) {
             var marker
             marker = new window.google.maps.Marker({
                 position: new window.google.maps.LatLng(locations[i][0], locations[i][1]),
-                map: map,
                 icon: this.icon
             });
 
@@ -142,11 +198,14 @@ class MapController {
             })(marker, i));
             this.cameras.push(marker)
         }
+        this.cameraCluster = new window.MarkerClusterer(map,this.cameras,
+                {imagePath: 'img/cameras/c'}
+            );
+
+
     }
     clearCamera() {
-        this.cameras.forEach(function (camera){
-            camera.setMap(null)
-        })
+        this.cameraCluster.clearMarkers();
     }
 
     clearMap(map) {

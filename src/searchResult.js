@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Drawer from '@material-ui/core/Drawer';
 
 import classNames from 'classnames';
@@ -16,6 +14,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import NavigationIcon from '@material-ui/icons/Navigation';
 import Fab from '@material-ui/core/Fab';
 import PanicButton from './panicButton.js';
+import { Link } from "react-router-dom";
 
 
 
@@ -139,6 +138,9 @@ const styles = theme => ({
         left: "-90px",
         zIndex:1300
     },
+    showDetails:{
+        color:'gray'
+    }
 });
 
 class ResultCard extends Component {
@@ -194,6 +196,11 @@ class ResultCard extends Component {
        
         console.log('render result: ',this.props.currentRoute);
         const { classes, theme } = this.props;
+        if(this.props.currentRoute){
+            var mode = this.props.currentRoute.request.travelMode.toLowerCase()
+            var suburbs = this.props.routeAnalysis[mode].suburbs
+        }
+        
         return (
             <div>
                 <div className={
@@ -221,8 +228,6 @@ class ResultCard extends Component {
                     open={this.state.open}
                 >
                 
-                
-                
                     <div className={classes.toolbar}>
                             <IconButton className={classes.drawerTriger} onClick={this.handleDrawerChange}>
                                 {this.state.open ? <ChevronDownIcon /> : <ChevronUpIcon />}
@@ -240,28 +245,19 @@ class ResultCard extends Component {
                     <div className={classes.contentPaper}>
                         {
                         this.props.currentRoute ?
-                            this.props.currentRoute.routes[0].legs.map(function (leg, i) {
-                                return (
-                                    <div key={i}>
-                                        {
-                                            leg.steps.map(function (step, x) {
-
-                                                return (
-                                                    <Card className={classes.contentCard} key={i.toString() + x.toString()} >
-                                                        <CardContent>
-                                                            <Typography variant="subtitle2">
-                                                                {step.distance.text} {step.duration.text}
-                                                            </Typography>
-                                                            <div dangerouslySetInnerHTML={{ __html: step.instructions }} />
-
-                                                        </CardContent>
-                                                    </Card>
-                                                    );
-                                            })
-                                        }
-                                    </div>
-                                );
-                            })
+                            <div>
+                                {
+                                    suburbs.highCrime.length>0 ? <p>You will pass through {suburbs.highCrime.length} high crime rate suburbs. We suggest you use location share function when navigating</p>:null
+                                }
+                                <Link 
+                                    className={classes.showDetails}
+                                    variant='h6'
+                                    to='/routeDetail'
+                                    >
+                                    View Route Details
+                                </Link>
+                            </div>
+                            
                             :
                             this.props.results.map(function (item, i) {
                                 var photo = "img/no-image.png"
@@ -287,20 +283,19 @@ class ResultCard extends Component {
                                             title="result photo"
                                             onClick={() => this.handleCardClick(i)}
                                         />
-                                        <div
-                                            className={classes.cardContent}
-                                            onClick={() => this.handleCardClick(i)}
-                                        >
-                                            <CardContent>
-                                                <Typography variant="h6">
-                                                    {name}
-                                                </Typography>
-                                                <Typography variant="body2">
-                                                    {address}
-                                                </Typography>
-
-                                            </CardContent>
-                                        </div>
+                                            <div
+                                                className={classes.cardContent}
+                                                onClick={() => this.handleCardClick(i)}
+                                            >
+                                                <CardContent>
+                                                    <Typography variant="h6">
+                                                        {name}
+                                                    </Typography>
+                                                    <Typography variant="body2">
+                                                        {address}
+                                                    </Typography>
+                                                </CardContent>
+                                            </div>
                                         <Fab
                                             variant="extended"
                                             size="small"

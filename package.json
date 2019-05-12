@@ -18,12 +18,16 @@
     "cordova-plugin-local-notification": "^0.9.0-beta.2",
     "cordova-plugin-statusbar": "^2.4.2",
     "cordova-plugin-whitelist": "1",
+    "cordova-support-google-services": "^1.1.0",
+    "d3-geo": "^1.11.3",
     "fetch": "^1.1.0",
     "geolib": "^2.0.24",
     "history": "^4.9.0",
     "inspector": "^0.5.0",
     "jquery": "^3.4.0",
     "mapbox-gl": "^0.53.1",
+    "phonegap-plugin-multidex": "^1.0.0",
+    "phonegap-plugin-push": "^2.2.3",
     "postscribe": "^2.0.8",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
@@ -69,6 +73,10 @@
         "ACCOUNT_LABEL": "@string/app_name",
         "ACCOUNT_TYPE": "$PACKAGE_NAME.account",
         "CONTENT_AUTHORITY": "$PACKAGE_NAME"
+      },
+      "phonegap-plugin-push": {
+        "ANDROID_SUPPORT_V13_VERSION": "27.+",
+        "FCM_VERSION": "11.6.2"
       }
     },
     "platforms": [
