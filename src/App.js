@@ -23,13 +23,15 @@ import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import ResultCard from './searchResult';
 import HomePageStepper from './homePageStepper.js';
 import ContactsPage from './contactsPage.js';
+import BuddyPage from './BuddyPage.js';
 import EmergencyContacts from './emergencyContactsPage.js';
-import AboutUs from './AboutUs.js';
+import AboutUs from './aboutUs.js';
 import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import suburbNames from './suburb.json';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
+import PinSurvey from './pinQuestionnaire';
 
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
@@ -1573,7 +1575,9 @@ class App extends Component {
                         }.bind(this))
                     }
                 </div>
-
+                <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
+                    <MyLocationIcon />
+                </Fab>
                 <Fab onClick={this.handleMyLocationClick.bind(this)} color="primary" size="small" className={classes.myPositionIcon}>
                     <MyLocationIcon />
                 </Fab>
@@ -1771,13 +1775,27 @@ class App extends Component {
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
-                            to='/aboutUs'
+                            to='/pinSurvey'
                         >
-                            Settings
+                            Pin Questionnaire
                         </Link>
                     </ListItem>
                     <Divider/>
                     <ListItem button key='Navigation3'>
+                            {this.state.isLogin ?
+                                <Link
+                                    className={classes.sideContent}
+                                    variant='h6'
+                                    to='/buddy'
+                                >
+                                    Buddies
+                                </Link>
+                                :
+                                null
+                            }
+                        
+                    </ListItem>
+                    <ListItem button key='Navigation4'>
                             {this.state.isLogin ?
                                 <Link
                                     className={classes.sideContent}
@@ -1791,7 +1809,7 @@ class App extends Component {
                             }
                         
                     </ListItem>
-                    <ListItem button key='Navigation4'>
+                    <ListItem button key='Navigation5'>
                         {this.state.isLogin ?
                             <div
                                     className={classes.sideContent}
@@ -1839,11 +1857,13 @@ class App extends Component {
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
-                    <Route exact path="/contacts" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
+                    <Route exact path="/pinSurvey" component={PinSurvey} getPinLocation={this.props.getPinLocation}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin}/>} />
                     

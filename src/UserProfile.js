@@ -257,8 +257,6 @@ class UserProfile extends React.Component{
         
         return(
             <Paper className={classes.paper}>
-                
-                
                     <AppBar
                             position="fixed"
                             className={classes.appBar}

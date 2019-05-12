@@ -20,6 +20,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 
 
+
 function getModalStyle() {
   
     return {
@@ -148,15 +149,21 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit * 20,
         padding: '5px'
       },
+      NoContacts:{
+          zIndex:2000
+
+      }
 });
 class ContactsPage extends React.Component {
     constructor(props) {
         super(props);
+
+        console.log('rendering contacts page')
+        
         this.apis = new APIs();
         this.state = {
             name: '',
             mobile: '',
-            userName:'',
             open:false,
             contactList:[],
             loading: true,
@@ -198,27 +205,7 @@ class ContactsPage extends React.Component {
     };
 
     componentDidMount() {
-        this.retrieveEmergencies();
-        if(this.props.isLogin){
-            
-            if (localStorage.userName) {
-                this.setState({ userName: localStorage.userName })
-            }
-            else {
-                localStorage.setItem('localUserName','')
-                this.setState({ userName: localStorage.userName })
-            }
-
-        }
-        else{
-            if (localStorage.userName) {
-                this.setState({ userName: localStorage.userName })
-            }
-            else {
-                localStorage.setItem('userName','')
-            }
-
-        }        
+        this.retrieveEmergencies(); 
     }
 
     handleChange = name => event => {
@@ -252,7 +239,6 @@ class ContactsPage extends React.Component {
             };
             var apiRoute = 'api/UserEmergency/create';
             this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.addError.bind(this))
-            
         }
         else{
             if (!localStorage.contactList) {
@@ -282,27 +268,21 @@ class ContactsPage extends React.Component {
         this.retrieveEmergencies();
 
         this.setState({ loading: false });
+        this.setState({ name: '', mobile: '' });
         //jump to next page
     }
 
     updateContactList() {
+        this.setState({ loading: true });
 
-        if(this.props.isLogin){
-            if (localStorage.getItem('localContactList')) {
-                console.log(localStorage.getItem('localContactList'));
-                this.setState({ contactList: JSON.parse(localStorage.localContactList) })
-            }
+        if (localStorage.getItem('contactList')) {
+            console.log(localStorage.getItem('contactList'));
+            this.setState({ contactList: JSON.parse(localStorage.contactList) })
         }
-        else{
+        else {
+            this.setState({ contactList: [] })
+        }
         
-            if (localStorage.getItem('contactList')) {
-                console.log(localStorage.getItem('contactList'));
-                this.setState({ contactList: JSON.parse(localStorage.contactList) })
-            }
-            else {
-                this.setState({ contactList: [] })
-            }
-        }
         this.setState({ loading: false });
         
     }
@@ -346,7 +326,7 @@ class ContactsPage extends React.Component {
                 EmergencyContactPhone: mobileNumber,
             };
             var apiRoute = 'api/UserEmergency/delete';
-            this.apis.callApi(apiRoute,contdata,this.addSuccess.bind(this),this.regError.bind(this))
+            this.apis.callApi(apiRoute,contdata,this.deleteSuccess.bind(this),this.regError.bind(this))
             
         }
         else{
@@ -358,6 +338,16 @@ class ContactsPage extends React.Component {
         }
 
     }
+
+    deleteSuccess(data) {
+        console.log("Emergency Contact successfully deleted")
+        this.retrieveEmergencies();
+
+        this.setState({ loading: false });
+        this.setState({ name: '', mobile: '' });
+        //jump to next page
+    }
+
     retrieveEmergencies() {
         this.setState({ loading: true });
 
@@ -374,12 +364,25 @@ class ContactsPage extends React.Component {
     }
 
     retrieveSuccess(reply) {
+        const { classes } = this.props;
         console.log("Success")
         if (this.props.isLogin) {
             this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
             localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
-
+        console.log("length:"+ JSON.parse(JSON.parse(reply).data).length)
+        if((JSON.parse(reply).data).length == '0'){
+            return(
+                <Card className={classes.NoContacts}>
+                    <CardContent>
+                        <Typography>
+                            No Emergency Contacts.
+                        </Typography>
+                    </CardContent>
+                </Card>
+            );
+        }
+        
         this.setState({ loading: false });            
         //jump to next page
     }
@@ -409,6 +412,17 @@ class ContactsPage extends React.Component {
             if (response.error_description) this.state.errors.push(response.error_description);
         }
         console.log(this.state.errors)
+        this.setState({ loading: false });
+        return(
+            <Card >
+                <CardContent>
+                    <Typography>
+                        Sorry!
+                        Server Error! Please try after sometime.
+                    </Typography>
+                </CardContent>
+            </Card>
+        );
     }
     addError(jqXHR) {
         this.setState({ errors : []});
