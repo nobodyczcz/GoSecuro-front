@@ -296,36 +296,36 @@ class App extends Component {
         this.suburbSet = new Set();
         this.pinLocation = null;
         this.pins=[
-            {
-                pinDetails:{ 
-                    CoordLog:145.043976,
-                    CoordLat:-37.880276,
-                    StreetLight:'Low Light',
-                    CCTV:'No CCTV Cover the Location',
-                    ExperienceType:'Stalked',
-                    Experience:'no experience',
-                    OtherDetails:null,
-                    UserProfileId:null,
-                    State:'VIC',
-                    Street:'Queens Ave',
-                    SuburbSuburbName:'CAULFIELD EAST'
-                }
-            },
-            {
-                pinDetails:{
-                    CoordLog:145.043262,
-                    CoordLat:-37.882431,
-                    StreetLight:'Low Light',
-                    CCTV:'No CCTV Cover the Location',
-                    ExperienceType:'Stalked',
-                    Experience:'no experience',
-                    OtherDetails:null,
-                    UserProfileId:null,
-                    State:'VIC',
-                    Street:'Queens Ave',
-                    SuburbSuburbName:'CAULFIELD EAST'
-                }
-            }
+            // {
+            //     pinDetails:{ 
+            //         CoordLog:145.043976,
+            //         CoordLat:-37.880276,
+            //         StreetLight:'Low Light',
+            //         CCTV:'No CCTV Cover the Location',
+            //         ExperienceType:'Stalked',
+            //         Experience:'no experience',
+            //         OtherDetails:null,
+            //         UserProfileId:null,
+            //         State:'VIC',
+            //         Street:'Queens Ave',
+            //         SuburbSuburbName:'CAULFIELD EAST'
+            //     }
+            // },
+            // {
+            //     pinDetails:{
+            //         CoordLog:145.043262,
+            //         CoordLat:-37.882431,
+            //         StreetLight:'Low Light',
+            //         CCTV:'No CCTV Cover the Location',
+            //         ExperienceType:'Stalked',
+            //         Experience:'no experience',
+            //         OtherDetails:null,
+            //         UserProfileId:null,
+            //         State:'VIC',
+            //         Street:'Queens Ave',
+            //         SuburbSuburbName:'CAULFIELD EAST'
+            //     }
+            // }
         ] //dumb data for pins
 
         this.userLocation = null;
@@ -452,10 +452,34 @@ class App extends Component {
             var theApi = 'api/TempLinks/avaliableLinks'
             var data = null;
             this.apis.callApi(theApi, data, this.receiveLinks.bind(this), this.receiveLinksError.bind(this));
-        }
+            
+            var pinData = {Time:null}
+            if (this.pins.length>0){
+                pinData.Time = this.pins[this.pins.length-1].pinDetails.Time
+            }
+            var pinApi = 'api/Pin/AllPins'
+            this.apis.callApi(pinApi, pinData, this.receivePins.bind(this), this.receivePinsError.bind(this));
 
+            
+        }
+    }
+
+    receivePins(data){
+        var newPins = JSON.parse(data.data);
+        console.log(newPins);
+        if(newPins.length===0){
+            return
+        }
         
-        
+        if(this.pins.length===0){
+            this.pins =this.pins.concat(newPins);
+        }
+        else if (newPins[0].Time > this.pins[this.pins.length-1].Time){
+            this.pins =this.pins.concat(newPins);
+        }
+    }
+    receivePinsError(error){
+        console.log(error)
     }
 
     updateLocations() {

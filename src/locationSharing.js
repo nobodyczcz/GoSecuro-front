@@ -11,6 +11,7 @@ class LocationSharing {
         this.currentLat=null;
         this.currentLng=null;
         this.BackgroundGeolocation = window.BackgroundGeolocation;
+        this.tracking=false;
         
     }
 
@@ -81,20 +82,13 @@ class LocationSharing {
         this.BackgroundGeolocation.on('background', function () {
             console.log('[INFO] App is in background');
             // you can also reconfigure service (changes will be applied immediately)
-            this.BackgroundGeolocation.configure({ debug: true });
         }.bind(this));
 
         this.BackgroundGeolocation.on('foreground', function () {
             console.log('[INFO] App is in foreground');
         }.bind(this));
 
-        this.BackgroundGeolocation.checkStatus(function (status) {
-            console.log('[INFO] BackgroundGeolocation service is running', status.isRunning);
-            console.log('[INFO] BackgroundGeolocation services enabled', status.locationServicesEnabled);
-            console.log('[INFO] BackgroundGeolocation auth status: ' + status.authorization);
 
-            // you don't need to check status before start (this is just the example)
-        });
     }
 
     uploadSuccess(data) {
@@ -113,12 +107,16 @@ class LocationSharing {
         this.journeyId = reply.journeyID;
         this.tempLinkID = reply.tempLinkID;
         this.BackgroundGeolocation.start();
+        this.tracking = true;
+
         
     }
 
     startError(error) {
         console.log("[ERROR] tell server start journey failed")
         console.log(JSON.stringify(error))
+        this.tracking = false;
+
     }
 
     stopSuccess(data) {
@@ -128,11 +126,15 @@ class LocationSharing {
     }
 
     stopError(error) {
+
         console.log("[ERROR] tell server STOP journey failed")
 
         console.log(JSON.string(error));
         this.journeyId = null;
         this.tempLinkID = null;
+    }
+    checkStatus(success,fail){        
+        this.BackgroundGeolocation.checkStatus(success,fail);
     }
 
 
@@ -162,6 +164,7 @@ class LocationSharing {
             SCoordLog: this.getCurrentLng(),
         }
         console.log("send data:" + JSON.stringify(data));
+        this.tracking = true;
         this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
 
         
@@ -169,6 +172,7 @@ class LocationSharing {
 
     stopTracking() {
         this.BackgroundGeolocation.stop();
+        this.tracking = false;
         var theApi = 'api/Journey/journeyFinish';
         var data = {
             JourneyId: this.getJourneyId(),
@@ -177,6 +181,10 @@ class LocationSharing {
         }
         console.log("[INFO] ask server stop: " + JSON.stringify(data));
         this.api.callApi(theApi, data, this.stopSuccess.bind(this), this.stopError.bind(this))
+    }
+
+    isTracking(){
+        return this.tracking;
     }
 
 

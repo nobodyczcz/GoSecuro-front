@@ -15,6 +15,7 @@ import MyLocationIcon from '@material-ui/icons/MyLocation';
 import Fab from '@material-ui/core/Fab';
 import { Divider } from '@material-ui/core';
 
+import Switch from '@material-ui/core/Switch';
 
 
 import { withStyles } from '@material-ui/core/styles';
@@ -26,7 +27,6 @@ const styles = theme => ({
         top: '0',
         zIndex: 1100,
         width: '100%',
-        zIndex:1200,
         minHeight: '120px',
         backgroundColor:'#4f6c98',
     },
@@ -82,6 +82,11 @@ const styles = theme => ({
     },
     gridItem: {
     },
+    shareSwitch:{
+        display:'flex',
+        justifyContent:'flex-end',
+        alignItems:'center'
+    }
 
 
 
@@ -124,15 +129,46 @@ class NavigationPage extends React.Component {
                 lat: this.steps[0].end_location.lat(),
                 lng: this.steps[0].end_location.lng()
             },
-            tracking: false,
+            navWithShare:false,
+
         };
 
     }
+
+    handleChange = name => event => {
+        if(event.target.checked){
+            if(window.cordova){
+                this.interval = setTimeout(function() {
+                    if (this.state.navWithShare) {
+                        console.log("[INFO]3 seconds reach, switch still on. start sharing.")
+                        this.props.locationSharing.navigationRoute = JSON.stringify({
+                            overview_path: this.props.currentRoute.routes[0].overview_path,
+                            origin: this.props.currentRoute.request.origin.location,
+                            destination: this.props.currentRoute.request.destination.location,
+                            duration: this.props.currentRoute.routes[0].legs[0].duration.value,
+                        });
+                        this.props.locationSharing.startTracking(this.props.getLocation());
+                    }
+                    else {
+                        console.log("[INFO]3 seconds reach, switch OFF.")
+                    }
+                }.bind(this), 3000);
+                
+            }
+        }
+        else{
+            this.handleStopTracking()
+        }
+        this.setState({ [name]: event.target.checked });
+    };
 
     componentDidMount() {
     }
     componentWillMount() {
         this.props.hideAppBar(true)
+        if(window.cordova){
+            this.state.navWithShare = this.props.locationSharing.isTracking();
+        }
 
 
     }
@@ -159,9 +195,8 @@ class NavigationPage extends React.Component {
 
 
     handleCancelNav() {
-        if (!this.props.alreadyTracking) {
-            this.handleStopTracking()
-        }
+        this.handleStopTracking()
+        
         this.props.history.goBack();
 
         
@@ -363,8 +398,15 @@ class NavigationPage extends React.Component {
                             <Grid item xs={4}>
                                 <Fab variant='extended' onClick={this.handleCancelNav.bind(this)} color="secondary" >Cancel</Fab>
                             </Grid>
-                            <Grid item xs={8}>
-                                <a>Navigation route and locations are sharing now</a>
+                            <Grid item xs={8} className={classes.shareSwitch}>
+                            <Typography variant="h6">
+                                Location share
+                            </Typography>
+                            <Switch
+                                checked={this.state.navWithShare}
+                                onChange={this.handleChange('navWithShare')}
+                                value="navWithShare"
+                            />
                             </Grid>
 
                         </Grid>
