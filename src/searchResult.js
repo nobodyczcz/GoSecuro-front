@@ -151,7 +151,7 @@ const styles = theme => ({
         zIndex: 1300,
 
         position: 'fixed',
-        top: 'calc( 100% - 100px)',
+        top: 'calc( 100% - 120px)',
         left: 'calc( 50% - 40px)',
         transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
@@ -255,7 +255,7 @@ class ResultCard extends Component {
                     destination: this.props.currentRoute.request.destination.location,
                     duration: this.props.currentRoute.routes[0].legs[0].duration.value,
                 });
-                this.props.locationSharing.startTracking(this.props.getLocation());
+                this.props.locationSharing.startTracking(this.props.getLocation(),Date.now(this.props.currentRoute.routes[0].legs[0].duration.value * 1000));
             }
             
         }
@@ -342,6 +342,50 @@ class ResultCard extends Component {
                             <div>
                                 {
                                     suburbs.highCrime.length>0 ? <p className={classes.warning}>You will pass through {suburbs.highCrime.length} high crime rate suburbs. We suggest you use location share function when navigating</p>:null
+                                }
+                                {
+                                <Card className={classes.routeInfoCard}>
+                                    <CardHeader 
+                                        className={classes.routeInfoHeader}
+                                        avatar={
+                                            <Avatar aria-label="Route Info" className={classes.lowCrime}>
+                                            R
+                                            </Avatar>
+                                        }
+                                        title='Route Information'
+                                        titleTypographyProps={{variant:'h5'}}
+                                     />
+
+                                    <CardContent >
+                                        <div className={classes.details}>
+                                            <Typography variant='h6' >
+                                                Distance
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                {this.props.currentRoute.routes[0].legs[0].distance.text}
+                                            </Typography>
+                                         </div>
+                                         <div className={classes.details}>
+                                            <Typography variant='h6' >
+                                                Duration
+                                            </Typography>
+                                            <Typography variant='h6'>
+                                                {this.props.currentRoute.routes[0].legs[0].duration.text}
+                                            </Typography>
+                                         </div>
+                                        
+                                    </CardContent>
+                                        
+                                        <CardActions className={classes.actions} disableActionSpacing>
+                                        <Link 
+                                            className={classes.showDetails}
+                                            to='/routeDetail'
+                                            >
+                                            View Route Details
+                                        </Link>
+                                    </CardActions>
+
+                                </Card>
                                 }
                                 {
                                     suburbs.highCrime.length>0 ? 
@@ -518,50 +562,7 @@ class ResultCard extends Component {
                                     </Card>
                                     : null
                                 }
-                                {
-                                <Card className={classes.routeInfoCard}>
-                                    <CardHeader 
-                                        className={classes.routeInfoHeader}
-                                        avatar={
-                                            <Avatar aria-label="Route Info" className={classes.lowCrime}>
-                                            R
-                                            </Avatar>
-                                        }
-                                        title='Route Information'
-                                        titleTypographyProps={{variant:'h5'}}
-                                     />
-
-                                    <CardContent >
-                                        <div className={classes.details}>
-                                            <Typography variant='h6' >
-                                                Distance
-                                            </Typography>
-                                            <Typography variant='h6'>
-                                                {this.props.currentRoute.routes[0].legs[0].distance.text}
-                                            </Typography>
-                                         </div>
-                                         <div className={classes.details}>
-                                            <Typography variant='h6' >
-                                                Duration
-                                            </Typography>
-                                            <Typography variant='h6'>
-                                                {this.props.currentRoute.routes[0].legs[0].duration.text}
-                                            </Typography>
-                                         </div>
-                                        
-                                    </CardContent>
-                                        
-                                        <CardActions className={classes.actions} disableActionSpacing>
-                                        <Link 
-                                            className={classes.showDetails}
-                                            to='/routeDetail'
-                                            >
-                                            View Route Details
-                                        </Link>
-                                    </CardActions>
-
-                                </Card>
-                                }
+                                
                                 
                             </div>
                             

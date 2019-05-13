@@ -96,6 +96,7 @@ class NavigationPage extends React.Component {
         super(props);
 
 
+        
         this.close = false;
         this.veryClose = false;
         this.apis = new APIs();
@@ -112,10 +113,12 @@ class NavigationPage extends React.Component {
                 this.steps.push(routes.steps[i])
             }
         }
+        this.cloest = this.steps[0].distance.value;//the closest distance to next step
+        this.fastest = 0;//the fastest distance to previous step
         console.log(this.steps)
         this.state = {
-            startTime: new Date(),
-            planEndTime: new Date(routes.duration.value * 1000),
+            startTime: Date.now(),
+            planEndTime: Date.now(routes.duration.value * 1000),
             steps: this.steps,
             current: 0,
             next: 1,
@@ -130,6 +133,7 @@ class NavigationPage extends React.Component {
                 lng: this.steps[0].end_location.lng()
             },
             navWithShare:false,
+            instructions:this.steps[0].instructions,
 
         };
 
@@ -147,7 +151,7 @@ class NavigationPage extends React.Component {
                             destination: this.props.currentRoute.request.destination.location,
                             duration: this.props.currentRoute.routes[0].legs[0].duration.value,
                         });
-                        this.props.locationSharing.startTracking(this.props.getLocation());
+                        this.props.locationSharing.startTracking(this.props.getLocation(),this.state.planEndTime);
                     }
                     else {
                         console.log("[INFO]3 seconds reach, switch OFF.")
@@ -211,18 +215,47 @@ class NavigationPage extends React.Component {
             { latitude: this.state.stepEnd.lat, longitude: this.state.stepEnd.lng }
         );
 
-        if (distance <= 10) {
-            this.close = true
+        var distanceToStart = geolib.getDistance(
+            { latitude: coord.lat, longitude: coord.lng },
+            { latitude: this.state.stepStart.lat, longitude: this.state.stepStart.lng }
+        );
+
+        if(this.cloest){
+            if (distance<this.cloest){
+                this.cloest = distance;
+            }
         }
+        else{
+            this.cloest = distance;
+        }
+
+        if(this.fastest){
+            if (this.fastest<distanceToStart){
+                this.fastest = distanceToStart;
+            }
+            else if(this.fastest-distanceToStart > 10){
+                this.cloest = distance;
+            }
+        }
+        else{
+            this.fastest = distanceToStart;
+        }
+
         var theCurrent = this.state.current;
         var theNext = this.state.next;
         var theFinish = this.state.finish;
         var theStart = this.state.stepStart;
         var theEnd = this.state.stepEnd;
-        if ((this.close && distance > 15) || distance < 5) {
-            this.close = false;
+        if (((distance - this.cloest > 5) && (distanceToStart-this.fastest>=-5) ) || distance < 5) {
+            this.cloest=null;
+            this.fastest=null;
             theNext = theNext + 1;
             theCurrent = theCurrent + 1;
+            if (!this.steps[theCurrent]) {
+                theFinish = true;
+                this.setState({finish:theFinish});
+                return
+            }
 
             theStart= {
                 lat: this.steps[theCurrent].start_location.lat(),
@@ -235,11 +268,39 @@ class NavigationPage extends React.Component {
             }
 
 
-            if (theCurrent >= this.state.steps.length) {
-                theFinish = true;
-            }
+            
         }
         console.log("update: " + distance + " " + "theCurrent");
+        var currentInstruction = this.steps[theCurrent].instructions
+        var currentSecondIndex = currentInstruction.search('<div')
+        var currentSecondInstruction='';
+        if(currentSecondIndex>0){
+            currentSecondInstruction = currentInstruction.slice(nextSecondIndex);
+            currentInstruction = currentInstruction.slice(0,nextSecondIndex);
+        }
+
+        var nextInstruction =  this.steps[theNext] ? this.steps[theNext].instructions:'';
+        var nextSecondIndex = nextInstruction.search('<div')
+        var nextSecondInstruction='';
+        if(nextSecondIndex>0){
+            nextSecondInstruction = nextInstruction.slice(nextSecondIndex);
+            nextInstruction = nextInstruction.slice(0,nextSecondIndex);
+        }
+
+        var theInstructions = '';
+        if(this.state.current===0 && this.fastest<this.cloest){
+            theInstructions = this.steps[0].instructions
+        }
+        else if(!this.steps[theNext]){
+            theInstructions = currentSecondInstruction;
+        }
+        else if(this.closest <= (this.steps[theCurrent].travel_mode === "WALKING"? 100:400)){
+            theInstructions = nextInstruction
+        }
+        else{
+            theInstructions = currentSecondInstruction
+        }
+
 
         this.setState({
             toNext: distance,
@@ -248,6 +309,7 @@ class NavigationPage extends React.Component {
             finish: theFinish,
             stepStart: theStart,
             stepEnd:theEnd,
+            instructions: theInstructions
         })
 
     }
@@ -260,12 +322,13 @@ class NavigationPage extends React.Component {
         var currentStep = this.state.steps[this.state.current];
         var nextStep = this.state.steps[this.state.next];
         var toNext;
-        if (this.state.toNextStep > 1000) {
-            toNext = this.state.toNextStep / 1000 + " km"
+        if (this.state.toNext > 1000) {
+            toNext = this.state.toNext / 1000 + " km"
         }
         else {
-            toNext = this.state.toNextStep + ' m'
+            toNext = this.state.toNext + ' m'
         }
+
         
         return (
             <div>
@@ -281,7 +344,20 @@ class NavigationPage extends React.Component {
                         spacing={8}
                         className={classes.grid}
                     >
-                        
+                    {this.state.theFinish?
+                        <Grid item xs={12}>
+                            <Card className={classes.contentCard}>
+                                <Typography
+                                    variant="h5"
+                                    align="center"
+                                    color="primary"
+                                >
+                                You are at the destination now. Navigation Finish
+                                </Typography>
+                            </Card>
+                        </Grid>
+                        :
+                        <div>
                         {currentStep.father ?
                             <Grid item xs={12}>
                                 <Card className={classes.header}>
@@ -296,10 +372,6 @@ class NavigationPage extends React.Component {
                             </Grid>
                             : null
                                     }
-        
-                                
-                                
-                                
                         {currentStep.travel_mode == "TRANSIT" ? 
                             <Grid item xs={12}>
                                 <Grid container
@@ -310,14 +382,14 @@ class NavigationPage extends React.Component {
                                     <Grid item xs={5} className={classes.transit}>
                                         <Card className={classes.contentCard}>>
                                         <Typography
-                                                variant="h5"
+                                                variant="h6"
                                                 color="primary"
                                         
                                         >
                                             Take {currentStep.transit.line.vehicle.name} {currentStep.transit.line.short_name} 
                                         </Typography>
                                         <Typography
-                                                variant="h5"
+                                                variant="h6"
                                                 color="primary"
 
                                         >
@@ -332,7 +404,25 @@ class NavigationPage extends React.Component {
                                                 variant="body1"
                                                 color="primary"
                                         >
-                                            Departure stop {currentStep.transit.departure_stop.name}. Arrival stop {currentStep.transit.departure_stop.name}.
+                                            Departure time {currentStep.transit.departure_time.text}.
+                                        </Typography>
+                                        <Typography
+                                                variant="body1"
+                                                color="primary"
+                                        >
+                                            Departure stop {currentStep.transit.departure_stop.name}.
+                                        </Typography>
+                                        <Typography
+                                                variant="body1"
+                                                color="primary"
+                                        >
+                                            Arrival time {currentStep.transit.arrival_time.text}.
+                                        </Typography>
+                                        <Typography
+                                                variant="body1"
+                                                color="primary"
+                                        >
+                                            Arrival stop {currentStep.transit.departure_stop.name}.
                                         </Typography>
                                             </Card>
                                         </Grid>
@@ -370,13 +460,17 @@ class NavigationPage extends React.Component {
                                                 variant="h6"
                                                 color="primary"
                                         >
-                                                {nextStep ? <a dangerouslySetInnerHTML={{ __html: nextStep.instructions }} /> : "You will reach the destination"}
+                                        <a dangerouslySetInnerHTML={{ __html: this.state.instructions }} />
                                             </Typography>
                                     </Card>
                                 </Grid>
                                 </Grid>
                             </Grid>
                         }
+                        </div>
+                    }
+                        
+                        
                     </Grid>
                     
                 </Paper>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "160811547000",
+    "firebase_url": "https://go-safe-notification.firebaseio.com",
+    "project_id": "go-safe-notification",
+    "storage_bucket": "go-safe-notification.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160811547000:android:4d9c7d75949fa8e9",
+        "android_client_info": {
+          "package_name": "com.fitech.gosafefront"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "160811547000-adqdb9411vgd1cvhjgf5925tiu3bgu2f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQf8UN3Nw16UiOzbcCPKwOhRjGkb2-gFo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "160811547000-adqdb9411vgd1cvhjgf5925tiu3bgu2f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
