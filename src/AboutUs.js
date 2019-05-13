@@ -21,26 +21,25 @@ else {
 }
 
 const styles = theme => ({
-    appBar: {
-        transition: theme.transitions.create(['margin', 'width'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        backgroundColor:'#fffafa'
-    },
+    // appBar: {
+    //     transition: theme.transitions.create(['margin', 'width'], {
+    //       easing: theme.transitions.easing.sharp,
+    //       duration: theme.transitions.duration.leavingScreen,
+    //     }),
+        //backgroundColor:'#fffafa'
+    //},
     backButton:{
-        color: '#FF7504',
-        zIndex: 1210
-
+        color: '#FFFFFF',
+        zIndex: 1210,
     },
     content: {
         justifyContent: 'center',
-        marginTop:'80px',
+        marginTop:'100px',
         paddingLeft: theme.spacing.unit * 3.5,
         paddingRight: theme.spacing.unit * 3.5
     },
     contentText:{
-        color:'#FF7504',
+        //color:'#FF7504',
         textAlign: 'justify'
     },
     emergencyText:{
@@ -73,31 +72,31 @@ class AboutUs extends React.Component{
                     <AppBar
                             position="fixed"
                             className={classes.appBar}
+                            color="secondary"
                     >
                         <Toolbar className={classes.toolbar}>
                             <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                             </IconButton>
-                            <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
+                            <Typography
+                            variant="h6"
+                            color="inherit"
+                            className={classes.headerTitle}
+                            >
                                 About Us
-                            </Typography>
+                        </Typography>
                         </Toolbar>
                         
                     </AppBar>
                     <div className={classes.content}>
                     <Typography className={classes.contentText} variant='h6'>
-                        SafeTrip is developed with your safety in mind.
+                        Crime and offences in public spaces have continued to threaten the safety of women, discouraging them to travel alone confidently.
                         <br/><br/>
-                        Knowing newcomers to Melbourne, like you are not familiar with the suburbs, 
-                        and how to get around.
+                        This situation is particularly intimidating to female students who are new and unfamiliar to Melbourne. It is a social responsibility to ensure the safety of women and encourage them to travel confidently. 
                         <br/><br/>
-                        In emergency, dial:
-                    </Typography>
-                    <Typography className={classes.emergencyText} variant='h4'>
-                    "000"
-                    </Typography>
-                    <Typography className={classes.contentText} variant='h6'>
-                        to contact the Victorian Police.
+                        GoSecuro is a safety app targeted towards new students in Melbourne. The application is developed with your safety in mind. 
+                        <br/><br/>
+                        GoSecuro acts as an additional safety measure when you’re navigating Melbourne, crime and incidents.
                     </Typography>
                     </div>
                     

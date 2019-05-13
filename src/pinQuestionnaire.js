@@ -17,6 +17,9 @@ import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import NativeSelect from '@material-ui/core/NativeSelect';
 import TextField from '@material-ui/core/TextField';
+import IconButton from '@material-ui/core/IconButton';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
 
 import { createBrowserHistory, createHashHistory } from 'history';
@@ -26,6 +29,10 @@ import { Toolbar } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
+    backButton:{
+        color: '#FFFFFF',
+        zIndex: 1210,
+    },
     buttons: {
         position: "fixed",
         bottom: 0,
@@ -65,7 +72,7 @@ const styles = theme => ({
         height:"100%",
     },
     toolbar: {
-        justifyContent: "center",
+        //justifyContent: "center",
         marginTop:"20px",
         
     },
@@ -89,6 +96,9 @@ const styles = theme => ({
     },
     headingText: {
         fontWeight:'bold',
+    },
+    headerTitle:{
+        marginLeft: `calc( 100% - 80% )`,        
     },
     
     
@@ -170,15 +180,19 @@ class PinSurvey extends React.Component {
    
 
     render() {
-        const { classes } = this.props;
+        const { classes,theme } = this.props;
 
         return(
             <Paper className={classes.paper}>
                 <AppBar color="secondary" position="static">
                     <Toolbar className={classes.toolbar}>
+                        <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
+                            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                            </IconButton>
                         <Typography
                             variant="h6"
                             color="inherit"
+                            className={classes.headerTitle}
                             >
                             Drop a Pin
                         </Typography>
