@@ -11,10 +11,6 @@ import Paper from '@material-ui/core/Paper';
 import { Grid } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 
-
-
-
-
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 const styles = theme => ({
@@ -48,7 +44,7 @@ const styles = theme => ({
     },
     mobileStepper: {
         alignItem: 'center',
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.secondary.main,
     },
     mainText:{
         color:'#FF7504',
@@ -146,18 +142,18 @@ class HomePageStepper extends Component {
                 </Card>
                 <MobileStepper
                     steps={maxSteps}
-                    position="static"
+                    variant="dots"
+                    position="bottom"
                     activeStep={activeStep}
                     className={classes.mobileStepper}
-                    color='secondary'
                     nextButton={
-                        <Button size="small" onClick={this.handleNext} disabled={activeStep === maxSteps - 1}>
+                        <Button color="primary" size="small" onClick={this.handleNext} disabled={activeStep === maxSteps - 1}>
                             Next
                               {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                         </Button>
                     }
                     backButton={
-                        <Button size="small" onClick={this.handleBack} disabled={activeStep === 0}>
+                        <Button color="primary" size="small" onClick={this.handleBack} disabled={activeStep === 0}>
                             {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
                             Back
                           </Button>
@@ -167,5 +163,6 @@ class HomePageStepper extends Component {
         );
     }
 }
+
 
 export default withStyles(styles, { withTheme: true })(HomePageStepper);
