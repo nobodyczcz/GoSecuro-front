@@ -151,7 +151,7 @@ const styles = theme => ({
         padding: '5px'
       },
       NoContacts:{
-          zIndex:2000
+          justifyContent: "center"
 
       }
 });
@@ -173,6 +173,7 @@ class ContactsPage extends React.Component {
             activeItemName: '',
             activeMobile: '',
             activeIndex:'',
+            noContacts: false
         };
 
     }
@@ -268,7 +269,7 @@ class ContactsPage extends React.Component {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
 
-        this.setState({ loading: false });
+        this.setState({ loading: false, noContacts: false });
         this.setState({ name: '', mobile: '' });
         //jump to next page
     }
@@ -365,23 +366,15 @@ class ContactsPage extends React.Component {
     }
 
     retrieveSuccess(reply) {
-        const { classes } = this.props;
+        this.setState({noContacts : false});
         console.log("Success")
         if (this.props.isLogin) {
             this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
             localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
         console.log("length:"+ JSON.parse(JSON.parse(reply).data).length)
-        if((JSON.parse(reply).data).length == '0'){
-            return(
-                <Card className={classes.NoContacts}>
-                    <CardContent>
-                        <Typography>
-                            No Emergency Contacts.
-                        </Typography>
-                    </CardContent>
-                </Card>
-            );
+        if(JSON.parse(JSON.parse(reply).data).length == 0){
+           this.setState({noContacts : true});
         }
         
         this.setState({ loading: false });            
@@ -414,16 +407,7 @@ class ContactsPage extends React.Component {
         }
         console.log(this.state.errors)
         this.setState({ loading: false });
-        return(
-            <Card >
-                <CardContent>
-                    <Typography>
-                        Sorry!
-                        Server Error! Please try after sometime.
-                    </Typography>
-                </CardContent>
-            </Card>
-        );
+        
     }
     addError(jqXHR) {
         this.setState({ errors : []});
@@ -534,9 +518,16 @@ class ContactsPage extends React.Component {
                             alignItems="center"
                             spacing={8}
                         >
+
                         
                             {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
-                     
+                            {this.state.noContacts ? 
+                                <Typography variant="h6">
+                                    No Emergency Contacts.
+                                </Typography>
+                                :
+                                null
+                            }
                             {this.state.contactList.map(function (item, i) {
                                 var displayName = "";
                                 displayName = (item.ECname ? item.ECname[0] : "") + (item.ECname ? item.ECname[1] : "");
@@ -627,10 +618,6 @@ class ContactsPage extends React.Component {
                                                     {item.EmergencyContactPhone}
                                                 </Typography>
     
-                                                {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
-                                                    {item.EmergencyContactPhone}
-                                                </Typography>    
-     */}
                                             </CardContent>
                                         </Card>
                                     </Grid>

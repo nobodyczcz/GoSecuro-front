@@ -37,6 +37,8 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
+import ShowPins from './showPins.js';
+import Settings from './settingsPage.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider } from '@material-ui/core';
 
@@ -798,7 +800,7 @@ class App extends Component {
 
     requestCrime(jsonData) {
         //load crime data from server. Display the data one loaded 
-        console.log('sendData: '+jsonData);
+        //console.log('sendData: '+jsonData);
         fetch(window.serverUrl + 'api/Suburbs/Details/', {
             method: 'POST',
             body: jsonData,
@@ -1862,6 +1864,7 @@ class App extends Component {
     };
 
     homePage() {
+       
 
         return (
             <div>
@@ -1869,19 +1872,6 @@ class App extends Component {
             </div>
             
             );
-    }
-
-    aboutUs() {
-        return(
-            <div>
-                <Typography variant='h6'>
-                    <br/>
-                    Your safe journey Home is important.
-                    <br/>
-                    Find your safe way home.
-                </Typography>
-            </div> 
-        );
     }
 
     startUpPage() {
@@ -1913,42 +1903,56 @@ class App extends Component {
                             About Us
                         </Link>
                     </ListItem>
-                    <ListItem button key='Navigation2'>
+                    <ListItem button key='Navigation'>
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
-                            to='/pinSurvey'
+                            to='/settings'
                         >
-                            Pin Questionnaire
+                            Settings
                         </Link>
                     </ListItem>
                     <Divider/>
-                    <ListItem button key='Navigation3'>
-                            {this.state.isLogin ?
-                                <Link
-                                    className={classes.sideContent}
-                                    variant='h6'
-                                    to='/buddy'
-                                >
-                                    Buddies
-                                </Link>
-                                :
+                    <ListItem button key='Navigation2'>
+                        {this.state.isLogin ?
+                            <Link 
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/showPins'
+                            >
+                                My Pins
+                            </Link>
+                            :
                                 null
                             }
                         
                     </ListItem>
+                    <ListItem button key='Navigation3'>
+                        {this.state.isLogin ?
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/buddy'
+                            >
+                                Buddies
+                            </Link>
+                            :
+                            null
+                        }
+                        
+                    </ListItem>
                     <ListItem button key='Navigation4'>
-                            {this.state.isLogin ?
-                                <Link
-                                    className={classes.sideContent}
-                                    variant='h6'
-                                    to='/userProfile'
-                                >
-                                    User Profile
-                                </Link>
-                                :
-                                null
-                            }
+                        {this.state.isLogin ?
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/userProfile'
+                            >
+                                User Profile
+                            </Link>
+                            :
+                            null
+                        }
                         
                     </ListItem>
                     <ListItem button key='Navigation5'>
@@ -1967,8 +1971,8 @@ class App extends Component {
                                 to='/login'
                             >
                                 Login
-                        </Link>
-                            }
+                            </Link>
+                        }
                         
                     </ListItem>
                 </List>
@@ -2009,7 +2013,9 @@ class App extends Component {
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
-                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
+                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} />
+                    <Route exact path="/showPins" component={()=><ShowPins history={history} isLogin={this.state.isLogin} hideAppBar={this.hideAppBar.bind(this)} map={this.map}/>}/>
+                    <Route exact path="/settings" component={()=><Settings history={history} hideAppBar={this.hideAppBar.bind(this)} />}/>
                 </Router>  
           </MuiThemeProvider>
         );
