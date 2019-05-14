@@ -28,6 +28,7 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
+import Snackbar from '@material-ui/core/Snackbar';
 
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
@@ -40,7 +41,7 @@ import LoginPage from './login.js';
 import ShowPins from './showPins.js';
 import Settings from './settingsPage.js';
 import Typography from '@material-ui/core/Typography';
-import { Divider } from '@material-ui/core';
+import { Divider, Fade } from '@material-ui/core';
 
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
@@ -195,6 +196,13 @@ const styles = theme => ({
         zIndex: 1000,
         backgroundColor: "#ff7504"
 
+    },
+    notification:{
+        width: "51%",
+        justifyContent: "center",
+        top: theme.spacing.unit * 18,
+        left: 'calc( 100% - 75%)',
+        opacity: 0.9,
     }
 
 });
@@ -361,18 +369,11 @@ class App extends Component {
         this.mainBar = React.createRef();
 
         this.naviPage = React.createRef();
-
-        console.log('test data')
         this.crimeData = {
             'type': 'FeatureCollection',
-            'features': [
-                
-            ],
+            'features': [],
         };
-
-
         console.log('set state')
-
         
         if (document.getElementById('mapdiv').childNodes.length === 0) {
             //load map script from server. and render map when script is loaded
@@ -382,8 +383,6 @@ class App extends Component {
             });
         }  
 
-        
-        
         this.state = {  // state of react component
             highCrime: false,
             midiumCrime: false,
@@ -406,6 +405,7 @@ class App extends Component {
             mapLayer:'all',
             startUpPageLayer: true,
             isLogin: this.serverApi.isLogin(),
+            logoutNotification: false,
             welcomeImgContainer:true,
             error:[],
             barColor: 'secondary',
@@ -439,9 +439,17 @@ class App extends Component {
         console.log(e[1])
     }
     logoutSuccess() {
-        this.setState({ isLogin: false });
-        
+        this.setState({ isLogin: false,logoutNotification: true  });
+        setTimeout(() => this.setState({ logoutNotification: false }), 3000);        
     }
+    handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        this.setState({ logoutNotification: false });
+      };
+    
 
     handleLogout = () => {
         console.log(window.serverUrl);
@@ -2004,6 +2012,18 @@ class App extends Component {
                     </div>
                     
                     {this.theBar()}
+                    <Snackbar
+                        anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
+                        open={this.state.logoutNotification}
+                        autoHideDuration={4000}
+                        TransitionComponent={Fade}
+                        onClose={this.handleClose}
+                        className={classes.notification}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">Logged out successfully.</span>}
+                    />
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin}/>}  />

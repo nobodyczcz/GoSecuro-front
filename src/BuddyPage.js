@@ -20,68 +20,13 @@ import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 
 
-function getModalStyle() {
-  
-    return {
-      top: `calc(100% - 60% )`,
-      left: `calc(100% - 98% )`,
-      width: `calc(100% - 10% )`,
-    };
-  }
-
-function EditIcon(props) {
-    return (
-        <svg xmlns="http://www.w3.org/2000/svg" 
-            width="1.5em" 
-            height="1.5em" 
-            viewBox="0 0 24 24"
-            {...props}
-        >
-        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-        </svg>
-    );
-}
-
 const styles = theme => ({
-    addNewButton:{
-        left:`calc( 100% - 125px )`
-    },
     avatar: {
         marginTop: '0px',
         width: "60px",
         height:"60px",
         fontSize: "20px"
     },
-    customLeftButton:{
-        left:`calc( 100% - 90% )`,
-        minWidth: '70px',
-        height: '40px',
-        width: '100px'
-    },
-
-    customRightButton:{
-        left:`calc( 50% - 10% )`,
-        minWidth: '70px',
-        height: '40px',
-        width: '100px'
-    },
-
-    deleteIconButton:{
-        float: 'right',
-        top: `calc( 100% - 90% )`,
-        padding: '0'
-
-    },
-    editIconButton:{
-        float: 'right',
-        top: `calc( 100% - 90% )`,
-        transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-        opacity: '1',
-        fill: '#4f6c98',
-        paddingLeft: '20px'
-
-    },
-
     paper: {
         position: 'fixed',
         width: '100%',
@@ -114,40 +59,18 @@ const styles = theme => ({
         float: 'right',
         fontSize:'medium'
     },
-    contMobile: {
-        width: '50%',
-        float: 'right',
-        fontSize:'medium',
-        fontColor: '#bdbdbd'
-    },
-    textField: {
-        marginTop: 0,
-        marginRight:'1%',
-        width:'49%'
+    infoText: {
+        color: '#757575',
+        fontSize: 'smaller'
     },
     mainText: {
         fontWeight:'bold',
         justifyContent: 'center',
     },
-    modalPaper: {
-        position: 'absolute',
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
-        padding: '10px',
-        outline: 'none',
-      },
-      contactPaper: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%',
-        top: `calc( 100% - 54% )`,
-        left: '0',
-        zIndex: 900,
-      },
-      progress: {
+    progress: {
         marginLeft: theme.spacing.unit * 20,
         padding: '5px'
-      },
+    },
 });
 class BuddyPage extends React.Component {
     constructor(props) {
@@ -156,49 +79,24 @@ class BuddyPage extends React.Component {
         this.state = {
             name: '',
             mobile: '',
-            userName:'',
-            open:false,
             contactList:[],
             loading: true,
             errors: [],
-            isOpen:false,
+            noContacts: false
+            
         };
 
     }
-
-    handleOpen = () => {
-        this.setState({ open: true });
-    };
-    
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
-    handleEditOpen = (index,item) => {
-        this.setState({ isOpen: true,
-                        name:item.name,
-                        mobile:item.mobile,
-        });
-    };
-
-    handleEditClose = () => {
-        this.setState({ isOpen: false,
-            name:'',
-            mobile: '',
-});
-    };
 
     componentDidMount() {
         this.retrieveBuddies();
 
     }
 
-    
     retrieveBuddies() {
         this.setState({ loading: true });
-
         console.log(window.serverUrl);
-        console.log("Retrieving emergency contacts");
+        console.log("Retrieving buddies");
         var apiRoute = 'api/UserEmergency/retrieveUser';
         if (this.props.isLogin)
             this.apis.callApi(apiRoute,'',this.retrieveSuccess.bind(this),this.regError.bind(this));
@@ -206,17 +104,21 @@ class BuddyPage extends React.Component {
     }
 
     retrieveSuccess(reply) {
-        console.log("Success")
+        console.log("Buddies retrieved successfully.")
         if (this.props.isLogin) {
             this.setState({ contactList: JSON.parse(reply.data) });
-            //localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
-
-        this.setState({ loading: false });            
-        //jump to next page
+        console.log("buddies length: " + JSON.parse(reply.data).length)
+        if(JSON.parse(reply.data).length == 0){
+            this.setState({noContacts : true});
+        }
+        else{
+             this.setState({noContacts: false})
+        }
+         
+        this.setState({ loading: false });          
     }
 
-   
     regError(jqXHR) {
         this.setState({ errors : []});
         var response = jqXHR.responseJSON;
@@ -241,13 +143,15 @@ class BuddyPage extends React.Component {
     
     render() {
         const { classes } = this.props;
-        console.log('rendering guardian page')
+        console.log('rendering Buddies page')
         return (
             <Paper className={classes.paper}>
                 <div className={classes.content}>
-                    
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Buddies
+                    </Typography >
+                    <Typography className={classes.infoText}>
+                        Your buddies add you as emergency contact. Do reach out to them when they need you!
                     </Typography>
                 </div>
 
@@ -261,7 +165,13 @@ class BuddyPage extends React.Component {
                         >
                         
                             {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
-                     
+                            {this.state.noContacts ? 
+                                <Typography variant="h6">
+                                    Waiting for buddies to add you!
+                                </Typography>
+                                :
+                                null
+                            }
                             {this.state.contactList.map(function (item, i) {
                                 var displayName = "";
                                 var phone = item.phone;
@@ -291,10 +201,6 @@ class BuddyPage extends React.Component {
                                             <Typography className={classes.contName} gutterBottom align='left' variant="h6">
                                                     {fullName?fullName : 'No Name'}<br/>
                                                     {phone}
-                                                </Typography>
-    
-                                                {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
-                                                    {item.EmergencyContactPhone}
                                                 </Typography>    
      */}
                                             </CardContent>

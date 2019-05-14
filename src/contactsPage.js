@@ -122,6 +122,10 @@ const styles = theme => ({
         fontSize:'medium',
         fontColor: '#bdbdbd'
     },
+    infoText: {
+        color: '#757575',
+        fontSize: 'smaller'
+    },
     textField: {
         marginTop: 0,
         marginRight:'1%',
@@ -137,23 +141,14 @@ const styles = theme => ({
         boxShadow: theme.shadows[5],
         padding: '10px',
         outline: 'none',
-      },
-      contactPaper: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%',
-        top: `calc( 100% - 54% )`,
-        left: '0',
-        zIndex: 900,
-      },
-      progress: {
-        marginLeft: theme.spacing.unit * 20,
-        padding: '5px'
-      },
-      NoContacts:{
-          justifyContent: "center"
-
-      }
+    },
+    progress: {
+    marginLeft: theme.spacing.unit * 20,
+    padding: '5px'
+    },
+    NoContacts:{
+        justifyContent: "center"
+    }
 });
 class ContactsPage extends React.Component {
     constructor(props) {
@@ -372,10 +367,11 @@ class ContactsPage extends React.Component {
             this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
             localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
-        console.log("length:"+ JSON.parse(JSON.parse(reply).data).length)
         if(JSON.parse(JSON.parse(reply).data).length == 0){
            this.setState({noContacts : true});
         }
+        else
+            this.setState({noContacts: false})
         
         this.setState({ loading: false });            
         //jump to next page
@@ -440,7 +436,10 @@ class ContactsPage extends React.Component {
                     
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
-                    </Typography> 
+                    </Typography>
+                    <Typography className={classes.infoText}>
+                        You can add your close and trusted ones as your emergency contacts. Do get in touch with them so that they can always be available for you!
+                    </Typography>
                     
                     <Fab
                         variant="extended"
