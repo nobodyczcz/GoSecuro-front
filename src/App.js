@@ -472,7 +472,7 @@ class App extends Component {
         if(newPins.length===0){
             return
         }
-        
+
         if(this.pins.length===0){
             this.pins =this.pins.concat(newPins);
         }
@@ -703,7 +703,12 @@ class App extends Component {
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         
-
+        history.listen((location, action) => {
+            if(['/map','/contactsPage','/'].indexOf(location.pathname)>=0){
+                this.hideAppBar(false);
+            }
+            // location is an object like window.location
+        });
         this.interval = setTimeout(() => this.setState({ startUpPageLayer: false }), 3000);
         if (!localStorage.userName || !localStorage.password) {
             history.push('\login');
@@ -1565,13 +1570,10 @@ class App extends Component {
      * 
      */ 
     mapPage() {
-        this.hideAppBar(false);
         //define the appearance of map 
         console.log('render home page')
         const { classes } = this.props;
-
-
-
+        
         const { mobileMoreAnchorEl, layerMenu } = this.state;
         const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
         var theleft;
@@ -1887,6 +1889,7 @@ class App extends Component {
     
 
     render() {
+        
         //Basic structure of the whole app
         console.log('reander basic app')
         const { classes } = this.props;

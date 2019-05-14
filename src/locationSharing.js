@@ -1,10 +1,15 @@
 import $ from 'jquery';
 import APIs from './apis.js';
+import geolib from 'geolib';
 
 
 class LocationSharing {
     constructor() {
         this.api = new APIs();
+        this.trackCoord=null;
+        this.UpdateTime = null;
+        this.planArrivalTime=null;
+        this.lastDestinationCheck=null;
         this.navigationRoute = null;
         this.journeyId = null;
         this.navigationRoute=null;
@@ -12,6 +17,7 @@ class LocationSharing {
         this.currentLng=null;
         this.BackgroundGeolocation = window.BackgroundGeolocation;
         this.tracking=false;
+        this.checkInteval=600000;
         
     }
 
@@ -25,9 +31,9 @@ class LocationSharing {
             notificationTitle: 'Gosafe background tracking',
             notificationText: 'enabled',
             debug: false,
-            interval: 15000,
-            fastestInterval: 10000,
-            activitiesInterval: 10000,
+            interval: 30000,
+            fastestInterval: 15000,
+            activitiesInterval: 30000,
         });
         this.BackgroundGeolocation.on('location', function (location) {
             // handle your locations here
@@ -41,6 +47,45 @@ class LocationSharing {
                 CoordLog: location.longitude
 
             }
+            var distance = geolib.getDistance(
+                { latitude: this.trackCoord.lat, longitude: this.trackCoord.lng },
+                { latitude: location.latitude, longitude: location.longitude }
+            );
+            var currentTime = Date.now();
+
+            if (distance>=20){
+                this.trackCoord = {lat:location.latitude,lng:location.longitude};
+                this.updateTime = currentTime
+            }
+            else{
+                var interval = currentTime-this.updateTime;
+                if(interval > this.checkInteval){
+                    //push notification
+                    window.cordova.plugins.notification.local.schedule({
+                        title: 'Are you OK?',
+                        text: 'You did not move for 10 minutes. Is everything ok?',
+                        actions: [
+                            { id: 'yes', title: 'Yes' },
+                            { id: 'no',  title: 'No' }
+                        ]
+                    });
+                    this.updateTime = currentTime
+                }
+                
+            }
+
+            if ((currentTime-this.lastDestinationCheck>this.checkInteval) && (currentTime > this.planArrivalTime)){
+                window.cordova.plugins.notification.local.schedule({
+                    title: 'Are you OK?',
+                    text: `You should reach desitination by ${Date(this.planArrivalTime)}`,
+                    actions: [
+                        { id: 'yes', title: 'Yes' },
+                        { id: 'no',  title: 'No' }
+                    ]
+                });
+                this.lastDestinationCheck = currentTime;
+            }
+            
             this.api.callApi(theApi, data, this.uploadSuccess.bind(this), this.uploadError.bind(this))
             // to perform long running operation on iOS
             // you need to create background task
@@ -55,6 +100,11 @@ class LocationSharing {
         this.BackgroundGeolocation.on('error', function (error) {
             console.log('[ERROR] BackgroundGeolocation error:', error.code, error.message);
         });
+
+        this.BackgroundGeolocation.on('stationary', function(stationaryLocation) {
+            // handle stationary locations here
+
+          }.bind(this));
 
         this.BackgroundGeolocation.on('start', function () {
             console.log('[INFO] BackgroundGeolocation service has been started');
@@ -115,14 +165,13 @@ class LocationSharing {
     startError(error) {
         console.log("[ERROR] tell server start journey failed")
         console.log(JSON.stringify(error))
-        this.tracking = false;
+        this.reset()
 
     }
 
     stopSuccess(data) {
-        console.log("[INFO]Stop success")
-        this.journeyId = null;
-        this.tempLinkID = null;
+        console.log("[INFO]tell server Stop journey success")
+
     }
 
     stopError(error) {
@@ -130,8 +179,6 @@ class LocationSharing {
         console.log("[ERROR] tell server STOP journey failed")
 
         console.log(JSON.string(error));
-        this.journeyId = null;
-        this.tempLinkID = null;
     }
     checkStatus(success,fail){        
         this.BackgroundGeolocation.checkStatus(success,fail);
@@ -145,6 +192,14 @@ class LocationSharing {
     getJourneyId() {
         return this.journeyId;
     }
+    reset(){
+        this.trackCoord = null;
+        this.updateTime = null;
+        this.journeyId = null;
+        this.tempLinkID = null;
+        this.tracking = false;
+        this.lastDestinationCheck=null;
+    }
 
     getCurrentLat() {
         return this.currentLat;
@@ -154,9 +209,15 @@ class LocationSharing {
         return this.currentLng;
     }
 
-    startTracking(coord) {
+    startTracking(coord,planArrivalTime=null) {
         this.currentLat = coord.lat;
         this.currentLng = coord.lng;
+        this.trackCoord = coord;
+        this.updateTime = Date.now();
+        this.lastDestinationCheck = Date.now();
+        if(planArrivalTime){
+            this.planArrivalTime = planArrivalTime;
+        }
         var theApi = 'api/Journey/create';
         var data = {
             NavigateRoute: this.getNavigationRoute(),
@@ -165,6 +226,10 @@ class LocationSharing {
         }
         console.log("send data:" + JSON.stringify(data));
         this.tracking = true;
+        window.cordova.plugins.notification.local.schedule({
+            title: 'Navigation Start',
+            text: `You are on your way.`,
+        });
         this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
 
         
@@ -172,7 +237,7 @@ class LocationSharing {
 
     stopTracking() {
         this.BackgroundGeolocation.stop();
-        this.tracking = false;
+        this.reset()
         var theApi = 'api/Journey/journeyFinish';
         var data = {
             JourneyId: this.getJourneyId(),
