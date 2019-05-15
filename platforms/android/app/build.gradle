@@ -272,12 +272,12 @@ dependencies {
     // SUB-PROJECT DEPENDENCIES START
     implementation(project(path: ":CordovaLib"))
     implementation "com.android.support:support-v4:26.+"
-    implementation "com.google.android.gms:play-services-location:11.6.2"
+    implementation "com.google.android.gms:play-services-location:16.0.0"
     implementation "com.android.support:support-v4:26+"
     implementation "com.android.support:appcompat-v7:26+"
     implementation "com.android.support:support-v13:27.+"
     implementation "me.leolin:ShortcutBadger:1.1.17@aar"
-    implementation "com.google.firebase:firebase-messaging:11.6.2"
+    implementation "com.google.firebase:firebase-messaging:17.6.0"
     // SUB-PROJECT DEPENDENCIES END
 }
 

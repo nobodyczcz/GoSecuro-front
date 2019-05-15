@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<gpx version="1.1" creator="GPS Visualizer http://www.gpsvisualizer.com/" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk>
+  <name>线条 2</name>
+  <trkseg>
+    <trkpt lat="-37.8831991" lon="145.0477159"></trkpt>
+    <trkpt lat="-37.8831822" lon="145.0475764"></trkpt>
+    <trkpt lat="-37.8831525" lon="145.0474584"></trkpt>
+    <trkpt lat="-37.8831441" lon="145.0473404"></trkpt>
+    <trkpt lat="-37.8831356" lon="145.047217"></trkpt>
+    <trkpt lat="-37.8831102" lon="145.0471151"></trkpt>
+    <trkpt lat="-37.8830975" lon="145.0470078"></trkpt>
+    <trkpt lat="-37.8830932" lon="145.0469005"></trkpt>
+    <trkpt lat="-37.8830763" lon="145.0467932"></trkpt>
+    <trkpt lat="-37.8830678" lon="145.0466859"></trkpt>
+    <trkpt lat="-37.8830594" lon="145.0465626"></trkpt>
+    <trkpt lat="-37.883034" lon="145.0464606"></trkpt>
+  </trkseg>
+</trk>
+<trk>
+  <name>线条 3</name>
+  <trkseg>
+    <trkpt lat="-37.883017" lon="145.0464231"></trkpt>
+    <trkpt lat="-37.8829366" lon="145.0464499"></trkpt>
+    <trkpt lat="-37.8828604" lon="145.0464821"></trkpt>
+    <trkpt lat="-37.8826868" lon="145.0465304"></trkpt>
+    <trkpt lat="-37.8825598" lon="145.0465626"></trkpt>
+    <trkpt lat="-37.8824243" lon="145.0465948"></trkpt>
+    <trkpt lat="-37.8823057" lon="145.0465894"></trkpt>
+    <trkpt lat="-37.8822041" lon="145.0466001"></trkpt>
+    <trkpt lat="-37.8821321" lon="145.0465733"></trkpt>
+  </trkseg>
+</trk>
+<trk>
+  <name>线条 4</name>
+  <trkseg>
+    <trkpt lat="-37.8821321" lon="145.0465733"></trkpt>
+    <trkpt lat="-37.8821186" lon="145.0464831"></trkpt>
+    <trkpt lat="-37.8820466" lon="145.0464777"></trkpt>
+    <trkpt lat="-37.882" lon="145.0463758"></trkpt>
+    <trkpt lat="-37.8819661" lon="145.04629"></trkpt>
+    <trkpt lat="-37.8819196" lon="145.0461934"></trkpt>
+    <trkpt lat="-37.8818518" lon="145.0461022"></trkpt>
+    <trkpt lat="-37.8817417" lon="145.04607"></trkpt>
+    <trkpt lat="-37.8816359" lon="145.0460432"></trkpt>
+    <trkpt lat="-37.8814581" lon="145.0460378"></trkpt>
+    <trkpt lat="-37.8813353" lon="145.0459681"></trkpt>
+    <trkpt lat="-37.8812514" lon="145.0459574"></trkpt>
+    <trkpt lat="-37.881171" lon="145.0459306"></trkpt>
+  </trkseg>
+</trk>
+<trk>
+  <name>线条 5</name>
+  <trkseg>
+    <trkpt lat="-37.881171" lon="145.0459306"></trkpt>
+    <trkpt lat="-37.8809695" lon="145.0458736"></trkpt>
+    <trkpt lat="-37.8807747" lon="145.0457877"></trkpt>
+    <trkpt lat="-37.8805376" lon="145.0456805"></trkpt>
+    <trkpt lat="-37.8803428" lon="145.0455946"></trkpt>
+    <trkpt lat="-37.8801904" lon="145.0454766"></trkpt>
+    <trkpt lat="-37.8799871" lon="145.0453586"></trkpt>
+  </trkseg>
+</trk>
+<trk>
+  <name>线条 6</name>
+  <trkseg>
+    <trkpt lat="-37.8799871" lon="145.0453586"></trkpt>
+    <trkpt lat="-37.8798704" lon="145.0451839"></trkpt>
+    <trkpt lat="-37.8797349" lon="145.0450873"></trkpt>
+    <trkpt lat="-37.8795656" lon="145.0449049"></trkpt>
+    <trkpt lat="-37.8793962" lon="145.0447118"></trkpt>
+    <trkpt lat="-37.8792438" lon="145.044508"></trkpt>
+    <trkpt lat="-37.8790405" lon="145.0445294"></trkpt>
+    <trkpt lat="-37.8787695" lon="145.0445294"></trkpt>
+    <trkpt lat="-37.8783885" lon="145.0446153"></trkpt>
+    <trkpt lat="-37.8781259" lon="145.0446474"></trkpt>
+    <trkpt lat="-37.877965" lon="145.0447225"></trkpt>
+    <trkpt lat="-37.8778041" lon="145.044744"></trkpt>
+    <trkpt lat="-37.8776178" lon="145.0447977"></trkpt>
+    <trkpt lat="-37.8773892" lon="145.0448513"></trkpt>
+    <trkpt lat="-37.877169" lon="145.0448513"></trkpt>
+    <trkpt lat="-37.8769911" lon="145.0448942"></trkpt>
+  </trkseg>
+</trk>
+</gpx>

@@ -21,6 +21,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import HomeIcon from '@material-ui/icons/Home';
 import MapIcon from '@material-ui/icons/Map';
+import ClearIcon from '@material-ui/icons/Clear';
+
 import ContactsIcon from '@material-ui/icons/Contacts';
 import BusIcon from '@material-ui/icons/DirectionsBus';
 import WalkIcon from '@material-ui/icons/DirectionsWalk';
@@ -89,7 +91,6 @@ const styles = theme => ({
     menuButton: {
         verticalAlign: 'middle',
     marginLeft: -12,
-    marginRight: 20,
   },
   title: {
     display: 'none',
@@ -113,14 +114,17 @@ const styles = theme => ({
     },
   },
   searchIcon: {
-    width: theme.spacing.unit * 5,
+    width: theme.spacing.unit * 4,
     height: '100%',
     display: 'flex',
     alignItems: 'center',
-    },
-    progress: {
-        position: 'fixed',
-    },
+    paddingRight:'0px',
+    paddingLeft:'0px'
+
+  },
+  progress: {
+      position: 'fixed',
+  },
   inputRoot: {
     color: 'secondary',
     width: '100%',
@@ -167,7 +171,8 @@ class MainBar extends React.Component {
             navValue: this.props.navValue ? this.props.navValue : 0,
             searching: null,
             searchCoord: [0, 0],
-            searchPlaceHolder:"Search a destination..."
+            searchPlaceHolder:"Search a destination...",
+            showClear:false
         };
   
     }
@@ -181,9 +186,24 @@ class MainBar extends React.Component {
         this.setState({ navValue: value });
     };
 
-    setupAutoComplete() {
+    setupAutoComplete(location=null) {
+      console.log('setUp auto complete')
         var input = document.getElementById('searchInput');
-        navigator.geolocation.getCurrentPosition(function (position) {
+        if(location){
+          var circle = new window.google.maps.Circle(
+              { center: location, radius: 1000 });
+          var options = {
+              bounds: circle.getBounds(),
+              types: ['establishment']
+          };
+          this.autocomplete = new window.google.maps.places.Autocomplete(input, options);
+          window.google.maps.event.addListener(this.autocomplete, 'place_changed', function() {
+            var input = document.getElementById('searchIcon');
+            input.click();
+        });
+        }
+        else{
+          navigator.geolocation.getCurrentPosition(function (position) {
             var geolocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
@@ -194,13 +214,19 @@ class MainBar extends React.Component {
                 bounds: circle.getBounds(),
                 types: ['establishment']
             };
-            var autocomplete = new window.google.maps.places.Autocomplete(input, options);
-        });
+            this.autocomplete = new window.google.maps.places.Autocomplete(input, options);
+            window.google.maps.event.addListener(this.autocomplete, 'place_changed', function() {
+              var input = document.getElementById('searchIcon');
+              input.click();
+          });
+        }.bind(this));
+        }
+
     };
 
     componentDidMount() {
         if (window.google) {
-            this.setupAutoComplete();
+            this.setupAutoComplete(this.props.getLocation());
         }
 
     }
@@ -229,7 +255,6 @@ class MainBar extends React.Component {
     handleSearch = event => {
         var input = document.getElementById('searchInput');
         var text = input.value;
-        input.value = "";
         console.log(text);
         if (text) {
             var searchIconPosition = event.currentTarget.getBoundingClientRect()
@@ -247,14 +272,29 @@ class MainBar extends React.Component {
 
     }
     handleInputChange = event => {
-        if (event.key == 'Enter') {
-            var input = document.getElementById('searchIcon');
-            input.click();
+        if (event.key === 'Enter') {
+          var search = document.getElementById('searchIcon');
+            search.click();
         }
+        
+    }
+    handleInputClear=event=>{
+      if(event.target.value && !this.state.showClear){
+        this.setState({showClear:true});
+      }
+      else if(!event.target.value){
+        this.setState({showClear:false});
+      }
     }
 
     handleClickAway = () => {
         document.getElementById('searchInput').blur();
+    }
+    handleClear=()=>{
+      var input = document.getElementById('searchInput');
+      input.value='';
+      this.setState({showClear:false});
+
     }
 
     render() {
@@ -280,20 +320,25 @@ class MainBar extends React.Component {
                       }
                     
                     <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-                      GoSafe
+                      GoSecuro
                     </Typography>
                     <div className={classes.search}>
-                            <InputBase
-                              placeholder={this.state.searchPlaceHolder}
-                                id="searchInput"
-                                onKeyPress={this.handleInputChange.bind(this)}
-                                classes={{
-                                    root: classes.inputRoot,
-                                    input: classes.inputInput,
-                                }}
+                          <InputBase
+                            placeholder={this.state.searchPlaceHolder}
+                              id="searchInput"
+                              onKeyPress={this.handleInputChange.bind(this)}
+                              onChange={this.handleInputClear.bind(this)}
+                              classes={{
+                                  root: classes.inputRoot,
+                                  input: classes.inputInput,
+                              }}
                         />
                         
                     </div>
+                    {this.state.showClear?<IconButton id="clearIcon" onClick={this.handleClear.bind(this)} className={classes.searchIcon} color="inherit">
+                          <ClearIcon />
+                    </IconButton>:null}
+                    
                         {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
                         <IconButton id="searchIcon" onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
                           <SearchIcon />

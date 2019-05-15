@@ -43,6 +43,9 @@ import { Divider } from '@material-ui/core';
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
 import Pin from './pinSvg';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 
 var d3Geo = require("d3-geo")
@@ -408,6 +411,8 @@ class App extends Component {
             error:[],
             barColor: 'secondary',
             hideAppBar:false,
+            showNotification:false,
+            notiContent:'',
         };
         
         this.interval= null;
@@ -427,6 +432,7 @@ class App extends Component {
      */
     loginSuccess() {
         this.retrieveTemplinks();
+        this.apis.initializeUserData();
         this.getLinksTimer = setInterval(this.retrieveTemplinks.bind(this), 15000); //retrieve the templink from server eveery 15 s
         this.setState({ isLogin: true });
     }
@@ -466,7 +472,6 @@ class App extends Component {
 
     receivePins(data){
         var newPins = JSON.parse(data.data);
-        console.log(newPins);
         if(newPins.length===0){
             return
         }
@@ -484,7 +489,6 @@ class App extends Component {
 
     updateLocations() {
         if (Object.keys(this.tempLinks).length > 0) {
-            console.log("[info]length >0")
             var theApi = 'api/TempLinks/updateLocations'
             var data = []
             for (var key in this.tempLinks) {
@@ -500,7 +504,6 @@ class App extends Component {
 
             }
             if (data.length > 0) {
-                console.log("[INFO] request locations")
                 this.apis.callApi(theApi, data, this.receiveLocations.bind(this), this.receiveLocationsError.bind(this));
 
             }
@@ -512,7 +515,6 @@ class App extends Component {
         for (var key in data) {
             if (data[key].locationListJson != "[]") {
                 this.tempLinks[data[key].TempLinkId].locations = this.tempLinks[data[key].TempLinkId].locations.concat(JSON.parse(data[key].locationListJson));
-                console.log(this.tempLinks[data[key].TempLinkId].locations)
                 if (this.state.friendDisplay == data[key].TempLinkId) {
                     var latlngs = this.convertLocations(JSON.parse(data[key].locationListJson))
                     var path = this.friendPath.getPath()
@@ -535,7 +537,6 @@ class App extends Component {
     }
 
     receiveLinks = (data) => {
-        console.log(data)
         var results = JSON.parse(JSON.parse(data).data);
         var tempLinks = this.tempLinks;
         var linkList=[];
@@ -568,7 +569,7 @@ class App extends Component {
         }
 
         this.tempLinks = tempLinks;
-        if (updated) {
+        if (updated && history.location.pathname==='/map') {
             console.log("[INFO] temp link list chaged");
             this.setState({ "tempLinks": Object.keys(this.tempLinks) });
         }
@@ -700,7 +701,24 @@ class App extends Component {
 
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
-        
+        window.handleShowNoti = this.handleShowNoti.bind(this);
+        if(window.cordova){
+
+
+            var success = function (hasPermission) { 
+                if (!hasPermission) {
+                    window.sms.requestPermission(function() {
+                        console.log('[OK] Permission accepted')
+                    }, function(error) {
+                        console.info('[WARN] Permission not accepted')
+                        // Handle permission not accepted
+                    })
+                }
+            };
+            var error = function (e) { alert('Something went wrong:' + e); };
+            window.sms.hasPermission(success, error);
+        }
+
         history.listen((location, action) => {
             if(['/map','/contactsPage','/'].indexOf(location.pathname)>=0){
                 this.hideAppBar(false);
@@ -734,7 +752,30 @@ class App extends Component {
             this.retrieveCrimeRates()
         }
 
+        if(window.cordova){
+            window.cordova.plugins.notification.local.hasPermission(function (granted) { 
+                if(!granted){
+                    window.cordova.plugins.notification.local.requestPermission(function (granted) {  });
+                }
+             });
 
+            document.addEventListener('deviceready', function () {
+                console.log(`[INFO] ${JSON.stringify(window.cordova.plugins.notification.local.launchDetails)}`);
+            }.bind(this), false);    
+            document.addEventListener('resume', function () {
+                console.log(`[INFO] ${JSON.stringify(window.cordova.plugins.notification.local.launchDetails)}`);
+
+            }.bind(this), false);   
+        }
+    }
+    onAlertReply(index){
+        console.log('[INFO] get reply: '+ index)
+        if(index ===0){
+            //nothing
+        }
+        else{
+            //contact emergency
+        }
     }
 
     successGetCrimeJson(fileEntry) {
@@ -746,7 +787,6 @@ class App extends Component {
             this.fileReader = reader; //allow call back function access reader object
 
             reader.onloadend = function () {
-                console.log("Successful file read: " + this.fileReader.result);
                 this.crimeData = JSON.parse(this.fileReader.result);
                 this.displayCrimeRateByLayerSetting();
                 
@@ -1225,36 +1265,41 @@ class App extends Component {
                 });
                 this.userMarker.setMap(this.map)
             }
+            this.map.setCenter(this.userLocation)
+            this.map.setZoom(15)
             
+        }
+        else{
+            navigator.geolocation.getCurrentPosition(function (position) {
+                var thelat = position.coords.latitude;
+                var thelng = position.coords.longitude;
+                if (position.coords.heading) {
+                    this.heading = position.coords.heading;
+                }
+                console.log(thelat)
+                console.log(thelng)
+                console.log(this.heading)
+                this.userLocation = { lat: thelat, lng: thelng }
+                this.map.setCenter({ lat: thelat, lng: thelng })
+                this.map.setZoom(15)
+                if (!this.userMarker) {
+                    console.log('Set up marker');
+                    this.userLocationImage.rotation = this.heading;
+                    // Shapes define the clickable region of the icon. The type defines an HTML
+                    // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+                    // The final coordinate closes the poly by connecting to the first coordinate.
+                    this.userMarker = new window.google.maps.Marker({
+                        position: { lat: thelat, lng: thelng },
+                        map: this.map,
+                        icon: this.userLocationImage,
+                    });
+                    this.userMarker.setMap(this.map)
+                }
+            }.bind(this));
         }
         
 
-        navigator.geolocation.getCurrentPosition(function (position) {
-            var thelat = position.coords.latitude;
-            var thelng = position.coords.longitude;
-            if (position.coords.heading) {
-                this.heading = position.coords.heading;
-            }
-            console.log(thelat)
-            console.log(thelng)
-            console.log(this.heading)
-            this.userLocation = { lat: thelat, lng: thelng }
-            this.map.setCenter({ lat: thelat, lng: thelng })
-            this.map.setZoom(15)
-            if (!this.userMarker) {
-                console.log('Set up marker');
-                this.userLocationImage.rotation = this.heading;
-                // Shapes define the clickable region of the icon. The type defines an HTML
-                // <area> element 'poly' which traces out a polygon as a series of X,Y points.
-                // The final coordinate closes the poly by connecting to the first coordinate.
-                this.userMarker = new window.google.maps.Marker({
-                    position: { lat: thelat, lng: thelng },
-                    map: this.map,
-                    icon: this.userLocationImage,
-                });
-                this.userMarker.setMap(this.map)
-            }
-        }.bind(this));
+        
     }
 
     getLocation() {
@@ -1268,13 +1313,13 @@ class App extends Component {
             this.currentLocation()
         }
         else if (this.focusUser) {
+            this.map.setCenter(this.userLocation);
             this.map.setZoom(18);
         }
         else {
             this.focusUser = true;
             this.map.setZoom(15);
             this.map.setCenter(this.userLocation);
-            this.currentLocation();
             console.log('focus user on')
 
         }
@@ -1283,14 +1328,12 @@ class App extends Component {
 
     onUpdateLocation(position) {
         //update user location and heading direction.
-        console.log('update location triggered')
         var thelat = position.coords.latitude;
         var thelng = position.coords.longitude;
         if (position.coords.heading) {
             this.heading = position.coords.heading;
 
         }
-        console.log('heading:' + this.heading)
 
         this.userLocation = { lat: thelat, lng: thelng };
         localStorage.setItem( "lastLocation" , JSON.stringify(this.userLocation) )
@@ -1301,7 +1344,6 @@ class App extends Component {
         
 
         if (this.userMarker) {
-            console.log('update user location')
 
             this.userLocationImage.rotation = this.basicHeading + this.heading;
 
@@ -1352,7 +1394,6 @@ class App extends Component {
     };
 
     clearAllMarkers = () => {
-        console.log('clear mark')
         for (var i = 0; i < this.markers.length; i++) {
             this.markers[i].setMap(null);
         }
@@ -1364,9 +1405,7 @@ class App extends Component {
 
         }
         this.mainBar.current.setState({ searching: false });
-        console.log(result)
         this.setState({ searchResponse: result, displayBack: true })
-        console.log(this.markers)
         if (this.markers) {
             this.clearAllMarkers();
         }
@@ -1568,6 +1607,10 @@ class App extends Component {
      * 
      */ 
     mapPage() {
+        if(this.state.tempLinks.toString!==Object.keys(this.tempLinks).toString){
+            this.setState({ "tempLinks": Object.keys(this.tempLinks) });
+        }
+
         //define the appearance of map 
         console.log('render home page')
         const { classes } = this.props;
@@ -1703,7 +1746,7 @@ class App extends Component {
                 
                 {!this.state.searchResponse ? (
                     <div className={classes.panicPosition}>
-                        <PanicButton getLocation={this.getLocation.bind(this)} />
+                        <PanicButton getLocation={this.getLocation.bind(this)}/>
 
                     </div>
                 ) : null
@@ -1712,6 +1755,7 @@ class App extends Component {
                 {this.state.searchResponse ? (
                     <ResultCard routeAnalysis={this.routeAnalysis} alreadyTracking={this.state.tracking} locationSharing={this.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
+                
             </div>
         );
     }
@@ -1750,12 +1794,12 @@ class App extends Component {
                         this.locationSharing.navigationRoute = null;
                         this.locationSharing.startTracking(this.userLocation);
                         this.setState({tracking:true})
-                        
                     }
                     else {
                         console.log("[INFO]3 seconds reach, switch OFF.")
                     }
                 }.bind(this), 3000);
+
             }
             else {
                 if (this.state.tracking) {
@@ -1763,6 +1807,13 @@ class App extends Component {
                 }
             }
             
+        }
+
+        if(!this.state[name]){
+            this.handleShowNoti('Start sharing location')
+        }
+        else{
+            this.handleShowNoti('Stop sharing location')
         }
         console.log("[INFO] sharing state:"+ this.state[name])
         this.setState({ [name]:!this.state[name] });
@@ -1787,6 +1838,26 @@ class App extends Component {
 
 
     /*Pin related functions
+     * 
+     * finish
+     */
+
+    /*Notification snapbar related functions
+     * 
+     * 
+     */
+    handleShowNoti = (content) => {
+        this.setState({ showNotification: true,notiContent:content });
+      };
+
+    handleNotiClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        this.setState({ showNotification: false,notiContent:'' });
+      };
+    /*Notification snapbar functions
      * 
      * finish
      */
@@ -1857,6 +1928,7 @@ class App extends Component {
                 tabValue={this.state.currentPage}
                 navValue={this.navValue}
                 style={this.barColor}
+                getLocation={this.getLocation.bind(this)}
             >
             </MainBar>
         );
@@ -1998,6 +2070,31 @@ class App extends Component {
                     </SwipeableDrawer>
                     <div className='mapStyle' id='MAP'>
                     </div>
+
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        open={this.state.showNotification}
+                        autoHideDuration={3000}
+                        onClose={this.handleNotiClose}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.notiContent}</span>}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            className={classes.close}
+                            onClick={this.handleNotiClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
+                    />
                     
                     {this.theBar()}
                     <Route exact path="/" component={this.homePage.bind(this)} />

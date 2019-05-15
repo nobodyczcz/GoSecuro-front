@@ -259,6 +259,30 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
       ]
     },
     {
+      "id": "cordova-plugin-dialogs.notification",
+      "file": "plugins/cordova-plugin-dialogs/www/notification.js",
+      "pluginId": "cordova-plugin-dialogs",
+      "merges": [
+        "navigator.notification"
+      ]
+    },
+    {
+      "id": "cordova-plugin-dialogs.notification_android",
+      "file": "plugins/cordova-plugin-dialogs/www/android/notification.js",
+      "pluginId": "cordova-plugin-dialogs",
+      "merges": [
+        "navigator.notification"
+      ]
+    },
+    {
+      "id": "cordova-sms-plugin.Sms",
+      "file": "plugins/cordova-sms-plugin/www/sms.js",
+      "pluginId": "cordova-sms-plugin",
+      "clobbers": [
+        "window.sms"
+      ]
+    },
+    {
       "id": "phonegap-plugin-push.PushNotification",
       "file": "plugins/phonegap-plugin-push/www/push.js",
       "pluginId": "phonegap-plugin-push",
@@ -277,6 +301,8 @@ cordova.define('cordova/plugin_list', function(require, exports, module) {
     "cordova-plugin-mauron85-background-geolocation": "3.0.3",
     "cordova-plugin-statusbar": "2.4.2",
     "cordova-plugin-whitelist": "1.3.3",
+    "cordova-plugin-dialogs": "2.0.1",
+    "cordova-sms-plugin": "1.0.0",
     "cordova-support-google-services": "1.1.0",
     "phonegap-plugin-multidex": "1.0.0",
     "phonegap-plugin-push": "2.2.3"

@@ -269,6 +269,30 @@ module.exports = [
         "pluginId": "cordova-plugin-mauron85-background-geolocation"
     },
     {
+        "file": "plugins/cordova-plugin-dialogs/www/notification.js",
+        "id": "cordova-plugin-dialogs.notification",
+        "pluginId": "cordova-plugin-dialogs",
+        "merges": [
+            "navigator.notification"
+        ]
+    },
+    {
+        "file": "plugins/cordova-plugin-dialogs/www/browser/notification.js",
+        "id": "cordova-plugin-dialogs.notification_browser",
+        "pluginId": "cordova-plugin-dialogs",
+        "merges": [
+            "navigator.notification"
+        ]
+    },
+    {
+        "file": "plugins/cordova-sms-plugin/www/sms.js",
+        "id": "cordova-sms-plugin.Sms",
+        "pluginId": "cordova-sms-plugin",
+        "clobbers": [
+            "window.sms"
+        ]
+    },
+    {
         "file": "plugins/phonegap-plugin-push/www/push.js",
         "id": "phonegap-plugin-push.PushNotification",
         "pluginId": "phonegap-plugin-push",
@@ -297,6 +321,8 @@ module.exports.metadata =
     "cordova-plugin-ionic-keyboard": "2.1.3",
     "cordova-plugin-file": "6.0.1",
     "cordova-plugin-mauron85-background-geolocation": "3.0.3",
+    "cordova-plugin-dialogs": "2.0.1",
+    "cordova-sms-plugin": "1.0.0",
     "phonegap-plugin-push": "2.2.3"
 }
 // BOTTOM OF METADATA

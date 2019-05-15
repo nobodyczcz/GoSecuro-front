@@ -12,6 +12,8 @@ import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
@@ -186,12 +188,13 @@ class ContactsPage extends React.Component {
     };
 
     handleEditOpen = (index,item) => {
+        console.log(item)
         this.setState({ isOpen: true,
-                        activeItemName: item.name,
-                        activeMobile: item.mobile,
+                        activeItemName: item.ECname,
+                        activeMobile: item.EmergencyContactPhone,
                         activeIndex:index,
-                        name:item.name,
-                        mobile:item.mobile,
+                        name:item.ECname,
+                        mobile:item.EmergencyContactPhone,
         });
     };
 
@@ -268,8 +271,7 @@ class ContactsPage extends React.Component {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
 
-        this.setState({ loading: false });
-        this.setState({ name: '', mobile: '' });
+        this.setState({ loading: false,name: '', mobile: '' });
         //jump to next page
     }
 
@@ -293,12 +295,12 @@ class ContactsPage extends React.Component {
         if(this.props.isLogin){
             var contData = {
                 pre: {
-                    name: this.state.activeItemName,
-                    mobile: this.state.activeMobile,
+                    ECname: this.state.activeItemName,
+                    EmergencyContactPhone: this.state.activeMobile,
                 },
                 now: {
-                    name: this.state.name,
-                    mobile: this.state.mobile,
+                    ECname: this.state.name,
+                    EmergencyContactPhone: this.state.mobile,
                 }
             };
             console.log("contData:" + contData);
@@ -394,7 +396,7 @@ class ContactsPage extends React.Component {
         //jump to next page
     }
     regError(jqXHR) {
-        this.setState({ errors : []});
+        this.state.errors=[];
         var response = jqXHR.responseJSON;
         if (response) {
             if (response.Message) this.state.errors.push(response.Message);
@@ -414,19 +416,17 @@ class ContactsPage extends React.Component {
         }
         console.log(this.state.errors)
         this.setState({ loading: false });
-        return(
-            <Card >
-                <CardContent>
-                    <Typography>
-                        Sorry!
-                        Server Error! Please try after sometime.
-                    </Typography>
-                </CardContent>
-            </Card>
-        );
+        try{
+            var theError = JSON.parse(this.state.errors[0]);
+            this.handleShowNoti(theError.result+' '+ theError.errors);
+        }
+        catch{
+
+        }
+        
     }
     addError(jqXHR) {
-        this.setState({ errors : []});
+        this.setState.errors=[];
         var response = jqXHR.responseJSON;
         if (response) {
             if (response.Message) this.state.errors.push(response.Message);
@@ -444,9 +444,36 @@ class ContactsPage extends React.Component {
             if (response.error) this.state.errors.push(response.error);
             if (response.error_description) this.state.errors.push(response.error_description);
         }
-        console.log(this.state.errors)
-    }
+        this.setState({ loading: false,name: '', mobile: '' });
 
+        console.log(this.state.errors)
+        try{
+            var theError = JSON.parse(this.state.errors[0]);
+            this.handleShowNoti(theError.result+' '+ theError.errors);
+        }
+        catch{
+
+        }
+    }
+/*Notification snapbar related functions
+     * 
+     * 
+     */
+    handleShowNoti = (content) => {
+        this.setState({ showNotification: true,notiContent:content });
+      };
+
+    handleNotiClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        this.setState({ showNotification: false,notiContent:'' });
+      };
+    /*Notification snapbar functions
+     * 
+     * finish
+     */
 
     render() {
         const { classes } = this.props;
@@ -558,61 +585,6 @@ class ContactsPage extends React.Component {
                                                     onClick={function(){this.handleEditOpen(i,item)}.bind(this)} 
                                                 >
                                                 </EditIcon>
-                                                <Modal
-                                                    aria-labelledby="Edit-Emergency-Contact"
-                                                    aria-describedby="edits-emergency-contact"
-                                                    open={this.state.isOpen}
-                                                    onClose={this.handleEditClose}
-                                                    >
-                                                    <div style={getModalStyle()} className={classes.modalPaper}>
-                                                    <Typography gutterBottom align='left' variant="h6">
-                                                            Emergency Contact
-                                                        </Typography>
-                                                        
-                                                        <TextField
-                                                            id="cantactName"
-                                                            label="Name"
-                                                            className={classes.textField}
-                                                            defaultValue={this.state.activeItemName}
-                                                            value={this.state.name}
-                                                            onChange={this.handleChange('name')}
-                                                            type='text'
-                                                            inputProps={{maxlength:'10'}}
-                                                            margin="normal"
-                                                        />
-                                                        <TextField
-                                                            id="cantactMobile"
-                                                            label="Mobile"
-                                                            className={classes.textField}
-                                                            defaultValue={this.state.activeMobile}
-                                                            value={this.state.mobile}
-                                                            onChange={this.handleChange('mobile')}
-                                                            type='number'
-                                                            inputProps={{ maxlength:'10'}}
-                                                            margin="normal"
-                                                        />
-
-                                                        <Fab
-                                                            variant="extended"
-                                                            color="secondary"
-                                                            aria-label="Cancel"
-                                                            className={classes.customLeftButton}
-                                                            onClick={this.handleEditClose}
-                                                        >
-                                                            Cancel
-                                                        </Fab>
-
-                                                        <Fab
-                                                            variant="extended"
-                                                            color="secondary"
-                                                            aria-label="Save"
-                                                            className={classes.customRightButton}
-                                                            onClick={function(){ this.handleEdit(this.state.activeIndex) }.bind(this)}
-                                                        >
-                                                            Save
-                                                        </Fab>
-                                                    </div>
-                                                </Modal>
                                                 
                                                 <IconButton 
                                                     className={classes.deleteIconButton}
@@ -629,15 +601,94 @@ class ContactsPage extends React.Component {
     
                                                 {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
                                                     {item.EmergencyContactPhone}
-                                                </Typography>    
-     */}
+                                                </Typography>
+                                                */}
                                             </CardContent>
                                         </Card>
                                     </Grid>
                                             );
                             }.bind(this))}
+                            <Modal
+                                aria-labelledby="Edit-Emergency-Contact"
+                                aria-describedby="edits-emergency-contact"
+                                open={this.state.isOpen}
+                                onClose={this.handleEditClose}
+                                >
+                                <div style={getModalStyle()} className={classes.modalPaper}>
+                                <Typography gutterBottom align='left' variant="h6">
+                                        Emergency Contact
+                                    </Typography>
+                                    
+                                    <TextField
+                                        id="cantactName"
+                                        label="Name"
+                                        className={classes.textField}
+                                        defaultValue={this.state.activeItemName}
+                                        value={this.state.name}
+                                        onChange={this.handleChange('name')}
+                                        type='text'
+                                        inputProps={{maxlength:'10'}}
+                                        margin="normal"
+                                    />
+                                    <TextField
+                                        id="cantactMobile"
+                                        label="Mobile"
+                                        className={classes.textField}
+                                        defaultValue={this.state.activeMobile}
+                                        value={this.state.mobile}
+                                        onChange={this.handleChange('mobile')}
+                                        type='number'
+                                        inputProps={{ maxlength:'10'}}
+                                        margin="normal"
+                                    />
+
+                                    <Fab
+                                        variant="extended"
+                                        color="secondary"
+                                        aria-label="Cancel"
+                                        className={classes.customLeftButton}
+                                        onClick={this.handleEditClose}
+                                    >
+                                        Cancel
+                                    </Fab>
+
+                                    <Fab
+                                        variant="extended"
+                                        color="secondary"
+                                        aria-label="Save"
+                                        className={classes.customRightButton}
+                                        onClick={function(){ this.handleEdit(this.state.activeIndex) }.bind(this)}
+                                    >
+                                        Save
+                                    </Fab>
+                                </div>
+                            </Modal>
                         </Grid>
-                    </div>              
+                    </div>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left',
+                        }}
+                        open={this.state.showNotification}
+                        autoHideDuration={3000}
+                        onClose={this.handleNotiClose}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.notiContent}</span>}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            className={classes.close}
+                            onClick={this.handleNotiClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
+                    />
             </Paper>
 
         );

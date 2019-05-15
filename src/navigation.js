@@ -72,7 +72,7 @@ const styles = theme => ({
     transit: {
         display: 'flex',
         justifyContent: "space-between",
-        padding:"5px"
+        padding:"5px",
     },
     contentCard: {
         backgroundColor: "#ff7504",
@@ -86,6 +86,11 @@ const styles = theme => ({
         display:'flex',
         justifyContent:'flex-end',
         alignItems:'center'
+    },
+    board:{
+        width:'100%',
+        marginTop:'5px',
+
     }
 
 
@@ -114,7 +119,7 @@ class NavigationPage extends React.Component {
             }
         }
         this.cloest = this.steps[0].distance.value;//the closest distance to next step
-        this.fastest = 0;//the fastest distance to previous step
+        this.fastest = 0;//the fartest distance to previous step
         console.log(this.steps)
         this.state = {
             startTime: Date.now(),
@@ -176,14 +181,7 @@ class NavigationPage extends React.Component {
 
 
     }
-    componentWillUnmount() {
-    }
 
-    handleStartTracking() {
-        
-        
-
-    }
 
     handleStopTracking() {
 
@@ -204,6 +202,9 @@ class NavigationPage extends React.Component {
         this.props.history.goBack();
 
         
+    }
+    handleExit(){
+        this.props.history.push('/map');
     }
 
     updateLocation(coord) {
@@ -230,7 +231,7 @@ class NavigationPage extends React.Component {
         }
 
         if(this.fastest){
-            if (this.fastest<distanceToStart){
+            if (distanceToStart > this.fastest){
                 this.fastest = distanceToStart;
             }
             else if(this.fastest-distanceToStart > 10){
@@ -241,21 +242,27 @@ class NavigationPage extends React.Component {
             this.fastest = distanceToStart;
         }
 
+
+
         var theCurrent = this.state.current;
         var theNext = this.state.next;
         var theFinish = this.state.finish;
         var theStart = this.state.stepStart;
         var theEnd = this.state.stepEnd;
+
+        if (!this.steps[theCurrent+1] && this.cloest<=15) {
+            theFinish = true;
+            this.handleStopTracking()
+            this.setState({finish:theFinish});
+            return
+        }
+
         if (((distance - this.cloest > 5) && (distanceToStart-this.fastest>=-5) ) || distance < 5) {
-            this.cloest=null;
-            this.fastest=null;
+            
             theNext = theNext + 1;
             theCurrent = theCurrent + 1;
-            if (!this.steps[theCurrent]) {
-                theFinish = true;
-                this.setState({finish:theFinish});
-                return
-            }
+            
+            
 
             theStart= {
                 lat: this.steps[theCurrent].start_location.lat(),
@@ -266,40 +273,49 @@ class NavigationPage extends React.Component {
                 lat: this.steps[theCurrent].end_location.lat(),
                 lng: this.steps[theCurrent].end_location.lng()
             }
+            this.cloest=geolib.getDistance(
+                { latitude: coord.lat, longitude: coord.lng },
+                { latitude: theEnd.lat, longitude: theEnd.lng }
+            );;
+            this.fastest= geolib.getDistance(
+                { latitude: coord.lat, longitude: coord.lng },
+                { latitude: theStart.lat, longitude: theStart.lng }
+            );;
 
 
             
         }
-        console.log("update: " + distance + " " + "theCurrent");
+
         var currentInstruction = this.steps[theCurrent].instructions
         var currentSecondIndex = currentInstruction.search('<div')
         var currentSecondInstruction='';
-        if(currentSecondIndex>0){
-            currentSecondInstruction = currentInstruction.slice(nextSecondIndex);
-            currentInstruction = currentInstruction.slice(0,nextSecondIndex);
+        if(currentSecondIndex>=0){
+            currentSecondInstruction = currentInstruction.slice(currentSecondIndex);
+            currentInstruction = currentInstruction.slice(0,currentSecondIndex);
         }
 
         var nextInstruction =  this.steps[theNext] ? this.steps[theNext].instructions:'';
         var nextSecondIndex = nextInstruction.search('<div')
         var nextSecondInstruction='';
-        if(nextSecondIndex>0){
+        if(nextSecondIndex>=0){
             nextSecondInstruction = nextInstruction.slice(nextSecondIndex);
             nextInstruction = nextInstruction.slice(0,nextSecondIndex);
         }
-
+        var turnDistance = this.steps[theCurrent].travel_mode === "WALKING"? 60:400
         var theInstructions = '';
-        if(this.state.current===0 && this.fastest<this.cloest){
-            theInstructions = this.steps[0].instructions
+        if(theCurrent===0 && this.cloest>turnDistance){
+            theInstructions = currentInstruction
         }
         else if(!this.steps[theNext]){
             theInstructions = currentSecondInstruction;
         }
-        else if(this.closest <= (this.steps[theCurrent].travel_mode === "WALKING"? 100:400)){
+        else if(this.cloest <= turnDistance){
             theInstructions = nextInstruction
         }
         else{
             theInstructions = currentSecondInstruction
         }
+        // console.log(`[INFO] closest ${this.cloest} farsest ${this.fastest} turn${turnDistance}+ THE ${theInstructions} CUR ${currentInstruction} CUR SE ${currentSecondInstruction} NEX ${nextInstruction} NEX SE${nextSecondInstruction}`)
 
 
         this.setState({
@@ -344,7 +360,7 @@ class NavigationPage extends React.Component {
                         spacing={8}
                         className={classes.grid}
                     >
-                    {this.state.theFinish?
+                    {this.state.finish?
                         <Grid item xs={12}>
                             <Card className={classes.contentCard}>
                                 <Typography
@@ -357,7 +373,7 @@ class NavigationPage extends React.Component {
                             </Card>
                         </Grid>
                         :
-                        <div>
+                        <div className={classes.board}>
                         {currentStep.father ?
                             <Grid item xs={12}>
                                 <Card className={classes.header}>
@@ -434,7 +450,8 @@ class NavigationPage extends React.Component {
                                     justify="space-between"
                                     alignItems="stretch"
                                     direction="row"
-                                    spacing={8}>
+                                    spacing={8}
+                                    >
                                 <Grid item xs={5} className={classes.transit}>
                                     <Card className={classes.contentCard}>
                                         <Typography
@@ -460,7 +477,7 @@ class NavigationPage extends React.Component {
                                                 variant="h6"
                                                 color="primary"
                                         >
-                                        <a dangerouslySetInnerHTML={{ __html: this.state.instructions }} />
+                                        {this.state.instructions?<a dangerouslySetInnerHTML={{ __html: this.state.instructions }} />:'Continue on current road'}
                                             </Typography>
                                     </Card>
                                 </Grid>
@@ -484,6 +501,17 @@ class NavigationPage extends React.Component {
                         <PanicButton getLocation={this.props.getLocation} />
                     </div>
                     <Toolbar className={classes.footBar}>
+                    {this.state.finish?
+                        <Grid container
+                            justify="space-between"
+                            alignItems="center"
+                            direction="row"
+                            spacing={8}>
+                            <Grid item xs={4}>
+                                <Fab variant='extended' onClick={this.handleExit.bind(this)} color="secondary" >Exit</Fab>
+                            </Grid>
+                        </Grid>
+                            :
                         <Grid container
                             justify="space-between"
                             alignItems="center"
@@ -502,9 +530,8 @@ class NavigationPage extends React.Component {
                                 value="navWithShare"
                             />
                             </Grid>
-
                         </Grid>
-                        
+                        }
                         
                     </Toolbar>
                     </AppBar>

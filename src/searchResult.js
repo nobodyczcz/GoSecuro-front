@@ -22,6 +22,7 @@ import Collapse from '@material-ui/core/Collapse';
 import CardHeader from '@material-ui/core/CardHeader';
 import Avatar from '@material-ui/core/Avatar';
 import Switch from '@material-ui/core/Switch';
+import Tooltip from '@material-ui/core/Tooltip';
 
 
 
@@ -139,7 +140,7 @@ const styles = theme => ({
     panicOpen: {
         position: 'fixed',
         zIndex: 1300,
-        top: 'calc( 75% - 150px)',
+        top: 'calc( 75% - 130px)',
         left: 'calc( 50% - 40px)',
         transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
@@ -195,7 +196,13 @@ const styles = theme => ({
       details:{
           display:'flex',
           justifyContent:'space-between',
-      }
+      },
+      noMaxWidth: {
+        left:'-150px',
+        width: '300px',
+        minWidth:'300px',
+        maxWidth: 'none',
+      },
 });
 
 class ResultCard extends Component {
@@ -209,6 +216,7 @@ class ResultCard extends Component {
             Mexpanded: false,
             Lexpanded: false,
             navWithShare:false,
+            reminderOpen:false,
 
         };
     };
@@ -219,7 +227,10 @@ class ResultCard extends Component {
             if(suburbs.highCrime.length>0){
                 this.setState({navWithShare:true})
             }
+
+            this.handleReminderOpen();
         }
+        
     }
 
     handleDrawerOpen = () => {
@@ -266,11 +277,20 @@ class ResultCard extends Component {
 
     handleExpandClick = (name) => {
         this.setState(state => ({ [name]: !state[name] }));
-      };
+        };
 
-      handleChange = name => event => {
-        this.setState({ [name]: event.target.checked });
-      };
+    handleChange = name => event => {
+    this.setState({ [name]: event.target.checked });
+    };
+
+    handleReminderClose(){
+        this.setState({reminderOpen:false});
+    }
+    handleReminderOpen(){
+        this.setState({reminderOpen:true});
+        setTimeout(()=>{this.handleReminderClose()},3000);
+    }
+
     
     render() {
        
@@ -286,10 +306,28 @@ class ResultCard extends Component {
                     classNames({
                         [classes.panicOpen]: this.state.open,
                         [classes.panicClose]: !this.state.open,
-                    })
-                    
-                }>
-                    <PanicButton getLocation={this.props.getLocation} />
+                    })}
+                    >
+                    <Tooltip
+                        PopperProps={{
+                            disablePortal: true,
+                        }}
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                        classes={{ tooltip: classes.noMaxWidth }}
+                        onClose={this.handleReminderClose.bind(this)}
+                        open={this.state.reminderOpen}
+                        title={<React.Fragment>
+                            {suburbs?(suburbs.highCrime.length>0 ? <Typography variant="body1" color='primary' className={classes.warning}>Looks like your journey will pass through {suburbs.highCrime.length} high crime-rate suburbs. The location sharing function has been automatically switched on. (Your emergency contacts can now view your live location and navigation route)</Typography>
+                            :<Typography color='primary' variant="body1">You won't pass through any high crime rate suburbs</Typography>):null}
+                            </React.Fragment>}
+                        
+                        >
+                        <span>
+                        <PanicButton getLocation={this.props.getLocation} />
+                        </span>
+                    </Tooltip>
                 </div>
                 <Drawer
                     anchor="bottom"
@@ -322,11 +360,12 @@ class ResultCard extends Component {
                             }
                     </div>
                     {
-                        this.props.currentRoute ?
+                    this.props.currentRoute ?
                         <div className={classes.subToolbar}>
-                            <Typography variant="body1">
+                            
+                                <Typography variant="body1" onClick={this.handleReminderOpen.bind(this)}>
                                 Share location when navigating
-                            </Typography>
+                                </Typography>                            
                             <Switch
                                 checked={this.state.navWithShare}
                                 onChange={this.handleChange('navWithShare')}
@@ -340,9 +379,7 @@ class ResultCard extends Component {
                         {
                         this.props.currentRoute ?
                             <div>
-                                {
-                                    suburbs.highCrime.length>0 ? <p className={classes.warning}>You will pass through {suburbs.highCrime.length} high crime rate suburbs. We suggest you use location share function when navigating</p>:null
-                                }
+
                                 {
                                 <Card className={classes.routeInfoCard}>
                                     <CardHeader 

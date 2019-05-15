@@ -7,6 +7,8 @@ class APIs {
         this.tokenKey = 'accessToken';
         this.userName = null;
         this.password = null;
+        
+        
 
 
     }
@@ -102,6 +104,66 @@ class APIs {
 
         }.bind(this)).fail(error);
     }
+
+    initializeUserData(){
+        var apiRoute = 'api/UserEmergency/retrieveEmergencies';
+        this.callApi(apiRoute,'',this.retrieveEmSuccess.bind(this),(err)=>{console.log(err)});
+
+        var apiRoute2 = 'api/UserProfiles/Retrieve';
+        this.callApi(apiRoute2, '', this.retrievePoSuccess.bind(this), (err)=>{console.log(err)});
+
+        if(window.cordova){
+            console.log('set push')
+                this.push= window.PushNotification.init({
+                    android: {
+                    },
+                    browser: {
+                        pushServiceURL: 'http://push.api.phonegap.com/v1/push'
+                    },
+                    ios: {
+                        alert: "true",
+                        badge: "true",
+                        sound: "true"
+                    },
+                    windows: {}
+                });
+                this.push.on('registration', (data) => {
+                    console.log('registration done')
+
+                    console.log(data.registrationId);
+                    var api='api/UserProfiles/setFcmId';
+                    this.callApi(api,[data.registrationId],()=>{console.log('[INFO]FcmId set success')},(error)=>{console.log(error)})
+                });
+                this.push.on('notification', (data) => {
+                    // data.message,
+                    // data.title,
+                    // data.count,
+                    // data.sound,
+                    // data.image,
+                    // data.additionalData
+                    window.cordova.plugins.notification.local.schedule({
+                        title: "Your friend " + data.Name + " might need help",
+                        text: "You might want to call them to make sure they are alright",
+                    });
+                    console.log('[INFO] on motification '+ data.title)
+                });
+                
+                this.push.on('error', (e) => {
+                    console.log('[INFO] push error')
+                    console.log(e.message)
+                });
+        }
+
+
+    }
+
+    retrieveEmSuccess(reply) {
+        localStorage.setItem("localContactList", JSON.parse(reply).data);
+    }
+    retrievePoSuccess(reply){
+        localStorage.setItem("profile",reply.data);
+    }
+    
 
 }
 
