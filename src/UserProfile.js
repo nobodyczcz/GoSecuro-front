@@ -49,10 +49,10 @@ const styles = theme => ({
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
-        backgroundColor:'#fffafa'
+        //backgroundColor:'#fffafa'
     },
     backButton:{
-        color: '#FF7504',
+        color: '#FFFFFF',
         zIndex: 1210
 
     },
@@ -72,7 +72,7 @@ const styles = theme => ({
         overflowY: "scroll",
     },
     contentText:{
-        color:'#FF7504',
+        color:'#4f6c98',
         textAlign: 'justify'
     },
     contCard: {
@@ -87,7 +87,7 @@ const styles = theme => ({
         top: `calc( 100% - 90% )`,
         transition: 'opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         opacity: '1',
-        fill: '#FF7504',
+        fill: '#4f6c98',
         paddingLeft: `calc( 100% - 10% )`
     },
     emergencyText:{
@@ -119,7 +119,7 @@ const styles = theme => ({
         marginTop: '100px',
     },
     label: {
-        color: '#FF7504'
+        color: '#4f6c98'
     },
     progress: {
         marginLeft: theme.spacing.unit * 20,
@@ -174,6 +174,7 @@ class UserProfile extends React.Component{
             console.log("[INFO]already login")
             this.apis.callApi(apiRoute, userData, this.editSuccess.bind(this), this.retError.bind(this));
         }
+        this.setState({ isreadOnly: true, showButtons: 'none' })
     }
 
     handleEditCancel() {
@@ -259,13 +260,14 @@ class UserProfile extends React.Component{
             <Paper className={classes.paper}>
                     <AppBar
                             position="fixed"
+                            color="secondary"
                             className={classes.appBar}
                     >
                         <Toolbar className={classes.toolbar}>
                             <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                             {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                             </IconButton>
-                            <Typography className={classes.headerTitle} variant="h5" color="Black" noWrap>
+                            <Typography className={classes.headerTitle} variant="h5" color="inherit" noWrap>
                             User Profile
                         </Typography>
                         </Toolbar>

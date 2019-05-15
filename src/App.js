@@ -14,6 +14,7 @@ import { Router, Route, Link } from "react-router-dom";
 import LayerIcon from '@material-ui/icons/Layers';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 
+
 import Fab from '@material-ui/core/Fab';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
@@ -28,6 +29,7 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
+import Snackbar from '@material-ui/core/Snackbar';
 
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
@@ -37,8 +39,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
+import ShowPins from './showPins.js';
+import Settings from './settingsPage.js';
 import Typography from '@material-ui/core/Typography';
-import { Divider } from '@material-ui/core';
+import { Divider, Fade } from '@material-ui/core';
 
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
@@ -196,6 +200,13 @@ const styles = theme => ({
         zIndex: 1000,
         backgroundColor: "#ff7504"
 
+    },
+    notification:{
+        width: "51%",
+        justifyContent: "center",
+        top: theme.spacing.unit * 18,
+        left: 'calc( 100% - 75%)',
+        opacity: 0.9,
     }
 
 });
@@ -362,18 +373,11 @@ class App extends Component {
         this.mainBar = React.createRef();
 
         this.naviPage = React.createRef();
-
-        console.log('test data')
         this.crimeData = {
             'type': 'FeatureCollection',
-            'features': [
-                
-            ],
+            'features': [],
         };
-
-
         console.log('set state')
-
         
         if (document.getElementById('mapdiv').childNodes.length === 0) {
             //load map script from server. and render map when script is loaded
@@ -383,8 +387,6 @@ class App extends Component {
             });
         }  
 
-        
-        
         this.state = {  // state of react component
             highCrime: false,
             midiumCrime: false,
@@ -407,6 +409,7 @@ class App extends Component {
             mapLayer:'all',
             startUpPageLayer: true,
             isLogin: this.serverApi.isLogin(),
+            logoutNotification: false,
             welcomeImgContainer:true,
             error:[],
             barColor: 'secondary',
@@ -443,9 +446,17 @@ class App extends Component {
         console.log(e[1])
     }
     logoutSuccess() {
-        this.setState({ isLogin: false });
-        
+        this.setState({ isLogin: false,logoutNotification: true  });
+        setTimeout(() => this.setState({ logoutNotification: false }), 3000);        
     }
+    handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        this.setState({ logoutNotification: false });
+      };
+    
 
     handleLogout = () => {
         console.log(window.serverUrl);
@@ -843,7 +854,7 @@ class App extends Component {
 
     requestCrime(jsonData) {
         //load crime data from server. Display the data one loaded 
-        console.log('sendData: '+jsonData);
+        //console.log('sendData: '+jsonData);
         fetch(window.serverUrl + 'api/Suburbs/Details/', {
             method: 'POST',
             body: jsonData,
@@ -1936,6 +1947,7 @@ class App extends Component {
     };
 
     homePage() {
+       
 
         return (
             <div>
@@ -1943,19 +1955,6 @@ class App extends Component {
             </div>
             
             );
-    }
-
-    aboutUs() {
-        return(
-            <div>
-                <Typography variant='h6'>
-                    <br/>
-                    Your safe journey Home is important.
-                    <br/>
-                    Find your safe way home.
-                </Typography>
-            </div> 
-        );
     }
 
     startUpPage() {
@@ -1988,42 +1987,56 @@ class App extends Component {
                             About Us
                         </Link>
                     </ListItem>
-                    <ListItem button key='Navigation2'>
+                    <ListItem button key='Navigation'>
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
-                            to='/pinSurvey'
+                            to='/settings'
                         >
-                            Pin Questionnaire
+                            Settings
                         </Link>
                     </ListItem>
                     <Divider/>
-                    <ListItem button key='Navigation3'>
-                            {this.state.isLogin ?
-                                <Link
-                                    className={classes.sideContent}
-                                    variant='h6'
-                                    to='/buddy'
-                                >
-                                    Buddies
-                                </Link>
-                                :
+                    <ListItem button key='Navigation2'>
+                        {this.state.isLogin ?
+                            <Link 
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/showPins'
+                            >
+                                My Pins
+                            </Link>
+                            :
                                 null
                             }
                         
                     </ListItem>
+                    <ListItem button key='Navigation3'>
+                        {this.state.isLogin ?
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/buddy'
+                            >
+                                Buddies
+                            </Link>
+                            :
+                            null
+                        }
+                        
+                    </ListItem>
                     <ListItem button key='Navigation4'>
-                            {this.state.isLogin ?
-                                <Link
-                                    className={classes.sideContent}
-                                    variant='h6'
-                                    to='/userProfile'
-                                >
-                                    User Profile
-                                </Link>
-                                :
-                                null
-                            }
+                        {this.state.isLogin ?
+                            <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/userProfile'
+                            >
+                                User Profile
+                            </Link>
+                            :
+                            null
+                        }
                         
                     </ListItem>
                     <ListItem button key='Navigation5'>
@@ -2042,8 +2055,8 @@ class App extends Component {
                                 to='/login'
                             >
                                 Login
-                        </Link>
-                            }
+                            </Link>
+                        }
                         
                     </ListItem>
                 </List>
@@ -2097,6 +2110,18 @@ class App extends Component {
                     />
                     
                     {this.theBar()}
+                    <Snackbar
+                        anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
+                        open={this.state.logoutNotification}
+                        autoHideDuration={4000}
+                        TransitionComponent={Fade}
+                        onClose={this.handleClose}
+                        className={classes.notification}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">Logged out successfully.</span>}
+                    />
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
                     <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin}/>}  />
@@ -2109,7 +2134,9 @@ class App extends Component {
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />
-                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} /> 
+                    <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} />
+                    <Route exact path="/showPins" component={()=><ShowPins history={history} isLogin={this.state.isLogin} hideAppBar={this.hideAppBar.bind(this)} map={this.map}/>}/>
+                    <Route exact path="/settings" component={()=><Settings history={history} hideAppBar={this.hideAppBar.bind(this)} />}/>
                 </Router>  
           </MuiThemeProvider>
         );

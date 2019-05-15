@@ -124,6 +124,10 @@ const styles = theme => ({
         fontSize:'medium',
         fontColor: '#bdbdbd'
     },
+    infoText: {
+        color: '#757575',
+        fontSize: 'smaller'
+    },
     textField: {
         marginTop: 0,
         marginRight:'1%',
@@ -139,23 +143,14 @@ const styles = theme => ({
         boxShadow: theme.shadows[5],
         padding: '10px',
         outline: 'none',
-      },
-      contactPaper: {
-        position: 'fixed',
-        width: '100%',
-        height: '100%',
-        top: `calc( 100% - 54% )`,
-        left: '0',
-        zIndex: 900,
-      },
-      progress: {
-        marginLeft: theme.spacing.unit * 20,
-        padding: '5px'
-      },
-      NoContacts:{
-          zIndex:2000
-
-      }
+    },
+    progress: {
+    marginLeft: theme.spacing.unit * 20,
+    padding: '5px'
+    },
+    NoContacts:{
+        justifyContent: "center"
+    }
 });
 class ContactsPage extends React.Component {
     constructor(props) {
@@ -175,6 +170,7 @@ class ContactsPage extends React.Component {
             activeItemName: '',
             activeMobile: '',
             activeIndex:'',
+            noContacts: false
         };
 
     }
@@ -271,7 +267,7 @@ class ContactsPage extends React.Component {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
 
-        this.setState({ loading: false,name: '', mobile: '' });
+        this.setState({ loading: false, noContacts: false,name: '', mobile: '' });
         //jump to next page
     }
 
@@ -367,24 +363,17 @@ class ContactsPage extends React.Component {
     }
 
     retrieveSuccess(reply) {
-        const { classes } = this.props;
+        this.setState({noContacts : false});
         console.log("Success")
         if (this.props.isLogin) {
             this.setState({ contactList: JSON.parse(JSON.parse(reply).data) });
             localStorage.setItem("localContactList", JSON.stringify(this.state.contactList));
         }
-        console.log("length:"+ JSON.parse(JSON.parse(reply).data).length)
-        if((JSON.parse(reply).data).length == '0'){
-            return(
-                <Card className={classes.NoContacts}>
-                    <CardContent>
-                        <Typography>
-                            No Emergency Contacts.
-                        </Typography>
-                    </CardContent>
-                </Card>
-            );
+        if(JSON.parse(JSON.parse(reply).data).length == 0){
+           this.setState({noContacts : true});
         }
+        else
+            this.setState({noContacts: false})
         
         this.setState({ loading: false });            
         //jump to next page
@@ -483,7 +472,10 @@ class ContactsPage extends React.Component {
                     
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
-                    </Typography> 
+                    </Typography>
+                    <Typography className={classes.infoText}>
+                        You can add your close and trusted ones as your emergency contacts. Do get in touch with them so that they can always be available for you!
+                    </Typography>
                     
                     <Fab
                         variant="extended"
@@ -561,9 +553,16 @@ class ContactsPage extends React.Component {
                             alignItems="center"
                             spacing={8}
                         >
+
                         
                             {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
-                     
+                            {this.state.noContacts ? 
+                                <Typography variant="h6">
+                                    No Emergency Contacts.
+                                </Typography>
+                                :
+                                null
+                            }
                             {this.state.contactList.map(function (item, i) {
                                 var displayName = "";
                                 displayName = (item.ECname ? item.ECname[0] : "") + (item.ECname ? item.ECname[1] : "");
@@ -599,10 +598,6 @@ class ContactsPage extends React.Component {
                                                     {item.EmergencyContactPhone}
                                                 </Typography>
     
-                                                {/* <Typography className={classes.contMobile} gutterBottom align='left' variant="subtitle2">
-                                                    {item.EmergencyContactPhone}
-                                                </Typography>
-                                                */}
                                             </CardContent>
                                         </Card>
                                     </Grid>
