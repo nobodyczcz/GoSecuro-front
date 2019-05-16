@@ -12,6 +12,15 @@ import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 import Fab from '@material-ui/core/Fab';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import CloseIcon from '@material-ui/icons/Close';
+import InfoIcon from '@material-ui/icons/Info';
+import { Fade } from '@material-ui/core';
+import AppBar from '@material-ui/core/AppBar';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import { Toolbar } from '@material-ui/core';
+import { createBrowserHistory, createHashHistory } from 'history';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
@@ -27,14 +36,18 @@ const styles = theme => ({
         height:"60px",
         fontSize: "20px"
     },
+    backButton:{
+        color: '#FFFFFF',
+        zIndex: 1210
+
+    },
     paper: {
         position: 'fixed',
         width: '100%',
         height: '100%',
         top: '0',
         left: '0',
-        zIndex: 899,
-        marginTop: '130px'
+        zIndex:1200,
     },
     content: {
         marginTop: "0",
@@ -71,6 +84,17 @@ const styles = theme => ({
         marginLeft: theme.spacing.unit * 20,
         padding: '5px'
     },
+    infoIcon:{
+        float: "right",
+        marginTop: "0px"
+    },
+    notification:{
+        width: "90%",
+        justifyContent: "center",
+        top: theme.spacing.unit * 30,
+        left: 'calc( 100% - 95%)',
+        opacity: 0.9,
+    }
 });
 class BuddyPage extends React.Component {
     constructor(props) {
@@ -82,16 +106,49 @@ class BuddyPage extends React.Component {
             contactList:[],
             loading: true,
             errors: [],
-            noContacts: false
+            noContacts: false,
+            showInfo: false
             
         };
 
     }
 
-    componentDidMount() {
+    componentWillMount(){
         this.retrieveBuddies();
+        this.props.hideAppBar(true);
 
     }
+    
+    /* Handle click on Info icon
+    * Sets  state true to display information snackbar about emergency contact
+    *
+    * start 
+    */
+   handleInfoClick(){
+    this.setState({ showInfo: true });
+
+}
+/* Handle click on Info icon
+*
+* finish 
+*/
+
+/* Handle close of Info icon
+* Sets  state false to display information snackbar about emergency contact
+*
+* start 
+*/
+handleInfoClose = (event, reason) => {
+    if (reason === 'clickaway') {
+        return;
+      }
+    this.setState({ showInfo: false });
+
+}
+/* Handle close of Info icon
+*
+* finish 
+*/
 
     retrieveBuddies() {
         this.setState({ loading: true });
@@ -142,17 +199,60 @@ class BuddyPage extends React.Component {
     }
     
     render() {
-        const { classes } = this.props;
+        const { classes, theme } = this.props;
         console.log('rendering Buddies page')
         return (
             <Paper className={classes.paper}>
-                <div className={classes.content}>
-                    <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
-                        Buddies
-                    </Typography >
-                    <Typography className={classes.infoText}>
-                        Your buddies add you as emergency contact. Do reach out to them when they need you!
+                <AppBar
+                    position="fixed"
+                    color="secondary"
+                    className={classes.appBar}
+                >
+                    <Toolbar className={classes.toolbar}>
+                        <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
+                        {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                        </IconButton>
+                        <Typography className={classes.headerTitle} variant="h5" color="inherit" noWrap>
+                         Buddies
                     </Typography>
+                    </Toolbar>
+                    
+                </AppBar>
+                <div className={classes.content}>
+                    <Fab onClick={this.handleInfoClick.bind(this)} color="primary" size="small" className={classes.infoIcon}>
+                        <InfoIcon />
+                    </Fab>
+                    
+                    <Snackbar
+                        anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
+                        open={this.state.showInfo}
+                        autoHideDuration={4000}
+                        TransitionComponent={Fade}
+                        onClose={this.handleInfoClose}
+                        className={classes.notification}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            onClick={this.handleInfoClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
+                        message={
+                            <span id="message-id">
+                                Your buddies add you as emergency contact. Do reach out to them when they need you!
+                            </span>
+                        }
+                        
+                    />
+                    {/* <Typography className={classes.infoText}>
+                        Your buddies add you as emergency contact. Do reach out to them when they need you!
+                    </Typography> */}
                 </div>
 
                 <div className={classes.contacts}>
@@ -218,5 +318,6 @@ class BuddyPage extends React.Component {
 
 BuddyPage.propTypes = {
     classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
   };
-export default withStyles(styles)(BuddyPage);
+export default withStyles(styles, { withTheme: true })(BuddyPage);

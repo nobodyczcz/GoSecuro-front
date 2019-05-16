@@ -152,7 +152,7 @@ class PinSurvey extends React.Component {
 
     pinSuccess = () =>{
         console.log("Pin added to database.");
-        this.props.history.push('/');
+        this.props.history.push('/map')
     }
 
     pinError(jqXHR) {

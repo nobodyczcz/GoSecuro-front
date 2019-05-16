@@ -27,13 +27,12 @@ const styles = theme => ({
     content: {
         backgroundImage: "url('img/background1.jpg')",
         backgroundSize: "cover",
-        marginTop: theme.spacing.unit * 15,
+        marginTop: theme.spacing.unit * 17,
         height: '73%',
         overflow:"hidden"
     },
     body: {
         height: '100%',
-        
     },
     header: {
         display: 'flex',
