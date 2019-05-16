@@ -301,8 +301,7 @@ handleInfoClose = (event, reason) => {
                                             <Typography className={classes.contName} gutterBottom align='left' variant="h6">
                                                     {fullName?fullName : 'No Name'}<br/>
                                                     {phone}
-                                                </Typography>    
-     */}
+                                                </Typography>
                                             </CardContent>
                                         </Card>
                                     </Grid>

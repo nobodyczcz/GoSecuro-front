@@ -13,6 +13,7 @@ import postscribe from 'postscribe';
 import { Router, Route, Link } from "react-router-dom";
 import LayerIcon from '@material-ui/icons/Layers';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
+import Snackbar from '@material-ui/core/Snackbar';
 
 
 import Fab from '@material-ui/core/Fab';
