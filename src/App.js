@@ -2092,7 +2092,13 @@ class App extends Component {
                                 User Profile
                             </Link>
                             :
-                            null
+                            <Link 
+                                className={classes.sideContent}
+                                variant='h6'
+                                to="/register"
+                            >
+                                Sign Up
+                            </Link>
                         }
                         
                     </ListItem>
