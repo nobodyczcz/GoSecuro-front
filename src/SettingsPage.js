@@ -10,6 +10,7 @@ import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import Switch from '@material-ui/core/Switch';
 import App from './App.js';
+import Select from '@material-ui/core/Select';
 
 import MapController from './mapController.js';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -78,7 +79,8 @@ class SettingsPage extends React.Component{
         super(props);
         this.state = {
             heatMapSwitch: true,
-            showRouteSwitch: true,
+            showRouteSwitch: false,
+            interval:600000,
 
         };
         this.mapController = new MapController();
@@ -86,12 +88,34 @@ class SettingsPage extends React.Component{
 
     componentWillMount(){
         this.props.hideAppBar(true);
-    }
-    handleHeatMapSwitch(){
-        if (!localStorage.displayHeatMap){
-            //console.log('create new contact list')
+        // load current setting from local storage. If don't exist, give a default value
+        if (localStorage.displayHeatMap){
+            this.state.heatMapSwitch=localStorage.displayHeatMap==='true'
+        }
+        else{
+            this.state.heatMapSwitch=true
             localStorage.setItem('displayHeatMap', true);
         }
+
+        if (localStorage.shareRoute){
+            this.state.showRouteSwitch=localStorage.shareRoute==='true'
+        }
+        else{
+            this.state.heatMapSwitch=false
+            localStorage.setItem('shareRoute', false);
+        }
+
+        if (localStorage.secureCheckInterval){
+            this.state.interval = parseInt(localStorage.secureCheckInterval)
+        }
+        else{
+            this.state.interval=600000
+            localStorage.setItem('secureCheckInterval', 600000);
+        }
+
+    }
+    handleHeatMapSwitch(){
+
         if (!this.state.heatMapSwitch) {
             //Turn on Heat map          
 
@@ -107,10 +131,7 @@ class SettingsPage extends React.Component{
     }
 
     handleShowRouteSwitch(){
-        if (!localStorage.shareRoute){
-            //console.log('create new contact list')
-            localStorage.setItem('shareRoute', true);
-        }
+
         if (!this.state.showRouteSwitch) {
             //Turn on Heat map          
 
@@ -124,6 +145,15 @@ class SettingsPage extends React.Component{
             this.setState({ showRouteSwitch: !this.state.showRouteSwitch });
         }
     }
+
+    handleChange = name => event => {
+        //handle change of interval select
+        if(name === 'interval'){
+            window.locationSharing.checkInteval = event.target.value
+            localStorage.secureCheckInterval=event.target.value
+        }
+        this.setState({ [name]: event.target.value });
+    };
 
     render(){
         const { classes,theme } = this.props;
@@ -153,7 +183,7 @@ class SettingsPage extends React.Component{
                     </AppBar>
                     <div className={classes.content}>
                         <MenuItem className={classes.menuItem} variant="h6">
-                            Heat Map
+                            Always Show Heat Map
                             <Switch
                                 checked={this.state.heatMapSwitch}
                                 onChange={this.handleHeatMapSwitch.bind(this)}
@@ -164,7 +194,7 @@ class SettingsPage extends React.Component{
                         </MenuItem>
 
                         <MenuItem className={classes.menuItem} variant="h6">
-                            Share Routes
+                            Always Share Routes
                             <Switch
                                 checked={this.state.showRouteSwitch}
                                 onChange={this.handleShowRouteSwitch.bind(this)}
@@ -172,6 +202,23 @@ class SettingsPage extends React.Component{
                                 color="secondary"
                                 className={classes.switchButton}
                             />
+                        </MenuItem>
+                        <MenuItem className={classes.menuItem} variant="h6">
+                            Security Check Interval
+                            <Select
+                                value={this.state.interval}
+                                onChange={this.handleChange('interval')}
+                                name="interval"
+                                inputProps={{
+                                    id: 'interval',
+                                }}
+                                className={classes.selectAge}
+                            >
+                                <MenuItem value={60000}>1 min</MenuItem>
+                                <MenuItem value={600000}>10 min</MenuItem>
+                                <MenuItem value={1200000}>20 min</MenuItem>
+                                <MenuItem value={1800000}>30 min</MenuItem>
+                            </Select>
                         </MenuItem>
 
                     </div>

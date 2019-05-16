@@ -57,38 +57,39 @@ class LocationSharing {
             );
             var currentTime = Date.now();
 
-            if (distance>=20){
-                this.trackCoord = {lat:location.latitude,lng:location.longitude};
-                this.updateTime = currentTime
-            }
-            else{
-                var interval = currentTime-this.updateTime;
-                if(interval > this.checkInteval){
-                    //push notification
-                    window.cordova.plugins.notification.local.schedule({
-                        title: 'Are you OK?',
-                        text: 'You did not move for 10 minutes. Is everything ok?',
-                        actions: [
-                            { id: 'yes', title: 'Yes' },
-                            { id: 'no',  title: 'No' }
-                        ]
-                    });
+            if(this.navigationRoute){
+                if (distance>=20){
+                    this.trackCoord = {lat:location.latitude,lng:location.longitude};
                     this.updateTime = currentTime
                 }
-                
+                else{
+                    var interval = currentTime-this.updateTime;
+                    if(interval > this.checkInteval){
+                        //push notification
+                        this.triggerCheck({ latitude: this.trackCoord.lat, longitude: this.trackCoord.lng })
+                        this.updateTime = currentTime
+                    }
+                    
+                }
+    
+                if (((currentTime-this.lastDestinationCheck)>this.checkInteval) && ((currentTime - this.planArrivalTime)>this.checkInteval)){
+                    //trigger check arrival late
+                    window.cordova.plugins.notification.local.schedule({
+                        title: `You should reach desitination by ${new Date(this.planArrivalTime).toLocaleTimeString()}`,
+                        text:  `Is everything OK?`,
+                        actions: [
+                            { id: 'late-yes', title: 'Yes' },
+                            { id: 'late-no',  title: 'No' }
+                        ]
+                    });
+                    this.doubleCheck('late')
+                    window.cordova.plugins.notification.local.on('late-yes', this.staCheckCallBack, this);
+                    window.cordova.plugins.notification.local.on('late-no', this.staCheckCallBack, this);
+                    this.checkLate=true;
+                    this.lastDestinationCheck = currentTime;
+                }
             }
-
-            if (((currentTime-this.lastDestinationCheck)>this.checkInteval) && ((currentTime - this.planArrivalTime)>this.checkInteval)){
-                window.cordova.plugins.notification.local.schedule({
-                    title: 'Are you OK?',
-                    text: `You should reach desitination by ${Date(this.planArrivalTime)}`,
-                    actions: [
-                        { id: 'yes', title: 'Yes' },
-                        { id: 'no',  title: 'No' }
-                    ]
-                });
-                this.lastDestinationCheck = currentTime;
-            }
+            
             
             // to perform long running operation on iOS
             // you need to create background task
@@ -106,7 +107,9 @@ class LocationSharing {
 
         this.BackgroundGeolocation.on('stationary', function(location) {
             console.log("[INFO] device on stationary")
-            this.checkUser(location)
+            if(this.navigationRoute){
+                this.stationaryCheckUser(location)
+            }
           }.bind(this));
 
         this.BackgroundGeolocation.on('start', function () {
@@ -141,11 +144,18 @@ class LocationSharing {
             console.log('[INFO] App is in foreground');
             console.log(`[INFO] ${JSON.stringify(window.cordova.plugins.notification.local.launchDetails)}`);
                 if(this.checkStationary){
-                    this.checkStationary=false;
                     navigator.notification.confirm(
-                        'You did not move for a long time. Is everything ok?', // message
-                         this.onAlertReply.bind(this),            // callback to invoke with index of button pressed
-                        'Are you OK?',           // title
+                        `You haven't been moving for ${this.checkInteval/1000/60} minutes. Is everything ok?`, // message
+                        (index)=>{this.onStaAlertReply(index,'stationary')},            // callback to invoke with index of button pressed
+                        'Is everything alright?',           // title
+                        ["Yes, I'm fine",'No, contact my friends']     // buttonLabels
+                    );
+                }
+                if(this.checkLate){
+                    navigator.notification.confirm(
+                        `You should reach desitination by ${new Date(this.planArrivalTime).toLocaleTimeString()}`, // message
+                         (index)=>{this.onStaAlertReply(index,'late')},            // callback to invoke with index of button pressed
+                        'Is everything alright?',           // title
                         ["Yes, I'm fine",'No, contact my friends']     // buttonLabels
                     );
                 }
@@ -155,13 +165,56 @@ class LocationSharing {
     }
 
     staCheckCallBack(notification, eopts){
+        //{"event":"staCheckNo","foreground":false,"queued":false,"notification":0}"
         console.log('[INFO] sta callback '+JSON.stringify(notification))
         console.log('[INFO] sta callback '+JSON.stringify(eopts))
-        this.checkStationary=false;
+        if(eopts.event === 'staCheckYes'){
+
+            this.checkStationary=false;
+        }
+
+        if(eopts.event === 'staCheckNo'){
+
+            this.checkStationary=false;
+            this.api.triggerEmergency({lat:this.currentLat,lng:this.currentLng});
+
+
+        }
+        if(eopts.event === 'late-yes'){
+
+            this.checkLate=false;
+
+        }
+        if(eopts.event === 'late-no'){
+
+            this.checkLate=false;
+            this.api.triggerEmergency({lat:this.currentLat,lng:this.currentLng});
+
+        }
+        
 
     }
 
-    checkUser(location){
+    onStaAlertReply(index,name){
+        console.log('[INFO] get reply: '+ index)
+        if(index ===1){
+            //nothing
+        }
+        else{
+            //contact emergency
+            this.api.triggerEmergency({lat:this.currentLat,lng:this.currentLng});
+
+        }
+
+        if(name === 'late'){
+            this.checkLate=false
+        }
+        else if(name === 'stationary' ){
+            this.checkStationary=false;
+        }
+    }
+
+    stationaryCheckUser(location){
         if (this.checkStationary){
             return
         }
@@ -172,57 +225,83 @@ class LocationSharing {
                 console.log(`latitude: ${location.latitude}, longitude: ${location.longitude}`)
                 console.log(`latitude: ${this.currentLat.lat}, longitude: ${this.currentLng.lng}`)
 
-                var distance = geolib.getDistance(
-                    { latitude: this.currentLat, longitude: this.currentLng },
-                    { latitude: location.latitude, longitude: location.longitude }
-                );
-                console.log('[INFO] stationary Time out: distance '+ distance)
-                if (distance<=20){
-                    this.checkStationary = true;
-                    window.cordova.plugins.notification.local.schedule({
-                        title: 'Are you OK?',
-                        text: `You did not move for ${this.checkInteval/1000/60} minutes. Is everything ok?`,
-                        vibrate:true,
-                        actions: [
-                            { id: 'staCheckYes', title: "Yes, I'm fine" },
-                            { id: 'staCheckNo',  title: 'No, contact my friends' }
-                        ]
-                    });
-
-                   
-                    setTimeout(()=>{
-                        if(this.checkStationary){
-                            window.cordova.plugins.notification.local.schedule({
-                                title: 'You did not reponse',
-                                text: `You did't response to the system. we will notify your emergency contacts to contact you now`,
-                                vibrate:true
-                            });
-                            this.checkStationary = false;
-                            //notify emergency contacts
-                        }
-
-                        this.BackgroundGeolocation.endTask(taskKey);
-                    },this.checkInteval/2)
-                    window.cordova.plugins.notification.local.on('staCheckYes', this.staCheckCallBack, this);
-
-                }
+                this.triggerCheck(location,taskKey)
                 
             },this.checkInteval);
            
         }.bind(this));
 
     }
+    triggerCheck(location,taskKey=null){
+        var distance = geolib.getDistance(
+            { latitude: this.currentLat, longitude: this.currentLng },
+            { latitude: location.latitude, longitude: location.longitude }
+        );
+        console.log('[INFO] stationary Time out: distance '+ distance)
+        if (distance<=20){
+            this.checkStationary = true;
+            window.cordova.plugins.notification.local.schedule({
+                title: `You haven't been moving for ${this.checkInteval/1000/60} minutes.`,
+                text:'Is everything alright?',
+                foreground:true,
+                priority: 1,
+                autoClear:false,
+                vibrate:true,
+                lockscreen:true,
+                sound:true,
+                channel:'default-channel-id',
+                actions: [
+                    { id: 'staCheckYes', title: "Yes, I'm fine" },
+                    { id: 'staCheckNo',  title: 'No, contact my friends' }
+                ]
+            });
 
-    onAlertReply(index){
-        console.log('[INFO] get reply: '+ index)
-        if(index ===1){
-            //nothing
+           
+            this.doubleCheck('stationary',taskKey)
+            window.cordova.plugins.notification.local.on('staCheckYes', this.staCheckCallBack, this);
+            window.cordova.plugins.notification.local.on('staCheckNo', this.staCheckCallBack, this);
+
         }
-        else{
-            //contact emergency
-        }
-        this.checkStationary=false;
     }
+    doubleCheck(name,taskKey=null){
+        setTimeout(()=>{
+
+            if(name==='stationary' && this.checkStationary){
+                window.cordova.plugins.notification.local.schedule({
+                    title: "You haven't responded to the system,  the alert messages have now been already sent to your emergency contacts.",
+                    foreground:true,
+                    vibrate:true,
+                    priority: 1,
+                    sound:true,
+                    channel:'Default channel',
+                });
+                
+                this.checkStationary = false;
+                this.api.triggerEmergency({lat:this.currentLat,lng:this.currentLng});
+
+                //notify emergency contacts
+            }
+            else if(name==='late' && this.checkLate){
+                window.cordova.plugins.notification.local.schedule({
+                    title: "You haven't responded to the system,  the alert messages have now been already sent to your emergency contacts.",
+                    foreground:true,
+                    vibrate:true,
+                    priority: 1,
+                    sound:true,
+                });
+                this.checkLate = false;
+                this.api.triggerEmergency({lat:this.currentLat,lng:this.currentLng});
+
+                //notify emergency contacts
+            }
+
+            if(taskKey){
+                this.BackgroundGeolocation.endTask(taskKey);
+            }
+        },this.checkInteval/2)
+    }
+
+
 
     uploadSuccess(data) {
         console.log("[INFO]up load LOCATION success")
@@ -276,12 +355,14 @@ class LocationSharing {
         return this.journeyId;
     }
     reset(){
+        this.navigationRoute=null;
         this.trackCoord = null;
         this.updateTime = null;
         this.journeyId = null;
         this.tempLinkID = null;
         this.tracking = false;
         this.lastDestinationCheck=null;
+        this.checkStationary=false;
     }
 
     getCurrentLat() {
@@ -309,10 +390,6 @@ class LocationSharing {
         }
         console.log("send data:" + JSON.stringify(data));
         this.tracking = true;
-        window.cordova.plugins.notification.local.schedule({
-            title: 'Navigation Start',
-            text: `You are on your way.`,
-        });
         this.api.callApi(theApi, data, this.startSuccess.bind(this), this.startError.bind(this))
 
         

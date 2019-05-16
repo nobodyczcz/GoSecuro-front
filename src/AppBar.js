@@ -230,6 +230,19 @@ class MainBar extends React.Component {
         }
 
     }
+    componentWillMount(){
+      var currentRoute = this.props.history.location.pathname
+
+      if (currentRoute==='/'){
+        this.state.tabValue=0
+      }
+      else if(currentRoute==='/map'){
+        this.state.tabValue=1
+      }
+      else if(currentRoute==='/contactsPage'){
+        this.state.tabValue=2
+      }
+    }
 
 
     removeFocus() {

@@ -1,27 +1,24 @@
 {
-  "_from": "cordova-plugin-local-notification",
+  "_from": "git+https://github.com/rahulk11/cordova-plugin-local-notifications.git",
   "_id": "cordova-plugin-local-notification@0.9.0-beta.2",
   "_inBundle": false,
-  "_integrity": "sha512-63n77K1pt8dnbWnNR8QWETi9Glezi1bvNHvHWmGNIOv0xCb0phZnm+Ku49BQ+omwe8Z5voMvrA4I03SYPpv38w==",
+  "_integrity": "",
   "_location": "/cordova-plugin-local-notification",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "cordova-plugin-local-notification",
-    "name": "cordova-plugin-local-notification",
-    "escapedName": "cordova-plugin-local-notification",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+    "type": "git",
+    "raw": "https://github.com/rahulk11/cordova-plugin-local-notifications.git",
+    "rawSpec": "https://github.com/rahulk11/cordova-plugin-local-notifications.git",
+    "saveSpec": "git+https://github.com/rahulk11/cordova-plugin-local-notifications.git",
+    "fetchSpec": "https://github.com/rahulk11/cordova-plugin-local-notifications.git",
+    "gitCommittish": null
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/cordova-plugin-local-notification/-/cordova-plugin-local-notification-0.9.0-beta.2.tgz",
-  "_shasum": "e3a0b4a35d11f95bb4f1e367d9baee9909cca695",
-  "_spec": "cordova-plugin-local-notification",
+  "_resolved": "git+https://github.com/rahulk11/cordova-plugin-local-notifications.git#40d32fd623fa133100cf39329d2d104764808deb",
+  "_spec": "https://github.com/rahulk11/cordova-plugin-local-notifications.git",
   "_where": "C:\\Users\\czcz2\\IEProject\\gosafe-front",
   "author": {
     "name": "Sebastián Katzer"

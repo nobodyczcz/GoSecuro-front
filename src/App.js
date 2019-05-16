@@ -39,15 +39,14 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
-import ShowPins from './showPins.js';
-import Settings from './settingsPage.js';
+import ShowPins from './ShowPins.js';
+import Settings from './SettingsPage.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider, Fade } from '@material-ui/core';
 
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
 import Pin from './pinSvg';
-import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -207,6 +206,10 @@ const styles = theme => ({
         top: theme.spacing.unit * 18,
         left: 'calc( 100% - 75%)',
         opacity: 0.9,
+    },
+    ergentAvatar:{
+        backgroundColor:'#ff7504',
+        color:'#fff'
     }
 
 });
@@ -266,9 +269,17 @@ class App extends Component {
 
         //apis to our server
         this.serverApi = new APIs();
-        this.locationSharing = new LocationSharing();
+        window.locationSharing = new LocationSharing();
         if (window.cordova) {
-            this.locationSharing.initialize();
+            window.locationSharing.initialize();
+            if (localStorage.secureCheckInterval){
+                window.locationSharing.checkInteval = parseInt(localStorage.secureCheckInterval)
+            }
+            else{
+                window.locationSharing.checkInteval = 600000
+                localStorage.setItem('secureCheckInterval', 600000);
+            }
+            
         }
         this.tempLinks = {};
         this.friendPath = null;
@@ -416,6 +427,7 @@ class App extends Component {
             hideAppBar:false,
             showNotification:false,
             notiContent:'',
+            ergentList:[]
         };
         
         this.interval= null;
@@ -435,7 +447,7 @@ class App extends Component {
      */
     loginSuccess() {
         this.retrieveTemplinks();
-        this.apis.initializeUserData();
+        this.apis.initializeUserData(this.mapController);
         this.getLinksTimer = setInterval(this.retrieveTemplinks.bind(this), 15000); //retrieve the templink from server eveery 15 s
         this.setState({ isLogin: true });
     }
@@ -713,6 +725,7 @@ class App extends Component {
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         window.handleShowNoti = this.handleShowNoti.bind(this);
+        window.addErgentList = this.addErgentList.bind(this)
         if(window.cordova){
 
 
@@ -847,6 +860,7 @@ class App extends Component {
 
     componentWillUnmount() {
         clearInterval(this.interval);
+
     }
 
 
@@ -1122,6 +1136,11 @@ class App extends Component {
      * 
      */
 
+     addErgentList(data){
+         var list =this.state.ergentList
+         list.push(data)
+         this.setState({ergentList: list})
+     }
 
     
     renderMap() {
@@ -1608,6 +1627,10 @@ class App extends Component {
         this.directionsDisplay.setDirections(this.state.currentRoute)
         
     }
+
+    handleErgent(item,index){
+        this.mapController.displayPerson(this.map,item,index)
+    }
     /*Map search related functions
      * 
      * finish
@@ -1620,6 +1643,18 @@ class App extends Component {
     mapPage() {
         if(this.state.tempLinks.toString!==Object.keys(this.tempLinks).toString){
             this.setState({ "tempLinks": Object.keys(this.tempLinks) });
+        }
+
+        if (localStorage.displayHeatMap){
+            if(this.state.crimeSwitch!==(localStorage.displayHeatMap==='true')){
+                this.handleCrimeSwitch();
+            }
+        }
+        else{
+            localStorage.setItem('displayHeatMap', true);
+            if(this.state.crimeSwitch!==true){
+                this.handleCrimeSwitch();
+            }
         }
 
         //define the appearance of map 
@@ -1712,6 +1747,30 @@ class App extends Component {
                 </div>
                 <div className={classes.friendsBoard}>
                     {
+                        this.state.ergentList.map(function (item, index) {
+                            console.log(JSON.stringify(item))
+                        var displayName = "";
+                        if(item.Name.length<=5){
+                            displayName=item.Name
+                        }
+                        else{
+                            var names = item.Name.split(' ')
+                            displayName = names[0][0].toUpperCase()
+                            if(names[1]){
+                                displayName = displayName + names[1][0].toUpperCase()
+                            }
+                        }
+                        
+                        
+
+                        return (
+                            <Fab className={classes.ergentAvatar} key = { item.phone } onClick = { function() { this.handleErgent(item,index) }.bind(this)
+                        } > { displayName }</Fab>
+                            )
+
+                        }.bind(this))
+                    }
+                    {
                         this.state.tempLinks.map(function (item, index) {
 
                         var journey = this.tempLinks[item];
@@ -1732,7 +1791,7 @@ class App extends Component {
                         }
 
                         return (
-                                    <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                            <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
                             } > { displayName }</Fab>
                             )
                         }.bind(this))
@@ -1764,7 +1823,7 @@ class App extends Component {
                 }
 
                 {this.state.searchResponse ? (
-                    <ResultCard routeAnalysis={this.routeAnalysis} alreadyTracking={this.state.tracking} locationSharing={this.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
+                    <ResultCard routeAnalysis={this.routeAnalysis} alreadyTracking={this.state.tracking} locationSharing={window.locationSharing} crimeTable={this.crimeTable} history={history} apiKey={this.apiKey} map={this.map} getLocation={this.getLocation.bind(this)} results={this.state.searchResponse} currentRoute={this.state.currentRoute} navigateTo={this.navigateTo.bind(this)} ></ResultCard>
                 ) : null}
                 
             </div>
@@ -1802,8 +1861,8 @@ class App extends Component {
                 this.interval = setTimeout(function() {
                     if (this.state.sharing) {
                         console.log("[INFO]3 seconds reach, switch still on. start sharing.")
-                        this.locationSharing.navigationRoute = null;
-                        this.locationSharing.startTracking(this.userLocation);
+                        window.locationSharing.navigationRoute = null;
+                        window.locationSharing.startTracking(this.userLocation);
                         this.setState({tracking:true})
                     }
                     else {
@@ -1814,7 +1873,7 @@ class App extends Component {
             }
             else {
                 if (this.state.tracking) {
-                    this.locationSharing.stopTracking();
+                    window.locationSharing.stopTracking();
                 }
             }
             
@@ -1961,7 +2020,7 @@ class App extends Component {
         return(
             <div className={this.props.classes.startUpPageLayer} >
                 <div className={this.props.classes.welcomeImgContainer} >
-                    <img src="img/SafeTrip-logo.png" className={this.props.classes.welcomeImg} alt='SafeTrip'/> 
+                    <img src="img/icon.png" className={this.props.classes.welcomeImg} alt='SafeTrip'/> 
                 </div>
             </div>
         );
@@ -1987,7 +2046,7 @@ class App extends Component {
                             About Us
                         </Link>
                     </ListItem>
-                    <ListItem button key='Navigation'>
+                    <ListItem button key='Navigation1'>
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
@@ -2128,7 +2187,7 @@ class App extends Component {
                     <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
-                    <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={this.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
+                    <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={window.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
                     <Route exact path="/pinSurvey" component={()=><PinSurvey history={history} getPinLocation={this.getPinLocation.bind(this)}/>} />
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>

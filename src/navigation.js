@@ -66,7 +66,9 @@ const styles = theme => ({
     },
     header: {
         width: "100%",
-        minHeight: "20px",
+    },
+    headerCard: {
+        width: "100%",
         backgroundColor:"#ff7504",
     },
     transit: {
@@ -91,6 +93,9 @@ const styles = theme => ({
         width:'100%',
         marginTop:'5px',
 
+    },
+    exitFab:{
+        width:'100%'
     }
 
 
@@ -172,6 +177,7 @@ class NavigationPage extends React.Component {
     };
 
     componentDidMount() {
+        console.log(this.state.planEndTime);
     }
     componentWillMount() {
         this.props.hideAppBar(true)
@@ -354,12 +360,26 @@ class NavigationPage extends React.Component {
 
                     <Grid
                         container
-                        direction="row"
+                        direction="column"
                         justify="center"
                         alignItems="center"
                         spacing={8}
                         className={classes.grid}
                     >
+                    {currentStep.father ?
+                            <Grid item xs={12}  className={classes.header}>
+                                <Card className={classes.headerCard}>
+                                    <Typography
+                                        variant="body1"
+                                        align="center"
+                                        color="primary"
+                                    >
+                                        <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
+                                    </Typography>
+                                </Card>
+                            </Grid>
+                            : null
+                        }
                     {this.state.finish?
                         <Grid item xs={12}>
                             <Card className={classes.contentCard}>
@@ -373,23 +393,10 @@ class NavigationPage extends React.Component {
                             </Card>
                         </Grid>
                         :
-                        <div className={classes.board}>
-                        {currentStep.father ?
-                            <Grid item xs={12}>
-                                <Card className={classes.header}>
-                                    <Typography
-                                        variant="body1"
-                                        align="center"
-                                        color="primary"
-                                    >
-                                        <a dangerouslySetInnerHTML={{ __html: currentStep.father.instructions }} />
-                                    </Typography>
-                                </Card>
-                            </Grid>
-                            : null
-                                    }
+                        <Grid item xs={12}>
+                        
                         {currentStep.travel_mode == "TRANSIT" ? 
-                            <Grid item xs={12}>
+                            
                                 <Grid container
                                     justify="space-between"
                                     alignItems="stretch"
@@ -443,9 +450,7 @@ class NavigationPage extends React.Component {
                                             </Card>
                                         </Grid>
                                     </Grid>
-                            </Grid>
                             :
-                            <Grid item xs={12}>
                                 <Grid container
                                     justify="space-between"
                                     alignItems="stretch"
@@ -482,9 +487,8 @@ class NavigationPage extends React.Component {
                                     </Card>
                                 </Grid>
                                 </Grid>
-                            </Grid>
                         }
-                        </div>
+                            </Grid>
                     }
                         
                         
@@ -508,7 +512,7 @@ class NavigationPage extends React.Component {
                             direction="row"
                             spacing={8}>
                             <Grid item xs={4}>
-                                <Fab variant='extended' onClick={this.handleExit.bind(this)} color="secondary" >Exit</Fab>
+                                <Fab className={classes.exitFab} variant='extended' onClick={this.handleExit.bind(this)} color="secondary" >Exit</Fab>
                             </Grid>
                         </Grid>
                             :

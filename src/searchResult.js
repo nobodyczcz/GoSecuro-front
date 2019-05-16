@@ -217,6 +217,7 @@ class ResultCard extends Component {
             Lexpanded: false,
             navWithShare:false,
             reminderOpen:false,
+            shareOnDefault:false,
 
         };
     };
@@ -224,13 +225,34 @@ class ResultCard extends Component {
         if(this.props.currentRoute){
             var mode = this.props.currentRoute.request.travelMode.toLowerCase()
             var suburbs = this.props.routeAnalysis[mode].suburbs
-            if(suburbs.highCrime.length>0){
+
+            if(this.state.shareOnDefault){
                 this.setState({navWithShare:true})
             }
+            else if(suburbs.highCrime.length>0){
+                this.setState({navWithShare:true})
+                this.handleReminderOpen();
+            }
+            else{
+                this.handleReminderOpen();
+            }
 
-            this.handleReminderOpen();
+            
         }
         
+    }
+
+    componentWillMount(){
+
+        if (localStorage.shareRoute){
+            this.state.shareOnDefault=localStorage.shareRoute==='true'
+        }
+        else{
+            this.state.shareOnDefault=false
+            localStorage.setItem('shareRoute', false);
+        }
+
+
     }
 
     handleDrawerOpen = () => {

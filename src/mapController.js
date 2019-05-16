@@ -7,6 +7,7 @@ class MapController {
         this.pins=[];
         this.icon = null;
         this.pinIcon=null;
+        this.personList={};
 
         this.cameraLocations = [
             [-37.814050, 144.944293, 'Security - Safe City - Camera # 48:' + "<br>" + 'Harbour ESP SE Corner West Wharf'],
@@ -208,12 +209,46 @@ class MapController {
         this.cameraCluster.clearMarkers();
     }
 
+    displayPerson(map,item,index){
+        if(this.personList[index]){
+            this.personList[index].setMap();
+            this.personList[index]=null;
+        }
+        else{
+            var lat = parseFloat(item.lat)
+            var lng = parseFloat(item.lng)
+            var content = `Name: ${item.Name}
+            Mobile: ${item.Phone}`
+            var newPo = new window.google.maps.LatLng(lat, lng)
+            var marker
+            marker = new window.google.maps.Marker({
+                position: newPo,
+            });
+            var infowindow = new window.google.maps.InfoWindow();
+            infowindow.setContent(content)
+            infowindow.open(map, marker);
+            map.setCenter(newPo)
+
+            window.google.maps.event.addListener(marker, 'click', ()=>{
+                infowindow.open(map, marker);
+
+            });
+            this.personList[index]=marker;
+            marker.setMap(map)
+
+        }
+    }
+
+
     clearMap(map) {
         //Clear all crime rate from map
-        map.data.forEach(function (feature) {
-            // filter...
-            map.data.remove(feature);
-        });
+        if(map){
+            map.data.forEach(function (feature) {
+                // filter...
+                map.data.remove(feature);
+            });
+        }
+
     };
 
     displayMediumToHighCrime(map, data) {

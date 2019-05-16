@@ -105,7 +105,8 @@ class APIs {
         }.bind(this)).fail(error);
     }
 
-    initializeUserData(){
+    initializeUserData(mapController){
+        this.mapController = mapController;
         var apiRoute = 'api/UserEmergency/retrieveEmergencies';
         this.callApi(apiRoute,'',this.retrieveEmSuccess.bind(this),(err)=>{console.log(err)});
 
@@ -141,10 +142,13 @@ class APIs {
                     // data.sound,
                     // data.image,
                     // data.additionalData
-                    window.cordova.plugins.notification.local.schedule({
-                        title: "Your friend " + data.Name + " might need help",
-                        text: "You might want to call them to make sure they are alright",
-                    });
+                    window.addErgentList(data.additionalData);
+                    navigator.notification.confirm(
+                        `You might want to call them to make sure they are alright`, // message
+                        ()=>{},
+                        "Your friend " + data.additionalData.Name + " might need help",// title
+                        'Check his location'           
+                    );
                     console.log('[INFO] on motification '+ data.title)
                 });
                 
@@ -162,6 +166,56 @@ class APIs {
     }
     retrievePoSuccess(reply){
         localStorage.setItem("profile",reply.data);
+    }
+
+    triggerEmergency(location){
+        console.log("On cordova emergency")
+                var contList = JSON.parse(localStorage.localContactList);
+                var lat = location.lat;
+                var lng = location.lng;
+
+                var data = [location.lat,location.lng] 
+
+                    var api = 'api/UserEmergency/emergency/';
+                    this.callApi(api,data,()=>{console.log('[INFO] emergency api success')},(err)=>{console.log('[INFO] emergency api error: '+err)})
+
+                for (var i in contList) {
+                    console.log('send Message to ',contList[i].ECname)
+                    var name = contList[i].ECname;
+                    var userName
+                    if(localStorage.UserProfiles){
+                        var profile = JSON.parse(localStorage.UserProfiles)
+                        userName = profile.FirstName + profile.LastName?' '+profile.LastName:'';
+                    }
+                    else{
+                        userName='';
+                    }
+                    
+                    var googleLink = 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng
+                    var string = "Hi " + name + ", \nYour friend " + userName + " is in trouble at the moment.\nThis is their last current location " + googleLink + ".\nYou might want to call them to make sure they are alright..\nThanks. \n(Sent automatically by GoSafe) ";
+
+                    
+
+                    
+                    var options = {
+                        replaceLineBreaks: false, // true to replace \n by a new line, false by default
+                        android: {
+                            intent: '' // send SMS without opening any other app
+                        }
+                    };
+                
+                    var success = function () { window.handleShowNoti('Message Send Successful') };
+                    var error = function (e) { window.handleShowNoti('Message Failed:' + e) };
+                    if(window.cordova){
+                        window.sms.send(contList[i].EmergencyContactPhone, string, options, success, error);
+                    }
+            }
+            navigator.notification.confirm(
+                `Panic Button triggerd! Emergency messages and your location have been sent to your Emergency contacts!`, // message
+                ()=>{},
+                'Emergency!',
+                'Done'           // title
+            );
     }
     
 
