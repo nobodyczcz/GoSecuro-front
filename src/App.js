@@ -2113,7 +2113,6 @@ class App extends Component {
                         autoHideDuration={4000}
                         TransitionComponent={Fade}
                         onClose={this.handleClose}
-                        className={classes.notification}
                         ContentProps={{
                             'aria-describedby': 'message-id',
                         }}

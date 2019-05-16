@@ -108,7 +108,7 @@ class HomePageStepper extends Component {
                     >
                         <div key='1' className={classes.pages}>
                             <div className='screenPicture'>
-                                <img src='img/screen3v3.png' alt='Background' className='screen3'/>  
+                                <img src='img/GoSecuro-home.png' alt='Background' className='screen3'/>  
                             </div>                            
                         </div>
 
