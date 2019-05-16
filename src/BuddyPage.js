@@ -50,8 +50,9 @@ const styles = theme => ({
         zIndex:1200,
     },
     content: {
-        marginTop: "0",
+        marginTop:'65px',
         padding: '3%',
+        justifyContent: 'center',
     },
     contacts: {
         height:"45%",
@@ -94,7 +95,13 @@ const styles = theme => ({
         top: theme.spacing.unit * 30,
         left: 'calc( 100% - 95%)',
         opacity: 0.9,
-    }
+    },
+    toolbar: {
+        marginTop:"20px",
+    },
+    headerTitle:{
+        marginLeft: `calc( 100% - 74% )`,        
+    },
 });
 class BuddyPage extends React.Component {
     constructor(props) {
@@ -212,9 +219,13 @@ handleInfoClose = (event, reason) => {
                         <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
                         {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                         </IconButton>
-                        <Typography className={classes.headerTitle} variant="h5" color="inherit" noWrap>
-                         Buddies
-                    </Typography>
+                        <Typography
+                            variant="h6"
+                            color="inherit"
+                            className={classes.headerTitle}
+                            >
+                                Buddies
+                        </Typography>
                     </Toolbar>
                     
                 </AppBar>
