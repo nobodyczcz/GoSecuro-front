@@ -104,7 +104,7 @@ class MapController {
             <p>
                 Surviliance cameras: ${details.CCTV}
             </p>
-                ${details.experienceType ==='None'?'':details.experienceType}
+                Experience: ${details.ExperienceType}
             </div>
             `
             marker = new window.google.maps.Marker({

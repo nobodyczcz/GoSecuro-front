@@ -16,7 +16,7 @@ const startApp = () => {
 var oldLog = console.log
 
 console.log = (message)=>{
-    
+
 }
 
 if (window.cordova) {

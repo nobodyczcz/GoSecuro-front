@@ -96,6 +96,9 @@ const styles = theme => ({
     },
     exitFab:{
         width:'100%'
+    },
+    directionBoard:{
+        width:'100%',
     }
 
 
@@ -128,7 +131,7 @@ class NavigationPage extends React.Component {
         console.log(this.steps)
         this.state = {
             startTime: Date.now(),
-            planEndTime: Date.now(routes.duration.value * 1000),
+            planEndTime: Date.now()+routes.duration.value * 1000,
             steps: this.steps,
             current: 0,
             next: 1,
@@ -401,7 +404,9 @@ class NavigationPage extends React.Component {
                                     justify="space-between"
                                     alignItems="stretch"
                                     direction="row"
-                                    spacing={8}>
+                                    spacing={8}
+                                    className={classes.directionBoard}
+                                    >
                                     <Grid item xs={5} className={classes.transit}>
                                         <Card className={classes.contentCard}>>
                                         <Typography
@@ -456,6 +461,7 @@ class NavigationPage extends React.Component {
                                     alignItems="stretch"
                                     direction="row"
                                     spacing={8}
+                                    className={classes.directionBoard}
                                     >
                                 <Grid item xs={5} className={classes.transit}>
                                     <Card className={classes.contentCard}>

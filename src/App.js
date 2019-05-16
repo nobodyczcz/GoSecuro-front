@@ -862,6 +862,19 @@ class App extends Component {
         clearInterval(this.interval);
 
     }
+    componentWillMount(){
+        if (localStorage.displayHeatMap){
+            if(this.state.crimeSwitch!==(localStorage.displayHeatMap==='true')){
+                this.state.crimeSwitch=(localStorage.displayHeatMap==='true')
+            }
+        }
+        else{
+            localStorage.setItem('displayHeatMap', true);
+            if(this.state.crimeSwitch!==true){
+                this.state.crimeSwitch=true
+            }
+        }
+    }
 
 
 
@@ -1645,17 +1658,7 @@ class App extends Component {
             this.setState({ "tempLinks": Object.keys(this.tempLinks) });
         }
 
-        if (localStorage.displayHeatMap){
-            if(this.state.crimeSwitch!==(localStorage.displayHeatMap==='true')){
-                this.handleCrimeSwitch();
-            }
-        }
-        else{
-            localStorage.setItem('displayHeatMap', true);
-            if(this.state.crimeSwitch!==true){
-                this.handleCrimeSwitch();
-            }
-        }
+       
 
         //define the appearance of map 
         console.log('render home page')
