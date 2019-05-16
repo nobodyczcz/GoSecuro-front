@@ -14,6 +14,8 @@ import Fab from '@material-ui/core/Fab';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
+import InfoIcon from '@material-ui/icons/Info';
+import { Fade } from '@material-ui/core';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
@@ -48,7 +50,8 @@ function EditIcon(props) {
 
 const styles = theme => ({
     addNewButton:{
-        left:`calc( 100% - 125px )`
+        left:`calc( 100% - 125px )`,
+        marginTop: "5px"
     },
     avatar: {
         marginTop: '0px',
@@ -93,16 +96,16 @@ const styles = theme => ({
         top: '0',
         left: '0',
         zIndex: 899,
-        marginTop: '130px'
+        marginTop: theme.spacing.unit * 17,
     },
     content: {
-        marginTop: "0",
+        //marginTop: "10px",
         padding: '3%',
     },
     contacts: {
         height:"45%",
         overflowY: "scroll",
-        paddingLeft: '3%',
+        paddingLeft: '4%',
         paddingRight: '3%',
     },
     contCard: {
@@ -150,6 +153,17 @@ const styles = theme => ({
     },
     NoContacts:{
         justifyContent: "center"
+    },
+    infoIcon:{
+        float: "right",
+        marginBottom: "2px"
+    },
+    notification:{
+        width: "90%",
+        justifyContent: "center",
+        top: theme.spacing.unit * 30,
+        left: 'calc( 100% - 95%)',
+        opacity: 0.9,
     }
 });
 class ContactsPage extends React.Component {
@@ -170,7 +184,8 @@ class ContactsPage extends React.Component {
             activeItemName: '',
             activeMobile: '',
             activeIndex:'',
-            noContacts: false
+            noContacts: false,
+            showInfo: false
         };
 
     }
@@ -204,7 +219,7 @@ class ContactsPage extends React.Component {
 });
     };
 
-    componentDidMount() {
+    componentWillMount() {
         this.retrieveEmergencies(); 
     }
 
@@ -464,6 +479,37 @@ class ContactsPage extends React.Component {
      * finish
      */
 
+    /* Handle click on Info icon
+    * Sets  state true to display information snackbar about emergency contact
+    *
+    * start 
+    */
+    handleInfoClick(){
+        this.setState({ showInfo: true });
+
+    }
+    /* Handle click on Info icon
+    *
+    * finish 
+    */
+
+    /* Handle close of Info icon
+    * Sets  state false to display information snackbar about emergency contact
+    *
+    * start 
+    */
+    handleInfoClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+          }
+        this.setState({ showInfo: false });
+
+    }
+    /* Handle close of Info icon
+    *
+    * finish 
+    */
+
     render() {
         const { classes } = this.props;
         return (
@@ -472,10 +518,37 @@ class ContactsPage extends React.Component {
                     
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
+                        <Fab onClick={this.handleInfoClick.bind(this)} color="primary" size="small" className={classes.infoIcon}>
+                        <InfoIcon />
+                    </Fab>
                     </Typography>
-                    <Typography className={classes.infoText}>
+                    
+                    <Snackbar
+                        anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
+                        open={this.state.showInfo}
+                        autoHideDuration={4000}
+                        TransitionComponent={Fade}
+                        onClose={this.handleInfoClose}
+                        className={classes.notification}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            onClick={this.handleInfoClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
+                        message={<span id="message-id">You can add your close and trusted ones as your emergency contacts. Do get in touch with them so that they can always be available for you!.</span>}
+                        
+                    />
+                    {/* <Typography className={classes.infoText}>
                         You can add your close and trusted ones as your emergency contacts. Do get in touch with them so that they can always be available for you!
-                    </Typography>
+                    </Typography> */}
                     
                     <Fab
                         variant="extended"

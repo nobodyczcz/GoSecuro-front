@@ -29,7 +29,6 @@ import UserProfile from './UserProfile.js';
 import PanicButton from './panicButton.js';
 import inerSuburbNames from './innerSuburb.json';
 import LightLocation from './LightLocation.json';
-import Snackbar from '@material-ui/core/Snackbar';
 
 import MapController from './mapController.js';
 import NavigationPage from './navigation.js'
@@ -2006,8 +2005,6 @@ class App extends Component {
     };
 
     homePage() {
-       
-
         return (
             <div>
                 <HomePageStepper />
@@ -2170,7 +2167,7 @@ class App extends Component {
                     
                     {this.theBar()}
                     <Snackbar
-                        anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
+                        anchorOrigin={{ vertical : 'bottom', horizontal: 'center' }}
                         open={this.state.logoutNotification}
                         autoHideDuration={4000}
                         TransitionComponent={Fade}
@@ -2180,10 +2177,20 @@ class App extends Component {
                             'aria-describedby': 'message-id',
                         }}
                         message={<span id="message-id">Logged out successfully.</span>}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            onClick={this.handleClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
                     />
                     <Route exact path="/" component={this.homePage.bind(this)} />
                     <Route exact path="/map" component={this.mapPage.bind(this)} />
-                    <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin}/>}  />
+                    <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin} history={history} hideAppBar={this.hideAppBar.bind(this)} />}  />
                     <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
