@@ -216,7 +216,9 @@ handleInfoClose = (event, reason) => {
                     className={classes.appBar}
                 >
                     <Toolbar className={classes.toolbar}>
-                        <IconButton className={classes.backButton} onClick={()=>{this.props.history.goBack()}}>
+                        <IconButton className={classes.backButton} onClick={()=>{                
+                            this.props.history.goBack();
+                        }}>
                         {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
                         </IconButton>
                         <Typography

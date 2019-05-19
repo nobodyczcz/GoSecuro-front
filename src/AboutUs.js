@@ -8,6 +8,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
+import HomePageStepper from './homePageStepper.js';
 
 import { Router, Route, Link } from "react-router-dom";
 import { Toolbar } from '@material-ui/core';
@@ -31,6 +32,8 @@ const styles = theme => ({
     backButton:{
         color: '#FFFFFF',
         zIndex: 1210,
+        position:'fixed',
+        left:0
     },
     content: {
         justifyContent: 'center',
@@ -46,9 +49,9 @@ const styles = theme => ({
         color:'Red',
         textAlign: 'center',
     },
-    headerTitle:{
-        marginLeft: `calc( 100% - 80% )`,        
-    },
+    // headerTitle:{
+    //     marginLeft: `calc( 100% - 80% )`,        
+    // },
     paper: {
         position: 'fixed',
         width: '100%',
@@ -59,6 +62,8 @@ const styles = theme => ({
     },
     toolbar: {
         marginTop:"20px",
+        display:'flex',
+        justifyContent:'center',
     },
 });
 class AboutUs extends React.Component{
@@ -89,15 +94,9 @@ class AboutUs extends React.Component{
                         
                     </AppBar>
                     <div className={classes.content}>
-                    <Typography className={classes.contentText} variant='h6'>
-                        Crime and offences in public spaces have continued to threaten the safety of women, discouraging them to travel alone confidently.
-                        <br/><br/>
-                        This situation is particularly intimidating to female students who are new and unfamiliar to Melbourne. It is a social responsibility to ensure the safety of women and encourage them to travel confidently. 
-                        <br/><br/>
-                        GoSecuro is a safety app targeted towards new students in Melbourne. The application is developed with your safety in mind. 
-                        <br/><br/>
-                        GoSecuro acts as an additional safety measure when you’re navigating Melbourne, crime and incidents.
-                    </Typography>
+                    <HomePageStepper />
+
+                    
                     </div>
                     
                 </div>

@@ -236,11 +236,25 @@ class MainBar extends React.Component {
       if (currentRoute==='/'){
         this.state.tabValue=0
       }
-      else if(currentRoute==='/map'){
+      // else if(currentRoute==='/map'){
+      //   this.state.tabValue=1
+      // }
+      else if(currentRoute==='/contactsPage'){
         this.state.tabValue=1
       }
+    }
+
+    checkTab(){
+      var currentRoute = this.props.history.location.pathname
+
+      if (currentRoute==='/'){
+        this.setState({tabValue:0});
+      }
+      // else if(currentRoute==='/map'){
+      //   this.state.tabValue=1
+      // }
       else if(currentRoute==='/contactsPage'){
-        this.state.tabValue=2
+        this.setState({tabValue:1});
       }
     }
 
@@ -273,10 +287,9 @@ class MainBar extends React.Component {
             var searchIconPosition = event.currentTarget.getBoundingClientRect()
             this.props.handleInputSearch(text);
             this.setState({ searching: true, searchCoord: [searchIconPosition.left, searchIconPosition.top] });
-            if (this.state.tabValue != 1) {
+            if (this.state.tabValue != 0) {
                 document.getElementById('mapIcon').click();
-                this.props.history.push('/map');
-
+                this.props.history.go(window.homeIndex());
             }
         }
         else {
@@ -318,7 +331,7 @@ class MainBar extends React.Component {
 
         return (
           <div>
-                    <div className={this.state.tabValue == 1? classes.mainBarMap :classes.mainBar}>
+                    <div className={this.state.tabValue == 0? classes.mainBarMap :classes.mainBar}>
                     </div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
@@ -388,12 +401,13 @@ class MainBar extends React.Component {
                       className={classes.tabs}
 
                   >
-                      <Tab icon={<HomeIcon color="primary"/>} onClick={() => {
-                          this.props.history.push('/')
+                      <Tab icon={<HomeIcon color="primary"/>} id='mapIcon' onClick={() => {
+                        if(this.props.history.location.pathname!=='/')
+                          this.props.history.go(window.homeIndex());
                       }} />
-                      <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
+                      {/* <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
                           this.props.history.push('/map')
-                      }} />
+                      }} /> */}
                       <Tab icon={<ContactsIcon color="primary"/>} onClick={() => {
                           this.props.history.push('/contactsPage')
                       }} />

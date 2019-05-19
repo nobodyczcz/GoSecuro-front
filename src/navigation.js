@@ -213,7 +213,7 @@ class NavigationPage extends React.Component {
         
     }
     handleExit(){
-        this.props.history.push('/map');
+        this.props.history.goBack();
     }
 
     updateLocation(coord) {

@@ -27,10 +27,10 @@ const styles = theme => ({
     content: {
         backgroundImage: "url('img/background1.jpg')",
         backgroundSize: "cover",
-        marginTop: theme.spacing.unit * 17,
+        marginTop: theme.spacing.unit * 10,
         height: '73%',
         overflow:"hidden",
-        overflowY: 'hidden',
+        // overflowY: 'hidden',
     },
     body: {
         height: '100%',
@@ -52,8 +52,13 @@ const styles = theme => ({
         justifyContent: 'center',
     },
     pages: {
-        overflow:'hidden',
-    }
+         overflow:'hidden',
+    },
+    contentText:{
+        //color:'#FF7504',
+        textAlign: 'justify',
+        margin:'10px',
+    },
 
 });
 
@@ -90,7 +95,7 @@ class HomePageStepper extends Component {
     render() {
         const { classes, theme } = this.props;
         const { activeStep } = this.state;
-        const maxSteps = 3;
+        const maxSteps = 4;
 
         return (
             <Paper className={classes.root}>
@@ -136,6 +141,17 @@ class HomePageStepper extends Component {
                             <div className='chartPicture'>
                                 <img src='img/statisticsChart.png' alt='Statistics based on Survey with 400 Women' className='statisticsImage'/>
                             </div>
+                        </div>
+                        <div key='3' className={classes.pages}>
+                        <Typography className={classes.contentText} variant='h6'>
+                        Crime and offences in public spaces have continued to threaten the safety of women, discouraging them to travel alone confidently.
+                        <br/><br/>
+                        This situation is particularly intimidating to female students who are new and unfamiliar to Melbourne. It is a social responsibility to ensure the safety of women and encourage them to travel confidently. 
+                        <br/><br/>
+                        GoSecuro is a safety app targeted towards new students in Melbourne. The application is developed with your safety in mind. 
+                        <br/><br/>
+                        GoSecuro acts as an additional safety measure when you’re navigating Melbourne, crime and incidents.
+                    </Typography>
                         </div>
  
                     </AutoPlaySwipeableViews>

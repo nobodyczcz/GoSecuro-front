@@ -56,11 +56,16 @@ var d3Geo = require("d3-geo")
 var history;
 if (window.cordova) {
     history = new createHashHistory();
+    window.homeIndex = ()=>{
+        return(-(history.length-1))
+    }
 }
 else {
     history = new createBrowserHistory();
-}
-
+    window.homeIndex = ()=>{
+        return(-(history.length-2))
+    }
+    }
 
 const styles = theme => ({
     list: {
@@ -592,7 +597,7 @@ class App extends Component {
         }
 
         this.tempLinks = tempLinks;
-        if (updated && history.location.pathname==='/map') {
+        if (updated && history.location.pathname==='/') {
             console.log("[INFO] temp link list chaged");
             this.setState({ "tempLinks": Object.keys(this.tempLinks) });
         }
@@ -744,9 +749,12 @@ class App extends Component {
         }
 
         history.listen((location, action) => {
+            console.log(location.pathname)
             if(['/map','/contactsPage','/'].indexOf(location.pathname)>=0){
                 this.hideAppBar(false);
+
             }
+
             // location is an object like window.location
         });
         this.interval = setTimeout(() => this.setState({ startUpPageLayer: false }), 3000);
@@ -863,6 +871,9 @@ class App extends Component {
 
     }
     componentWillMount(){
+        console.log(history.length)
+
+
         if (localStorage.displayHeatMap){
             if(this.state.crimeSwitch!==(localStorage.displayHeatMap==='true')){
                 this.state.crimeSwitch=(localStorage.displayHeatMap==='true')
@@ -1945,6 +1956,9 @@ class App extends Component {
                 this.setState({ hideAppBar: false })
                 //this.state.hideAppBar=false
             }
+            else{
+                this.mainBar.current.checkTab();
+            }
         }
 
     }
@@ -2197,8 +2211,8 @@ class App extends Component {
                             </IconButton>,
                         ]}
                     />
-                    <Route exact path="/" component={this.homePage.bind(this)} />
-                    <Route exact path="/map" component={this.mapPage.bind(this)} />
+                    {/* <Route exact path="/" component={this.homePage.bind(this)} /> */}
+                    <Route exact path="/" component={this.mapPage.bind(this)} />
                     <Route exact path="/buddy" component={() => <BuddyPage isLogin={this.state.isLogin} history={history} hideAppBar={this.hideAppBar.bind(this)} />}  />
                     <Route exact path="/contactsPage" component={() => <ContactsPage isLogin={this.state.isLogin}/>}  />
                     <Route exact path="/register" component={() => <RegisterPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
