@@ -152,7 +152,7 @@ const styles = theme => ({
     sideContentBar: {
         marginTop: theme.spacing.unit * 5,
         minWidth:"250px",
-        padding:"30px",
+        padding:"30px", 
     },
     sideContent: {
         color:'#4f6c98',
