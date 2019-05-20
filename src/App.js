@@ -42,13 +42,21 @@ import LoginPage from './login.js';
 import ShowPins from './ShowPins.js';
 import Settings from './SettingsPage.js';
 import Typography from '@material-ui/core/Typography';
-import { Divider, Fade } from '@material-ui/core';
+import { Divider, Fade, Avatar } from '@material-ui/core';
 
 import LocShareIcon from './locShareIcon';
 import DropPin from './dropPin';
 import Pin from './pinSvg';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import InfoIcon from '@material-ui/icons/Info';
+import SettingsIcon from '@material-ui/icons/Settings';
+import PeopleIcon from '@material-ui/icons/People';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
+
+
+
+
 import Radio from '@material-ui/core/Radio';
 
 
@@ -143,11 +151,13 @@ const styles = theme => ({
     },
     sideContentBar: {
         marginTop: theme.spacing.unit * 5,
-        minWidth:"300px"
+        minWidth:"250px",
+        padding:"30px",
     },
     sideContent: {
         color:'#4f6c98',
-        textDecoration:'none'
+        textDecoration:'none',
+
     },
     legend: {
         position: "absolute",
@@ -217,6 +227,15 @@ const styles = theme => ({
     ergentAvatar:{
         backgroundColor:'#ff7504',
         color:'#fff'
+    },
+    userLogo:{
+        width: "60px",
+        height:"60px",
+        margin: "10px"
+    },
+    listItem:{
+        display:"flex",
+        justifyContent:"space-between",
     }
 
 });
@@ -2109,17 +2128,35 @@ class App extends Component {
         //Basic structure of the whole app
         console.log('reander basic app')
         const { classes } = this.props;
+        var userName;
+        if(localStorage.profile){
+            var profile = JSON.parse(localStorage.profile)
+            userName = profile.FirstName.slice(0,1).toUpperCase() + (profile.LastName?profile.LastName.slice(0,1).toUpperCase():'');
+        }
+        else{
+            userName='None';
+        }
 
         const sideList = (
             <div>
                 <List className={classes.sideContentBar}>
-                    
+                    {this.state.isLogin ?
+                            <Avatar color="secondary" className={classes.userLogo}
+                            >
+                            <b>{userName}</b>
+                            </Avatar>
+
+                            :
+                                null
+                            }
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
                         >
-                            <ListItem button key='Navigation'>
+                            <ListItem button key='Navigation' className={classes.listItem}>
+                            <InfoIcon></InfoIcon>
+
                             About Us
                             </ListItem>
 
@@ -2130,7 +2167,10 @@ class App extends Component {
                             variant='h6'
                             to='/settings'
                         >
-                            <ListItem button key='Navigation1'>
+
+                            <ListItem button key='Navigation1' className={classes.listItem}>
+                            <SettingsIcon></SettingsIcon>
+
                             Settings
                             </ListItem>
                         </Link>
@@ -2141,8 +2181,8 @@ class App extends Component {
                                 variant='h6'
                                 to='/showPins'
                             >
-                                <ListItem button key='Navigation2'>
-
+                                <ListItem button key='Navigation2' className={classes.listItem}>
+                                    <Pin></Pin>
                                 My Pins
                                 </ListItem>
 
@@ -2158,7 +2198,9 @@ class App extends Component {
                                 variant='h6'
                                 to='/buddy'
                             >
-                                <ListItem button key='Navigation3'>
+                                <ListItem button key='Navigation3' className={classes.listItem}>
+                                <PeopleIcon></PeopleIcon>
+
                                 Buddies
                                 </ListItem>
 
@@ -2173,7 +2215,8 @@ class App extends Component {
                                 variant='h6'
                                 to='/userProfile'
                             >
-                                <ListItem button key='Navigation4'>
+                                <ListItem button key='Navigation4' className={classes.listItem}>
+                                <AccountBoxIcon></AccountBoxIcon>
 
                                 User Profile
                                 </ListItem>
@@ -2185,7 +2228,7 @@ class App extends Component {
                                 variant='h6'
                                 to="/register"
                             >
-                                <ListItem button key='Navigation4'>
+                                <ListItem button key='Navigation4' className={classes.listItem}>
 
                                 Sign Up
                                 </ListItem>
@@ -2199,7 +2242,7 @@ class App extends Component {
                                     variant='h6'
                                     onClick={this.handleLogout.bind(this)}
                                 >
-                                <ListItem button key='Navigation5'>
+                                <ListItem button key='Navigation5' className={classes.listItem}>
 
                                     Logout
                                 </ListItem>
@@ -2211,7 +2254,7 @@ class App extends Component {
                                 variant='h6'
                                 to='/login'
                             >
-                                <ListItem button key='Navigation5'>
+                                <ListItem button key='Navigation5' className={classes.listItem}>
 
                                 Login
                                 </ListItem>

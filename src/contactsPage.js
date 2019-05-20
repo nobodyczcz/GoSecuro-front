@@ -528,7 +528,6 @@ class ContactsPage extends React.Component {
                     <Snackbar
                         anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
                         open={this.state.showInfo}
-                        autoHideDuration={4000}
                         TransitionComponent={Fade}
                         onClose={this.handleInfoClose}
                         className={classes.notification}

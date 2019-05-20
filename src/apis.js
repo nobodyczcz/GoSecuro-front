@@ -183,8 +183,8 @@ class APIs {
                     console.log('send Message to ',contList[i].ECname)
                     var name = contList[i].ECname;
                     var userName
-                    if(localStorage.UserProfiles){
-                        var profile = JSON.parse(localStorage.UserProfiles)
+                    if(localStorage.profile){
+                        var profile = JSON.parse(localStorage.profile)
                         userName = profile.FirstName + profile.LastName?' '+profile.LastName:'';
                     }
                     else{
