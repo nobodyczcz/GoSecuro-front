@@ -318,7 +318,7 @@ class PinSurvey extends React.Component {
                             </Typography>
                             <TextField
                                 id="standard-textarea-flexible"
-                                placeholder="You can describe your experience here..."
+                                placeholder="You can describe your experience here... These experience won't be displayed to other users, and will only be used for data analysis"
                                 multiline={true}
                                 rows="4"
                                 rowsMax="8"

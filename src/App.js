@@ -797,7 +797,7 @@ class App extends Component {
         }
         else {
             //directly load from server is using broswer
-            this.retrieveCrimeRates()
+            //this.retrieveCrimeRates()
         }
 
         if(window.cordova){

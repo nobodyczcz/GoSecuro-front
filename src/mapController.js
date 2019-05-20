@@ -126,8 +126,11 @@ class MapController {
             );
     }
     clearPins(){
-        if(this.pinCluster)
-        this.pinCluster.clearMarkers();
+        if(this.pinCluster){
+            this.pinCluster.clearMarkers();
+
+        }
+        
     }
 
     showLight(map, data) {

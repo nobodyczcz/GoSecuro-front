@@ -54,10 +54,10 @@ const styles = theme => ({
         marginTop: "5px"
     },
     avatar: {
-        marginTop: '0px',
-        width: "60px",
-        height:"60px",
-        fontSize: "20px"
+        // marginTop: '0px',
+        // width: "60px",
+        // height:"60px",
+        fontSize: "20px",
     },
     customLeftButton:{
         left:`calc( 100% - 90% )`,
@@ -96,10 +96,10 @@ const styles = theme => ({
         top: '0',
         left: '0',
         zIndex: 899,
-        marginTop: theme.spacing.unit * 17,
     },
     content: {
         //marginTop: "10px",
+        marginTop:`calc(5% + 100px)`,
         padding: '3%',
     },
     contacts: {
@@ -114,7 +114,7 @@ const styles = theme => ({
         marginBottom:theme.spacing.unit * 2,
     },
     cardContent:{
-        padding: '0px'
+        padding: '5px'
     },
     contName: {
         width: '50%',
@@ -138,7 +138,9 @@ const styles = theme => ({
     },
     mainText: {
         fontWeight:'bold',
-        justifyContent: 'center',
+        display:'flex',
+        justifyContent: 'space-between',
+        alignItems:'center',
     },
     modalPaper: {
         position: 'absolute',
@@ -518,9 +520,9 @@ class ContactsPage extends React.Component {
                     
                     <Typography id='headerText' className={classes.mainText} color="secondary" gutterBottom align='left' variant='h5'>
                         Emergency Contacts
-                        <Fab onClick={this.handleInfoClick.bind(this)} color="primary" size="small" className={classes.infoIcon}>
+                        <IconButton onClick={this.handleInfoClick.bind(this)} color="secondary" size="small" className={classes.infoIcon}>
                         <InfoIcon />
-                    </Fab>
+                    </IconButton>
                     </Typography>
                     
                     <Snackbar

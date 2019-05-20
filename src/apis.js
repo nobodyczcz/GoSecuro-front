@@ -192,7 +192,7 @@ class APIs {
                     }
                     
                     var googleLink = 'https://www.google.com/maps/search/?api=1&query='+lat+','+lng
-                    var string = "Hi " + name + ", \nYour friend " + userName + " is in trouble at the moment.\nThis is their last current location " + googleLink + ".\nYou might want to call them to make sure they are alright..\nThanks. \n(Sent automatically by GoSafe) ";
+                    var string = "Hi " + name + ", \nYour friend " + userName + " is in trouble at the moment.\nThis is their last current location " + googleLink + ".\nYou might want to call them to make sure they are alright..\nThanks. \n(Sent automatically by GoSecuro) ";
 
                     
 

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 import Drawer from '@material-ui/core/Drawer';
+import InfoIcon from '@material-ui/icons/Info';
 
 import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
@@ -28,6 +29,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 
 
+
 const drawerWidth = 240;
 const drawerHeight = 400;
 const styles = theme => ({
@@ -38,9 +40,11 @@ const styles = theme => ({
         padding:5,
         display:'flex',
         justifyContent:'space-between',
+        alignItems:'center',
         minHeight: 100,
         height:100,
         marginTop: theme.spacing.unit * 1,
+
     },
     routeInfoCard: {
         minHeight: 100,
@@ -75,7 +79,7 @@ const styles = theme => ({
     subToolbar: {
         display: 'flex',
         width:"100%",
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         alignItems:"center",
     },
     drawerTriger: {
@@ -87,6 +91,7 @@ const styles = theme => ({
     contentPaper: {
         overflowX: 'hidden',
         height:"100%",
+        padding:"3px",
     },
     drawer: {
 
@@ -134,7 +139,6 @@ const styles = theme => ({
     },
 
     navButton: {
-        marginTop:60,
     },
 
     panicOpen: {
@@ -306,11 +310,12 @@ class ResultCard extends Component {
     this.setState({ [name]: event.target.checked });
     };
 
-    handleReminderClose(){
+    handleReminderClose = ()=>{
         this.setState({reminderOpen:false});
     }
-    handleReminderOpen(){
-        this.setState({reminderOpen:true});
+    handleReminderOpen = (auto=true)=>{
+        this.setState({reminderOpen:!this.state.reminderOpen});
+        if(auto)
         setTimeout(()=>{this.handleReminderClose()},3000);
     }
 
@@ -342,7 +347,7 @@ class ResultCard extends Component {
                         onClose={this.handleReminderClose.bind(this)}
                         open={this.state.reminderOpen}
                         title={<React.Fragment>
-                            {suburbs?(suburbs.highCrime.length>0 ? <Typography variant="body2" color='primary' className={classes.warning}>Your journey will pass through {suburbs.highCrime.length} high crime-rate suburbs. The location sharing function has been automatically switched on. (Emergency contacts can view your live location)</Typography>
+                            {suburbs?(suburbs.highCrime.length>0 ? <Typography variant="body2" color='primary' className={classes.warning}>Your journey will pass through <b> {suburbs.highCrime.length}</b> high crime-rate suburbs. The location sharing function has been automatically <b>switched on</b>. (Emergency contacts can view your live location)</Typography>
                             :<Typography color='primary' variant="body1">You won't pass through any high crime rate suburbs</Typography>):null}
                             </React.Fragment>}
                         
@@ -385,9 +390,12 @@ class ResultCard extends Component {
                     {
                     this.props.currentRoute ?
                         <div className={classes.subToolbar}>
-                            
+                                <IconButton color="secondary" size="small" onClick={()=>{this.handleReminderOpen(false)}}>
+                                        <InfoIcon />
+                                </IconButton>
                                 <Typography variant="body1" onClick={this.handleReminderOpen.bind(this)}>
-                                Share location when navigating
+                                    
+                                    Share location when navigating
                                 </Typography>                            
                             <Switch
                                 checked={this.state.navWithShare}
@@ -651,19 +659,19 @@ class ResultCard extends Component {
                                             title="result photo"
                                             onClick={() => this.handleCardClick(i)}
                                         />
-                                            <div
-                                                className={classes.cardContent}
-                                                onClick={() => this.handleCardClick(i)}
-                                            >
-                                                <CardContent>
-                                                    <Typography variant="h6">
-                                                        {name}
-                                                    </Typography>
-                                                    <Typography variant="body2">
-                                                        {address}
-                                                    </Typography>
-                                                </CardContent>
-                                            </div>
+                                        <div
+                                            className={classes.cardContent}
+                                            onClick={() => this.handleCardClick(i)}
+                                        >
+                                            <CardContent>
+                                                <Typography variant="h6">
+                                                    {name}
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    {address}
+                                                </Typography>
+                                            </CardContent>
+                                        </div>
                                         <Fab
                                             size="small"
                                             color="primary"

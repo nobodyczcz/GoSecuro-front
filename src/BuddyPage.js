@@ -232,9 +232,9 @@ handleInfoClose = (event, reason) => {
                     
                 </AppBar>
                 <div className={classes.content}>
-                    <Fab onClick={this.handleInfoClick.bind(this)} color="primary" size="small" className={classes.infoIcon}>
+                    <IconButton onClick={this.handleInfoClick.bind(this)} color="secondary" size="small" className={classes.infoIcon}>
                         <InfoIcon />
-                    </Fab>
+                    </IconButton>
                     
                     <Snackbar
                         anchorOrigin={{ vertical : 'top', horizontal: 'center' }}

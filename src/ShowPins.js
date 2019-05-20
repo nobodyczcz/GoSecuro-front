@@ -70,14 +70,16 @@ class ShowPins extends Component {
             return
         }
         else{
-            this.setState({isExistingPins : true});
-        }
-        
-        this.pins =this.pins.concat(userPins);
+            this.setState({isExistingPins : true},()=>{
+                this.pins =this.pins.concat(userPins);
         
 
-        //Displays pins dropped by registered user
-        this.mapController.showPins(this.props.map,this.pins);   
+                //Displays pins dropped by registered user
+                this.mapController.showPins(this.props.map,this.pins);   
+            });
+        }
+        
+        
         
     }
 
@@ -97,8 +99,10 @@ class ShowPins extends Component {
     }
 
     componentWillUnmount(){
-        if(this.state.isExistingPins)
+        if(this.state.isExistingPins){
             this.mapController.clearPins();  
+        }
+
     }
 
     render(){
