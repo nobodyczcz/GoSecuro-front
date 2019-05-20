@@ -41,6 +41,7 @@ import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
 import ShowPins from './ShowPins.js';
 import Settings from './SettingsPage.js';
+import ContactUs from './ContactUs.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider, Fade, Avatar } from '@material-ui/core';
 
@@ -2271,6 +2272,18 @@ class App extends Component {
 
                             </Link>
                         }
+                        <Divider/>
+                        <Link
+                                className={classes.sideContent}
+                                variant='h6'
+                                to='/contactUs'
+                            >
+                                <ListItem button key='Navigation6' className={classes.listItem}>
+                                    Contact Us
+                                </ListItem>
+
+                            </Link>
+
                         
                 </List>
             </div>
@@ -2359,6 +2372,7 @@ class App extends Component {
                     <Route exact path="/dropPin" component={() => <DropPin setPinLocation={this.setPinLocation.bind(this)} map={this.map} geoCoder={this.geoCoder} hideAppBar={this.hideAppBar.bind(this)} history={history} />} />
                     <Route exact path="/showPins" component={()=><ShowPins history={history} isLogin={this.state.isLogin} hideAppBar={this.hideAppBar.bind(this)} map={this.map}/>}/>
                     <Route exact path="/settings" component={()=><Settings history={history} hideAppBar={this.hideAppBar.bind(this)} />}/>
+                    <Route exact path="/contactUs" component={ContactUs}/>
                 </Router>  
           </MuiThemeProvider>
         );
