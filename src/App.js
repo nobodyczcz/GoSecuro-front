@@ -826,13 +826,40 @@ class App extends Component {
                 }
              });
 
-            document.addEventListener('deviceready', function () {
-                console.log(`[INFO] ${JSON.stringify(window.cordova.plugins.notification.local.launchDetails)}`);
-            }.bind(this), false);    
+  
             document.addEventListener('resume', function () {
                 console.log(`[INFO] ${JSON.stringify(window.cordova.plugins.notification.local.launchDetails)}`);
 
-            }.bind(this), false);   
+            }.bind(this), false);
+            document.addEventListener("backbutton", function(e){
+                if (history.location.pathname=='/') {
+                    //window.location = "#exitDialog";
+                    exitAppPopup();
+                }else{
+                    history.back();
+                };
+            });
+            var exitAppPopup=()=>{
+                navigator.notification.confirm(
+                    "Do you really want to close this app?", 
+                    function(buttonIndex){
+                        ConfirmExit(buttonIndex);
+                    }, 
+                    "Confirmation", 
+                    "Yes,No"
+                ); 
+                alert("Outside Notification"); 
+                //return false;
+            };
+
+            var ConfirmExit = (stat)=>{
+                alert("Inside ConfirmExit");
+                if(stat == "1"){
+                    navigator.app.exitApp();
+                }else{
+                    return;
+                };
+            };
         }
     }
     onAlertReply(index){

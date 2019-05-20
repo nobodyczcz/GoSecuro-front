@@ -443,15 +443,16 @@ class ResultCard extends Component {
                                          </div>
                                         
                                     </CardContent>
-                                        
-                                        <CardActions className={classes.actions} disableActionSpacing>
-                                        <Link 
+                                    <Link 
                                             className={classes.showDetails}
                                             to='/routeDetail'
                                             >
+                                        <CardActions className={classes.actions} disableActionSpacing>
+                                        
                                             View Route Details
-                                        </Link>
                                     </CardActions>
+                                    </Link>
+
 
                                 </Card>
                                 }
@@ -469,7 +470,7 @@ class ResultCard extends Component {
                                     titleTypographyProps={{variant:'h5'}}
                                      />
                                         
-                                    <CardActions className={classes.actions} disableActionSpacing>
+                                    <CardActions className={classes.actions} disableActionSpacing onClick={()=>{this.handleExpandClick('Hexpanded')}}>
                                         <Typography variant="body2">
                                             Details
                                         </Typography>
@@ -477,7 +478,6 @@ class ResultCard extends Component {
                                             className={classnames(classes.expand, {
                                             [classes.expandOpen]: this.state.Hexpanded,
                                             })}
-                                            onClick={()=>{this.handleExpandClick('Hexpanded')}}
                                             aria-expanded={this.state.Hexpanded}
                                             aria-label="Show more"
                                         >
@@ -528,7 +528,7 @@ class ResultCard extends Component {
                                     titleTypographyProps={{variant:'h5'}}
                                      />
                                         
-                                    <CardActions className={classes.actions} disableActionSpacing>
+                                    <CardActions className={classes.actions} disableActionSpacing onClick={()=>{this.handleExpandClick('Mexpanded')}}>
                                         <Typography variant="body2">
                                             Details
                                         </Typography>
@@ -536,7 +536,6 @@ class ResultCard extends Component {
                                             className={classnames(classes.expand, {
                                             [classes.expandOpen]: this.state.Mexpanded,
                                             })}
-                                            onClick={()=>{this.handleExpandClick('Mexpanded')}}
                                             aria-expanded={this.state.Mexpanded}
                                             aria-label="Show more"
                                         >
@@ -586,7 +585,7 @@ class ResultCard extends Component {
                                     titleTypographyProps={{variant:'h5'}}
                                      />
                                         
-                                    <CardActions className={classes.actions} disableActionSpacing>
+                                    <CardActions className={classes.actions} disableActionSpacing onClick={()=>{this.handleExpandClick('Lexpanded')}}>
                                         <Typography variant="body2">
                                             Details
                                         </Typography>
@@ -594,7 +593,6 @@ class ResultCard extends Component {
                                             className={classnames(classes.expand, {
                                             [classes.expandOpen]: this.state.Lexpanded,
                                             })}
-                                            onClick={()=>{this.handleExpandClick('Lexpanded')}}
                                             aria-expanded={this.state.Lexpanded}
                                             aria-label="Show more"
                                         >
