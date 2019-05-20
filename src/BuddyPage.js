@@ -50,7 +50,7 @@ const styles = theme => ({
         zIndex:1200,
     },
     content: {
-        marginTop:'65px',
+        marginTop:'75px',
         padding: '3%',
         justifyContent: 'center',
     },
@@ -63,14 +63,16 @@ const styles = theme => ({
     contCard: {
         width: '100%',
         height:"63px",
+        display: "flex",
         marginBottom:theme.spacing.unit * 2,
     },
     cardContent:{
         padding: '0px'
     },
     contName: {
-        width: '50%',
+        //width: '50%',
         float: 'right',
+        marginLeft: '30px',
         fontSize:'medium'
     },
     infoText: {
@@ -86,8 +88,9 @@ const styles = theme => ({
         padding: '5px'
     },
     infoIcon:{
-        float: "right",
-        marginTop: "0px"
+        //float: "right",
+        marginTop: "0px",
+        left: 'calc(100% - 10%)'
     },
     notification:{
         width: "90%",
@@ -237,7 +240,7 @@ handleInfoClose = (event, reason) => {
                     <Snackbar
                         anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
                         open={this.state.showInfo}
-                        autoHideDuration={4000}
+                        //autoHideDuration={4000}
                         TransitionComponent={Fade}
                         onClose={this.handleInfoClose}
                         className={classes.notification}
@@ -312,7 +315,7 @@ handleInfoClose = (event, reason) => {
                                             <Typography className={classes.contName} gutterBottom align='left' variant="h6">
                                                     {fullName?fullName : 'No Name'}<br/>
                                                     {phone}
-                                                </Typography>
+                                            </Typography>
                                             </CardContent>
                                         </Card>
                                     </Grid>
