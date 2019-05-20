@@ -13,11 +13,11 @@ const startApp = () => {
 };
 
 //startApp();
-// var oldLog = console.log
+var oldLog = console.log
 
-// console.log = (message)=>{
+console.log = (message)=>{
 
-// }
+}
 
 if (window.cordova) {
     document.addEventListener('deviceready', startApp, false);
