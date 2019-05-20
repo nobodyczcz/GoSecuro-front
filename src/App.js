@@ -818,7 +818,7 @@ class App extends Component {
         }
         else {
             //directly load from server is using broswer
-            //this.retrieveCrimeRates()
+            this.retrieveCrimeRates()
         }
 
         if(window.cordova){
@@ -843,7 +843,7 @@ class App extends Component {
                         this.exitAppPopup();
                     }
                 }else{
-                    history.back();
+                    history.goBack();
                 };
             }.bind(this));
            
@@ -867,7 +867,6 @@ class App extends Component {
             "Confirmation", 
             "Yes,No"
         ); 
-        alert("Outside Notification"); 
         //return false;
     };
 
