@@ -275,8 +275,8 @@ class ContactsPage extends React.Component {
             
             var list = JSON.parse(localStorage.contactList)
             list.push({
-                name: this.state.name,
-                mobile: this.state.mobile
+                ECname: this.state.name,
+                EmergencyContactPhone: this.state.mobile
             });
     
             localStorage.contactList = JSON.stringify(list)
@@ -331,8 +331,8 @@ class ContactsPage extends React.Component {
         else{
             var list = JSON.parse(localStorage.contactList)
             list.splice(index, 1,{
-                name: this.state.name,
-                mobile: this.state.mobile
+                ECname: this.state.name,
+                EmergencyContactPhone: this.state.mobile
             });
             localStorage.contactList = JSON.stringify(list);
             this.updateContactList();
@@ -370,10 +370,10 @@ class ContactsPage extends React.Component {
             
         }
         else{
-            var list = JSON.parse(localStorage.localContactList)
+            var list = JSON.parse(localStorage.contactList)
             var result = list.splice(index, 1);
             console.log("splice result:" + result);
-            localStorage.localContactList = JSON.stringify(list);
+            localStorage.contactList = JSON.stringify(list);
             this.updateContactList();
         }
 
@@ -600,8 +600,9 @@ class ContactsPage extends React.Component {
                             </Typography>
                             
                             <TextField
+                                required
                                 id="cantactName"
-                                label="Name*"
+                                label="Name"
                                 className={classes.textField}
                                 value={this.state.name}
                                 onChange={this.handleChange('name')}
@@ -610,6 +611,7 @@ class ContactsPage extends React.Component {
                                 margin="normal"
                             />
                             <TextField
+                                required
                                 id="cantactMobile"
                                 label="Mobile"
                                 className={classes.textField}
@@ -621,6 +623,7 @@ class ContactsPage extends React.Component {
                             />
 
                             <FormHelperText>Emergency Contact will only be sent text messages in case of emergencies.</FormHelperText>
+                            <br/>
                             <Fab
                                 variant="extended"
                                 color="secondary"
