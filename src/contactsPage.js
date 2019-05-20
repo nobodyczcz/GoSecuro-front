@@ -16,6 +16,11 @@ import Snackbar from '@material-ui/core/Snackbar';
 import CloseIcon from '@material-ui/icons/Close';
 import InfoIcon from '@material-ui/icons/Info';
 import { Fade } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
@@ -110,7 +115,9 @@ const styles = theme => ({
     },
     contCard: {
         width: '100%',
-        height:"63px",
+        height: theme.spacing.unit * 10,
+        //padding: "2%",
+        //display: "flex",
         marginBottom:theme.spacing.unit * 2,
     },
     cardContent:{
@@ -187,7 +194,8 @@ class ContactsPage extends React.Component {
             activeMobile: '',
             activeIndex:'',
             noContacts: false,
-            showInfo: false
+            showInfo: false,
+            showDialog: false
         };
 
     }
@@ -333,8 +341,24 @@ class ContactsPage extends React.Component {
         this.handleEditClose();
     }
 
+    handleClickDelete(){
+        this.setState({ showDialog: true})
+    }
+
+    /* Function that handles cancel of delete contact
+    *
+    * Start
+    * */
+    handleCancelDelete(){
+        this.setState({showDialog: false})
+    }
+    /* Function that handles cancel of delete contact
+    *
+    * Finish
+    * */
+
     handleDelete(index,mobileNumber) {
-        
+        this.setState({showDialog: false})
         console.log(window.serverUrl);
 
         if(this.props.isLogin){
@@ -461,7 +485,8 @@ class ContactsPage extends React.Component {
 
         }
     }
-/*Notification snapbar related functions
+    
+    /*Notification snapbar related functions
      * 
      * 
      */
@@ -528,6 +553,7 @@ class ContactsPage extends React.Component {
                     <Snackbar
                         anchorOrigin={{ vertical : 'top', horizontal: 'center' }}
                         open={this.state.showInfo}
+                        //autoHideDuration={4000}
                         TransitionComponent={Fade}
                         onClose={this.handleInfoClose}
                         className={classes.notification}
@@ -566,7 +592,7 @@ class ContactsPage extends React.Component {
                         aria-labelledby="New-Emergency-Contact"
                         aria-describedby="adds-new-emergency-contact"
                         open={this.state.open}
-                        onClose={this.handleClose}
+                        onClose={this.handleClose.bind(this)}
                         >
                         <div style={getModalStyle()} className={classes.modalPaper}>
                         <Typography gutterBottom align='left' variant="h6">
@@ -575,12 +601,12 @@ class ContactsPage extends React.Component {
                             
                             <TextField
                                 id="cantactName"
-                                label="Name"
+                                label="Name*"
                                 className={classes.textField}
                                 value={this.state.name}
                                 onChange={this.handleChange('name')}
                                 type='text'
-                                inputProps={{maxlength:'10'}}
+                                inputProps={{maxlength:'20'}}
                                 margin="normal"
                             />
                             <TextField
@@ -600,7 +626,7 @@ class ContactsPage extends React.Component {
                                 color="secondary"
                                 aria-label="Cancel"
                                 className={classes.customLeftButton}
-                                onClick={this.handleClose}
+                                onClick={this.handleClose.bind(this)}
                             >
                                 Cancel
                             </Fab>
@@ -663,10 +689,31 @@ class ContactsPage extends React.Component {
                                                     className={classes.deleteIconButton}
                                                     aria-label="Delete"
                                                     color="secondary"
-                                                    onClick={function(){ this.handleDelete(i,item.EmergencyContactPhone) }.bind(this)}
+                                                    onClick={this.handleClickDelete.bind(this)}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
+                                                <Dialog
+                                                    open={this.state.showDialog}
+                                                    onClose={this.handleCancelDelete.bind(this)}
+                                                    aria-labelledby="alert-dialog-title"
+                                                    aria-describedby="alert-dialog-description"
+                                                    >
+                                                    <DialogTitle id="alert-dialog-title">{"Delete Emergency Contact?"}</DialogTitle>
+                                                    <DialogContent>
+                                                        <DialogContentText id="alert-dialog-description">
+                                                        Are you sure you want to delete the emergency contact?
+                                                        </DialogContentText>
+                                                    </DialogContent>
+                                                    <DialogActions>
+                                                        <Button onClick={this.handleCancelDelete.bind(this)} color="secondary">
+                                                        Cancel
+                                                        </Button>
+                                                        <Button onClick={function(){ this.handleDelete(i,item.EmergencyContactPhone) }.bind(this)} color="secondary" autoFocus>
+                                                        Confirm
+                                                        </Button>
+                                                    </DialogActions>
+                                                    </Dialog>
                                                 <Typography className={classes.contName} gutterBottom align='left' variant="h6">
                                                     {item.ECname}<br/>
                                                     {item.EmergencyContactPhone}

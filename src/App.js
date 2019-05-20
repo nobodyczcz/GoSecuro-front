@@ -39,7 +39,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
-import ShowPins from './ShowPins.js';
+import ShowPins from './showPins.js';
 import Settings from './SettingsPage.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider, Fade, Avatar } from '@material-ui/core';
