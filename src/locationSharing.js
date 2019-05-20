@@ -32,7 +32,7 @@ class LocationSharing {
             distanceFilter: 20,
             notificationTitle: 'GoSecuro background tracking',
             notificationText: 'enabled',
-            debug: true,
+            debug: false,
             interval: 30000,
             fastestInterval: 15000,
             activitiesInterval: 20000,

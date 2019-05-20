@@ -29,10 +29,12 @@ const styles = theme => ({
         backgroundSize: "cover",
         marginTop: theme.spacing.unit * 17,
         height: '73%',
-        overflow:"hidden"
+        overflow:"hidden",
+        overflowY: 'hidden',
     },
     body: {
         height: '100%',
+        overflowY: 'hidden',
     },
     header: {
         display: 'flex',

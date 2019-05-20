@@ -140,7 +140,7 @@ const styles = theme => ({
     panicOpen: {
         position: 'fixed',
         zIndex: 1300,
-        top: 'calc( 75% - 130px)',
+        top: 'calc( 60% - 50px)',
         left: 'calc( 50% - 40px)',
         transition: theme.transitions.create('top', {
             easing: theme.transitions.easing.sharp,
@@ -275,6 +275,7 @@ class ResultCard extends Component {
         this.props.navigateTo(this.props.results[index].geometry.location);
     }
     handleStartNav() {
+
         if (window.cordova) {
             console.log("Start tracking. start location:" + JSON.stringify(this.props.getLocation()));
             
@@ -288,7 +289,7 @@ class ResultCard extends Component {
                     destination: this.props.currentRoute.request.destination.location,
                     duration: this.props.currentRoute.routes[0].legs[0].duration.value,
                 });
-                this.props.locationSharing.startTracking(this.props.getLocation(),Date.now(this.props.currentRoute.routes[0].legs[0].duration.value * 1000));
+                this.props.locationSharing.startTracking(this.props.getLocation(),Date.now()+this.props.currentRoute.routes[0].legs[0].duration.value * 1000);
             }
             
         }
@@ -341,7 +342,7 @@ class ResultCard extends Component {
                         onClose={this.handleReminderClose.bind(this)}
                         open={this.state.reminderOpen}
                         title={<React.Fragment>
-                            {suburbs?(suburbs.highCrime.length>0 ? <Typography variant="body1" color='primary' className={classes.warning}>Looks like your journey will pass through {suburbs.highCrime.length} high crime-rate suburbs. The location sharing function has been automatically switched on. (Your emergency contacts can now view your live location and navigation route)</Typography>
+                            {suburbs?(suburbs.highCrime.length>0 ? <Typography variant="body2" color='primary' className={classes.warning}>Your journey will pass through {suburbs.highCrime.length} high crime-rate suburbs. The location sharing function has been automatically switched on. (Emergency contacts can view your live location)</Typography>
                             :<Typography color='primary' variant="body1">You won't pass through any high crime rate suburbs</Typography>):null}
                             </React.Fragment>}
                         
@@ -482,7 +483,7 @@ class ResultCard extends Component {
                                                 Suburb
                                             </Typography>
                                             <Typography variant='h6'>
-                                                Crime Rate
+                                            Offence/Population
                                             </Typography>
                                         </div>
                                         {suburbs.highCrime.map((item,index)=>{
@@ -493,7 +494,7 @@ class ResultCard extends Component {
                                                         {item.properties.suburb}
                                                     </Typography>
                                                     <Typography variant='body1' >
-                                                        {item.properties.crimeRate}
+                                                        {(item.properties.crimeRate*100).toPrecision(3)}%
                                                     </Typography>
                                                 </div>
 
@@ -541,7 +542,7 @@ class ResultCard extends Component {
                                                 Suburb
                                             </Typography>
                                             <Typography variant='h6'>
-                                                Crime Rate
+                                            Offence/Population
                                             </Typography>
                                         </div>
                                         {suburbs.mediumCrime.map((item,index)=>{
@@ -552,7 +553,7 @@ class ResultCard extends Component {
                                                         {item.properties.suburb}
                                                     </Typography>
                                                     <Typography variant='body1' >
-                                                        {item.properties.crimeRate}
+                                                        {(item.properties.crimeRate*100).toPrecision(3)}%
                                                     </Typography>
                                                 </div>
                                             )
@@ -599,7 +600,7 @@ class ResultCard extends Component {
                                                 Suburb
                                             </Typography>
                                             <Typography variant='h6'>
-                                                Crime Rate
+                                                Offence/Population
                                             </Typography>
                                         </div>
                                         {suburbs.lowCrime.map((item,index)=>{
@@ -610,7 +611,7 @@ class ResultCard extends Component {
                                                         {item.properties.suburb}
                                                     </Typography>
                                                     <Typography variant='body1' >
-                                                        {item.properties.crimeRate}
+                                                        {(item.properties.crimeRate*100).toPrecision(3)}%
                                                     </Typography>
                                                 </div>
                                             )
