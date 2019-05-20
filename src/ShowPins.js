@@ -17,13 +17,15 @@ import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
     backButton:{
         color: '#FFFFFF',
-        zIndex: 1210,
+
+        position:'fixed',
+        left:'0',
     },
-    headerTitle:{
-        marginLeft: `calc( 100% - 80% )`,        
-    },
+
     toolbar: {
         marginTop:"20px",
+        display:'flex',
+        justifyContent:"center"
     },
 
 });

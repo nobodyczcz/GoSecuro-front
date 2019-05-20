@@ -39,7 +39,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import RegisterPage from './registerPage.js';
 import LoginPage from './login.js';
-import ShowPins from './showPins.js';
+import ShowPins from './ShowPins.js';
 import Settings from './SettingsPage.js';
 import Typography from '@material-ui/core/Typography';
 import { Divider, Fade, Avatar } from '@material-ui/core';
@@ -225,6 +225,7 @@ const styles = theme => ({
         opacity: 0.9,
     },
     ergentAvatar:{
+        marginTop:'10px',
         backgroundColor:'#ff7504',
         color:'#fff'
     },
@@ -834,32 +835,17 @@ class App extends Component {
             document.addEventListener("backbutton", function(e){
                 if (history.location.pathname=='/') {
                     //window.location = "#exitDialog";
-                    exitAppPopup();
+                    if(this.state.searchResponse){
+                        this.handleBack()
+                    }
+                    else{
+                        this.exitAppPopup();
+                    }
                 }else{
                     history.back();
                 };
-            });
-            var exitAppPopup=()=>{
-                navigator.notification.confirm(
-                    "Do you really want to close this app?", 
-                    function(buttonIndex){
-                        ConfirmExit(buttonIndex);
-                    }, 
-                    "Confirmation", 
-                    "Yes,No"
-                ); 
-                alert("Outside Notification"); 
-                //return false;
-            };
-
-            var ConfirmExit = (stat)=>{
-                alert("Inside ConfirmExit");
-                if(stat == "1"){
-                    navigator.app.exitApp();
-                }else{
-                    return;
-                };
-            };
+            }.bind(this));
+           
         }
     }
     onAlertReply(index){
@@ -871,6 +857,27 @@ class App extends Component {
             //contact emergency
         }
     }
+    exitAppPopup=()=>{
+        navigator.notification.confirm(
+            "Do you really want to close this app?", 
+            function(buttonIndex){
+                this.ConfirmExit(buttonIndex);
+            }, 
+            "Confirmation", 
+            "Yes,No"
+        ); 
+        alert("Outside Notification"); 
+        //return false;
+    };
+
+    ConfirmExit = (stat)=>{
+        alert("Inside ConfirmExit");
+        if(stat == "1"){
+            navigator.app.exitApp();
+        }else{
+            return;
+        };
+    };
 
     successGetCrimeJson(fileEntry) {
         //if crimeRates.json exist. read the file and display them on map
@@ -1767,31 +1774,7 @@ class App extends Component {
                     {this.state.layerMenu ? (
                         <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} >
                             <Paper className={classes.layerMenu}>
-                                {/* <RadioGroup
-                                    name="gender2"
-                                    className={classes.group}
-                                    value={this.state.value}
-                                    onChange={this.handleChange}
-                                >
-                                    <FormControlLabel
-                                    value="all"
-                                    control={<Radio color="primary" />}
-                                    label="Full Heat Map"
-                                    labelPlacement="start"
-                                    />
-                                    <FormControlLabel
-                                    value="medium"
-                                    control={<Radio color="primary" />}
-                                    label="Medium-High"
-                                    labelPlacement="start"
-                                    />
-                                    <FormControlLabel
-                                    value="high"
-                                    control={<Radio color="primary" />}
-                                    label="High Only"
-                                    labelPlacement="start"
-                                    />
-                                </RadioGroup> */}
+
                                 <MenuItem className={classes.menuItem}>
                                     Crime Rate
                                     <Switch

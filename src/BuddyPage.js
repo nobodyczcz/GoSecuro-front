@@ -31,16 +31,17 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
     avatar: {
-        marginTop: '0px',
-        width: "60px",
-        height:"60px",
+        // marginTop: '0px',
+        // width: "60px",
+        // height:"60px",
         fontSize: "20px"
     },
     backButton:{
         color: '#FFFFFF',
-        zIndex: 1210
-
+        position:'fixed',
+        left:'0',
     },
+
     paper: {
         position: 'fixed',
         width: '100%',
@@ -62,12 +63,12 @@ const styles = theme => ({
     },
     contCard: {
         width: '100%',
-        height:"63px",
+        height: theme.spacing.unit * 8,
         display: "flex",
-        marginBottom:theme.spacing.unit * 2,
+        //marginBottom:theme.spacing.unit * 2,
     },
     cardContent:{
-        padding: '0px'
+        padding: '5px'
     },
     contName: {
         //width: '50%',
@@ -101,9 +102,8 @@ const styles = theme => ({
     },
     toolbar: {
         marginTop:"20px",
-    },
-    headerTitle:{
-        marginLeft: `calc( 100% - 74% )`,        
+        display:'flex',
+        justifyContent:"center"
     },
 });
 class BuddyPage extends React.Component {

@@ -532,7 +532,7 @@ class NavigationPage extends React.Component {
                             </Grid>
                             <Grid item xs={8} className={classes.shareSwitch}>
                             <Typography variant="h6">
-                                Location share
+                                Location sharing
                             </Typography>
                             <Switch
                                 checked={this.state.navWithShare}

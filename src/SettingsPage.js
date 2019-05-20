@@ -35,7 +35,8 @@ const styles = theme => ({
     //},
     backButton:{
         color: '#FFFFFF',
-        zIndex: 1210,
+        position:'fixed',
+        left:'0',
     },
     content: {
         justifyContent: 'center',
@@ -72,6 +73,8 @@ const styles = theme => ({
     },
     toolbar: {
         marginTop:"20px",
+        display:'flex',
+        justifyContent:"center"
     },
 });
 class SettingsPage extends React.Component{

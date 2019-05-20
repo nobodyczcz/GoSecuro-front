@@ -115,13 +115,13 @@ const styles = theme => ({
     },
     contCard: {
         width: '100%',
-        height: theme.spacing.unit * 10,
+        height: theme.spacing.unit * 8,
         //padding: "2%",
         //display: "flex",
-        marginBottom:theme.spacing.unit * 2,
+        //marginBottom:theme.spacing.unit * 2,
     },
     cardContent:{
-        padding: '5px'
+        padding: '5px',
     },
     contName: {
         width: '50%',
@@ -672,7 +672,7 @@ class ContactsPage extends React.Component {
                                 return (
                                     <Grid key={i} item xs={12} md={6} lg={3}>
                                         <Card className={classes.contCard} >
-                                            <CardContent className={classes.cardContent} >
+                                            <CardContent className={classes.cardContent}  >
                                             <Fab className={classes.avatar} color="secondary" >
                                              { displayName }
                                              </Fab>
