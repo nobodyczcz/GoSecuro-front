@@ -124,9 +124,9 @@ class MapController {
         this.pinCluster = new window.MarkerClusterer(map,this.pins,
                 {imagePath: 'img/pins/p'}
             );
-
     }
     clearPins(){
+        if(this.pinCluster)
         this.pinCluster.clearMarkers();
     }
 

@@ -49,6 +49,7 @@ import DropPin from './dropPin';
 import Pin from './pinSvg';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import Radio from '@material-ui/core/Radio';
 
 
 var d3Geo = require("d3-geo")
@@ -142,6 +143,7 @@ const styles = theme => ({
     },
     sideContentBar: {
         marginTop: theme.spacing.unit * 5,
+        minWidth:"300px"
     },
     sideContent: {
         color:'#4f6c98',
@@ -320,6 +322,7 @@ class App extends Component {
 
         
         this.focusUser = true;
+        this.displayPins=false;
 
         this.markers = null;
         this.service = null; // google map places services
@@ -409,6 +412,7 @@ class App extends Component {
             displayLight: false,
             displayCameras: false,
             crimeSwitch:true,
+            allCrime:true,
             tempLinks:[],
             tracking: false,
             sharing:false,
@@ -504,11 +508,23 @@ class App extends Component {
             return
         }
 
+        console.log('new pin time: '+newPins[0].pinDetails.Time)
+        if(this.pins[this.pins.length-1])
+        console.log('old '+this.pins[this.pins.length-1].pinDetails.Time)
+        
         if(this.pins.length===0){
             this.pins =this.pins.concat(newPins);
+            if (this.displayPins){
+                this.mapController.clearPins()
+                this.mapController.showPins(this.map,this.pins)
+            }
         }
-        else if (newPins[0].Time > this.pins[this.pins.length-1].Time){
+        else if (newPins[0].pinDetails.Time > this.pins[this.pins.length-1].pinDetails.Time){
             this.pins =this.pins.concat(newPins);
+            if (this.displayPins){
+                this.mapController.clearPins()
+                this.mapController.showPins(this.map,this.pins)
+            }
         }
     }
     receivePinsError(error){
@@ -1078,7 +1094,7 @@ class App extends Component {
                 this.mapController.displayAllCrime(this.map, this.crimeData);
             }
             
-            this.setState({ [name]: event.target.checked, "midiumCrime": false });
+            this.setState({ [name]: event.target.checked, "midiumCrime": false,"allCrime":false });
         }
         else if (name == "midiumCrime") {
             if (event.target.checked && this.state.crimeSwitch) {
@@ -1091,13 +1107,20 @@ class App extends Component {
                 this.mapController.displayAllCrime(this.map, this.crimeData);
             }
 
-            this.setState({ [name]: event.target.checked, "highCrime": false });
+            this.setState({ [name]: event.target.checked, "highCrime": false,"allCrime":false });
+
+        }
+        else if(name == "allCrime"){
+            if (event.target.checked && this.state.crimeSwitch) {
+            this.mapController.clearMap(this.map)
+            this.mapController.displayAllCrime(this.map, this.crimeData);
+            }
+            this.setState({ [name]: event.target.checked, "highCrime": false,"midiumCrime":false });
 
         }
         else if (name == "displayCameras") {
             if (event.target.checked ) {
                 this.mapController.ShowCamera(this.map, this.mapController.cameraLocations)
-
             }
             else {
                 this.mapController.clearCamera()
@@ -1117,10 +1140,11 @@ class App extends Component {
         else if (name == "displayPins") {
             if (event.target.checked ) {
                 this.mapController.showPins(this.map, this.pins)
-
+                this.displayPins=true;
             }
             else {
                 this.mapController.clearPins()
+                this.displayPins=false;
             }
             this.setState({ [name]: event.target.checked });
         }
@@ -1367,13 +1391,13 @@ class App extends Component {
             this.currentLocation()
         }
         else if (this.focusUser) {
-            this.map.setCenter(this.userLocation);
+            this.map.panTo(this.userLocation);
             this.map.setZoom(18);
         }
         else {
             this.focusUser = true;
             this.map.setZoom(15);
-            this.map.setCenter(this.userLocation);
+            this.map.panTo(this.userLocation);
             console.log('focus user on')
 
         }
@@ -1406,7 +1430,7 @@ class App extends Component {
             this.userMarker.setPosition({ lat: thelat, lng: thelng });
         }
         if (this.focusUser) {
-            this.map.setCenter({ lat: thelat, lng: thelng })
+            this.map.panTo({ lat: thelat, lng: thelng })
         }
     }
     onLocationErr(err) {
@@ -1697,6 +1721,31 @@ class App extends Component {
                     {this.state.layerMenu ? (
                         <ClickAwayListener onClickAway={this.handleClickAway.bind(this)} >
                             <Paper className={classes.layerMenu}>
+                                {/* <RadioGroup
+                                    name="gender2"
+                                    className={classes.group}
+                                    value={this.state.value}
+                                    onChange={this.handleChange}
+                                >
+                                    <FormControlLabel
+                                    value="all"
+                                    control={<Radio color="primary" />}
+                                    label="Full Heat Map"
+                                    labelPlacement="start"
+                                    />
+                                    <FormControlLabel
+                                    value="medium"
+                                    control={<Radio color="primary" />}
+                                    label="Medium-High"
+                                    labelPlacement="start"
+                                    />
+                                    <FormControlLabel
+                                    value="high"
+                                    control={<Radio color="primary" />}
+                                    label="High Only"
+                                    labelPlacement="start"
+                                    />
+                                </RadioGroup> */}
                                 <MenuItem className={classes.menuItem}>
                                     Crime Rate
                                     <Switch
@@ -1707,8 +1756,17 @@ class App extends Component {
                                     />
                                 </MenuItem>
                                 <MenuItem className={classes.menuItem}>
+                                    Full Heat Map
+                                    <Radio
+                                        checked={this.state.allCrime}
+                                        onChange={this.handleCrimeChange('allCrime')}
+                                        value="checkedA"
+                                        color="secondary"
+                                    />
+                                </MenuItem>
+                                <MenuItem className={classes.menuItem}>
                                     High only
-                                    <Checkbox
+                                    <Radio
                                         checked={this.state.highCrime}
                                         onChange={this.handleCrimeChange('highCrime')}
                                         value="checkedA"
@@ -1718,7 +1776,7 @@ class App extends Component {
 
                                 <MenuItem className={classes.menuItem}>
                                     Medium-High
-                                    <Checkbox
+                                    <Radio
                                         checked={this.state.midiumCrime}
                                         onChange={this.handleCrimeChange('midiumCrime')}
                                         value="checkedA"
@@ -1750,6 +1808,7 @@ class App extends Component {
                                     Comments
                                     <Checkbox
                                         checked={this.state.displayPins}
+                                        id="displayPins"
                                         onChange={this.handleCrimeChange('displayPins')}
                                         value="checkedA"
                                         color="secondary"
@@ -1965,6 +2024,8 @@ class App extends Component {
 
     handleDropPin() {
         this.map.setCenter(this.userLocation);
+        this.displayPins = true;
+        this.state.displayPins=true;
         history.push('/dropPin');
     }
 
@@ -2052,61 +2113,71 @@ class App extends Component {
         const sideList = (
             <div>
                 <List className={classes.sideContentBar}>
-                    <ListItem button key='Navigation'>
+                    
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
                             to='/aboutUs'
                         >
+                            <ListItem button key='Navigation'>
                             About Us
+                            </ListItem>
+
                         </Link>
-                    </ListItem>
-                    <ListItem button key='Navigation1'>
+                    
                         <Link 
                             className={classes.sideContent}
                             variant='h6'
                             to='/settings'
                         >
+                            <ListItem button key='Navigation1'>
                             Settings
+                            </ListItem>
                         </Link>
-                    </ListItem>
                     <Divider/>
-                    <ListItem button key='Navigation2'>
                         {this.state.isLogin ?
                             <Link 
                                 className={classes.sideContent}
                                 variant='h6'
                                 to='/showPins'
                             >
+                                <ListItem button key='Navigation2'>
+
                                 My Pins
+                                </ListItem>
+
                             </Link>
+
                             :
                                 null
                             }
                         
-                    </ListItem>
-                    <ListItem button key='Navigation3'>
                         {this.state.isLogin ?
                             <Link
                                 className={classes.sideContent}
                                 variant='h6'
                                 to='/buddy'
                             >
+                                <ListItem button key='Navigation3'>
                                 Buddies
+                                </ListItem>
+
                             </Link>
                             :
                             null
                         }
                         
-                    </ListItem>
-                    <ListItem button key='Navigation4'>
                         {this.state.isLogin ?
                             <Link
                                 className={classes.sideContent}
                                 variant='h6'
                                 to='/userProfile'
                             >
+                                <ListItem button key='Navigation4'>
+
                                 User Profile
+                                </ListItem>
+
                             </Link>
                             :
                             <Link 
@@ -2114,19 +2185,25 @@ class App extends Component {
                                 variant='h6'
                                 to="/register"
                             >
+                                <ListItem button key='Navigation4'>
+
                                 Sign Up
+                                </ListItem>
+
                             </Link>
                         }
                         
-                    </ListItem>
-                    <ListItem button key='Navigation5'>
                         {this.state.isLogin ?
                             <div
                                     className={classes.sideContent}
                                     variant='h6'
                                     onClick={this.handleLogout.bind(this)}
                                 >
+                                <ListItem button key='Navigation5'>
+
                                     Logout
+                                </ListItem>
+
                                  </div>
                             :
                             <Link
@@ -2134,11 +2211,14 @@ class App extends Component {
                                 variant='h6'
                                 to='/login'
                             >
+                                <ListItem button key='Navigation5'>
+
                                 Login
+                                </ListItem>
+
                             </Link>
                         }
                         
-                    </ListItem>
                 </List>
             </div>
         );
@@ -2219,7 +2299,7 @@ class App extends Component {
                     <Route exact path="/login" component={() => <LoginPage history={history} handleLogin={this.loginSuccess.bind(this)} />} />
                     <Route exact path="/navigation" component={() => <NavigationPage hideAppBar={this.hideAppBar.bind(this)} handleMyLocationClick={this.handleMyLocationClick.bind(this)} innerRef={this.naviPage} getLocation={this.getLocation.bind(this)} locationSharing={window.locationSharing} history={history} currentRoute={this.state.currentRoute} alreadyTracking={this.state.tracking} />} />
                     <Route exact path="/aboutUs" component={AboutUs} />
-                    <Route exact path="/pinSurvey" component={()=><PinSurvey history={history} getPinLocation={this.getPinLocation.bind(this)}/>} />
+                    <Route exact path="/pinSurvey" component={()=><PinSurvey history={history} getPinLocation={this.getPinLocation.bind(this)} map={this.map} retrieveTemplinks={this.retrieveTemplinks.bind(this)}/>} />
                     <Route exact path='/routeDetail' component={()=><RouteDetails hideAppBar={this.hideAppBar.bind(this)} history={history} currentRoute={this.state.currentRoute}/>}/>
                     <Route exact path="/userProfile" component={() => <UserProfile isLogin={this.state.isLogin} history={history} />} />
                     <Route exact path="/emergencyContact" component={() => <EmergencyContacts history={history} handleLogin={this.loginSuccess.bind(this)} isLogin={this.state.isLogin} />} />

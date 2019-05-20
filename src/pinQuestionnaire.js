@@ -151,8 +151,12 @@ class PinSurvey extends React.Component {
     };
 
     pinSuccess = () =>{
+        this.props.map.setCenter(this.props.getPinLocation());
+        this.props.map.setZoom(18);
+        this.props.retrieveTemplinks()
         console.log("Pin added to database.");
-        this.props.history.push('/')
+        window.handleShowNoti("Drop pin successful")
+        this.props.history.go(-2);
     }
 
     pinError(jqXHR) {
