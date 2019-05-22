@@ -89,7 +89,7 @@ class LoginPage extends React.Component {
     loginSuccess(data) {
         console.log("Success")
         //this.apis.setToken(data.access_token);
-        this.props.history.push("/");
+        this.props.history.goBack();
         this.props.handleLogin();
         
         //jump to next page
@@ -204,7 +204,7 @@ class LoginPage extends React.Component {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Button size="small" className={classes.button} onClick={() => { this.props.history.push("/")}}>
+                            <Button size="small" className={classes.button} onClick={() => { this.props.history.goBack()}}>
                                 SKIP FOR NOW
                             </Button>
                             

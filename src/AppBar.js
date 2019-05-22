@@ -403,7 +403,7 @@ class MainBar extends React.Component {
                   >
                       <Tab icon={<HomeIcon color="primary"/>} id='mapIcon' onClick={() => {
                         if(this.props.history.location.pathname!=='/')
-                          this.props.history.go(window.homeIndex());
+                          this.props.history.goBack();
                       }} />
                       {/* <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
                           this.props.history.push('/map')
