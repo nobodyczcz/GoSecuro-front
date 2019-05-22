@@ -1346,10 +1346,9 @@ class App extends Component {
         }.bind(this));
 
 
-        this.mainBar.current.setupAutoComplete();
-        console.log('set auto complete done')
+        
 
-        window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
+        //window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
         console.log('set location listener done')
 
         this.map.addListener('dragstart', function () {
@@ -1398,6 +1397,10 @@ class App extends Component {
             }
             this.map.setCenter(this.userLocation)
             this.map.setZoom(15)
+            this.mainBar.current.setupAutoComplete();
+        console.log('set auto complete done')
+            window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
+        console.log('set location listener done')
             
         }
         else{
@@ -1426,6 +1429,10 @@ class App extends Component {
                     });
                     this.userMarker.setMap(this.map)
                 }
+                this.mainBar.current.setupAutoComplete();
+                console.log('set auto complete done')
+                window.navigator.geolocation.watchPosition(this.onUpdateLocation.bind(this), this.onLocationErr.bind(this), { enableHighAccuracy: true })
+                console.log('set location listener done')
             }.bind(this));
         }
         
