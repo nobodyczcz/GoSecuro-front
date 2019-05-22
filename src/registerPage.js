@@ -11,7 +11,11 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import APIs from './apis.js';
+import { Fade } from '@material-ui/core';
 
 import { createBrowserHistory, createHashHistory } from 'history';
 import { Router, Route, Link } from "react-router-dom";
@@ -127,6 +131,8 @@ class RegisterPage extends React.Component {
             Gender: this.state.gender,
             Password: this.state.password,
             ConfirmPassword: this.state.password,
+            regSuccessNotification: false,
+            
         };
         this.apis.register(regdata, this.regSuccess.bind(this), this.regError.bind(this))
         
@@ -139,6 +145,7 @@ class RegisterPage extends React.Component {
     regSuccess(data) {
         console.log("User successfully registered.")
         //jump to next page: add emergency contacts page
+        this.setState({ regSuccessNotification: true})
         var logindata = {
             grant_type: "password",
             userName: this.state.mobileNumber,
@@ -152,7 +159,7 @@ class RegisterPage extends React.Component {
         console.log("User successfully logged in.")
         //jump to next page: add emergency contacts page
         this.props.handleLogin() //tell app.js that we successful login
-         this.props.history.push('/emergencyContact');
+        this.props.history.push('/emergencyContact');
     }
 
     regError(jqXHR) {
@@ -181,6 +188,14 @@ class RegisterPage extends React.Component {
 
     handleChange = name => event => {
         this.setState({ [name]: event.target.value });
+    };
+
+    handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        this.setState({ regSuccessNotification: false });
     };
 
 
@@ -352,6 +367,27 @@ class RegisterPage extends React.Component {
                         </Button>
                     </span>
                 </ValidatorForm>
+                <Snackbar
+                    anchorOrigin={{ vertical : 'bottom', horizontal: 'center' }}
+                    open={this.state.regSuccessNotification}
+                    autoHideDuration={4000}
+                    TransitionComponent={Fade}
+                    onClose={this.handleClose}
+                    ContentProps={{
+                        'aria-describedby': 'message-id',
+                    }}
+                    message={<span id="message-id">Registered successfully.</span>}
+                    action={[
+                        <IconButton
+                        key="close"
+                        aria-label="Close"
+                        color="inherit"
+                        onClick={this.handleClose}
+                        >
+                        <CloseIcon />
+                        </IconButton>,
+                    ]}
+                />
 
 
             </Paper>

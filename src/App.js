@@ -15,7 +15,6 @@ import LayerIcon from '@material-ui/icons/Layers';
 import MyLocationIcon from '@material-ui/icons/MyLocation';
 import Snackbar from '@material-ui/core/Snackbar';
 
-
 import Fab from '@material-ui/core/Fab';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
@@ -491,13 +490,14 @@ class App extends Component {
         this.setState({ isLogin: false,logoutNotification: true  });
         setTimeout(() => this.setState({ logoutNotification: false }), 3000);        
     }
+
     handleClose = (event, reason) => {
         if (reason === 'clickaway') {
           return;
         }
     
         this.setState({ logoutNotification: false });
-      };
+    };
     
 
     handleLogout = () => {
