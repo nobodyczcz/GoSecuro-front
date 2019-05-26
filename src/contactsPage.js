@@ -26,6 +26,7 @@ import Modal from '@material-ui/core/Modal';
 import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 
+
 import { withStyles } from '@material-ui/core/styles';
 import { FormHelperText } from '@material-ui/core';
 
@@ -195,7 +196,10 @@ class ContactsPage extends React.Component {
             activeIndex:'',
             noContacts: false,
             showInfo: false,
-            showDialog: false
+            showDialog: false,
+            addSuccessNotification: false,
+            delSuccessNotification: false,
+            editSuccessNotification: false
         };
 
     }
@@ -292,7 +296,7 @@ class ContactsPage extends React.Component {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
 
-        this.setState({ loading: false, noContacts: false,name: '', mobile: '' });
+        this.setState({ loading: false, addSuccessNotification: true, noContacts: false,name: '', mobile: '' });
         //jump to next page
     }
 
@@ -383,7 +387,7 @@ class ContactsPage extends React.Component {
         console.log("Emergency Contact successfully deleted")
         this.retrieveEmergencies();
 
-        this.setState({ loading: false });
+        this.setState({ loading: false, delSuccessNotification: true });
         this.setState({ name: '', mobile: '' });
         //jump to next page
     }
@@ -422,9 +426,11 @@ class ContactsPage extends React.Component {
 
     editSuccess(data) {
         console.log("Success")
+        this.setState({editSuccessNotification: true})
         this.retrieveEmergencies();
         //jump to next page
     }
+
     regError(jqXHR) {
         this.state.errors=[];
         var response = jqXHR.responseJSON;
@@ -529,7 +535,7 @@ class ContactsPage extends React.Component {
         if (reason === 'clickaway') {
             return;
           }
-        this.setState({ showInfo: false });
+        this.setState({ showInfo: false, addSuccessNotification: false,delSuccessNotification:false, editSuccessNotification: false });
 
     }
     /* Handle close of Info icon
@@ -645,6 +651,27 @@ class ContactsPage extends React.Component {
                             </Fab>
                         </div>
                     </Modal>
+                    <Snackbar
+                        anchorOrigin={{ vertical : 'bottom', horizontal: 'center' }}
+                        open={this.state.addSuccessNotification}
+                        autoHideDuration={4000}
+                        TransitionComponent={Fade}
+                        onClose={this.handleInfoClose}
+                        ContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">Contact added successfully.</span>}
+                        action={[
+                            <IconButton
+                            key="close"
+                            aria-label="Close"
+                            color="inherit"
+                            onClick={this.handleInfoClose}
+                            >
+                            <CloseIcon />
+                            </IconButton>,
+                        ]}
+                    />
                 </div>
 
                 <div className={classes.contacts}>
@@ -656,8 +683,6 @@ class ContactsPage extends React.Component {
                             alignItems="center"
                             spacing={8}
                         >
-
-                        
                             {this.state.loading ? <CircularProgress size={30} color="secondary" className={classes.progress} />:null}
                             {this.state.noContacts ? 
                                 <Typography variant="h6">
@@ -687,6 +712,27 @@ class ContactsPage extends React.Component {
                                                     onClick={function(){this.handleEditOpen(i,item)}.bind(this)} 
                                                 >
                                                 </EditIcon>
+                                                <Snackbar
+                                                    anchorOrigin={{ vertical : 'bottom', horizontal: 'center' }}
+                                                    open={this.state.editSuccessNotification}
+                                                    autoHideDuration={4000}
+                                                    TransitionComponent={Fade}
+                                                    onClose={this.handleInfoClose}
+                                                    ContentProps={{
+                                                        'aria-describedby': 'message-id',
+                                                    }}
+                                                    message={<span id="message-id">Contact edited successfully.</span>}
+                                                    action={[
+                                                        <IconButton
+                                                        key="close"
+                                                        aria-label="Close"
+                                                        color="inherit"
+                                                        onClick={this.handleInfoClose}
+                                                        >
+                                                        <CloseIcon />
+                                                        </IconButton>,
+                                                    ]}
+                                                />
                                                 
                                                 <IconButton 
                                                     className={classes.deleteIconButton}
@@ -716,7 +762,28 @@ class ContactsPage extends React.Component {
                                                         Confirm
                                                         </Button>
                                                     </DialogActions>
-                                                    </Dialog>
+                                                </Dialog>
+                                                <Snackbar
+                                                    anchorOrigin={{ vertical : 'bottom', horizontal: 'center' }}
+                                                    open={this.state.delSuccessNotification}
+                                                    autoHideDuration={4000}
+                                                    TransitionComponent={Fade}
+                                                    onClose={this.handleInfoClose}
+                                                    ContentProps={{
+                                                        'aria-describedby': 'message-id',
+                                                    }}
+                                                    message={<span id="message-id">Contact deleted successfully.</span>}
+                                                    action={[
+                                                        <IconButton
+                                                        key="close"
+                                                        aria-label="Close"
+                                                        color="inherit"
+                                                        onClick={this.handleInfoClose}
+                                                        >
+                                                        <CloseIcon />
+                                                        </IconButton>,
+                                                    ]}
+                                                />
                                                 <Typography className={classes.contName} gutterBottom align='left' variant="h6">
                                                     {item.ECname}<br/>
                                                     {item.EmergencyContactPhone}

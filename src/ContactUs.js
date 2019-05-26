@@ -75,15 +75,12 @@ class ContactUs extends React.Component{
                     </AppBar>
                     <div className={classes.content}>
                         <Typography className={classes.contentText} variant='h6'>
-                            We are happy to help and welcome any feedback. Get in touch with us through our email id. Ask us questions, give feedback, suggest interesting features or just appreciate us!
+                            We are happy to help and welcome any feedback. Get in touch with us through our email. Ask us questions, give feedback, suggest interesting features or just appreciate us!
                         </Typography>
                         <br/>
                         <Typography className={classes.contentText} variant='h6'>
                             Email Id: <span style={{color:"#4f6c98"}}>gosecuro@gmail.com</span>
                         </Typography>
-
-
-                    
                     </div>
                     
                 </div>
