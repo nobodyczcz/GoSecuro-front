@@ -116,7 +116,6 @@ class PinSurvey extends React.Component {
             experience: '',
             isExistingCamera: 0,
             otherDetails: '',
-            errors: []   
 
         };
     }
@@ -130,14 +129,14 @@ class PinSurvey extends React.Component {
             Time: new Date(),
             CoordLat: pinLocation.location.lat,
             CoordLog: pinLocation.location.lng,
-            ExperienceType: this.experienceType,
-            OtherDetails: '',
+            ExperienceTypeId: parseInt(this.state.experienceType),
+            Experience:this.state.experience,
             Street: pinLocation.street,
             SuburbSuburbName: pinLocation.suburb,
             State: pinLocation.state,
-            CCTV: this.isExistingCamera,
-            StreetLight: this.lightCondition,
-            OtherDetails: this.otherDetails
+            CCTVId: parseInt(this.state.isExistingCamera),
+            StreetLightId: parseInt(this.state.lightCondition),
+            OtherDetails: parseInt(this.state.otherDetails)
         }
         var apiRoute = 'api/Pin/Create';
             this.apis.callApi(apiRoute,pin,this.pinSuccess.bind(this),this.pinError.bind(this))

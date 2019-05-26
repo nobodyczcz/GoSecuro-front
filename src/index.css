@@ -43,7 +43,6 @@ code {
 
 .CrimePic {
   top: 30px;
-  height: 50%;
   width: 50%;
 }
 
@@ -54,7 +53,6 @@ code {
 
 .statisticsImage{
   top: 30px;
-  height: 100%;
   width: 100%;
 }
 
@@ -64,15 +62,18 @@ code {
 
 #highCrimeRateChart{
   padding-top: 30px;
+  width:100%;
+  height:auto;
+
 }
 
 
 .screenPicture{
   width:100%;
+  width:100%;
+
 }
 
 .screen3{
   width:100%;
-  height:100%;
-  object-fit: contain;
 }

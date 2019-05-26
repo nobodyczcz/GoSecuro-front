@@ -23,6 +23,10 @@ const styles = theme => ({
     },
     siren: {
         width: 60,
+    },
+    noEm:{
+        padding:'10%',
+        fontSize:'10px',
     }
 });
 class PanicButton extends React.Component {
@@ -35,7 +39,7 @@ class PanicButton extends React.Component {
             showProgress:false,
             completed: 0,
             progressCoord: [0, 0],
-            disabled: localStorage.localContactList ? (JSON.parse(localStorage.localContactList).length === 0 ? true:false) : false,
+            disabled: false,
         };
 
     }
@@ -70,6 +74,28 @@ class PanicButton extends React.Component {
         }
     }
 
+    componentWillMount(){
+        var disabled = false;
+        if (this.apis.isLogin()){
+            if(!localStorage.localContactList){
+                localStorage.localContactList = JSON.stringify([])
+            }
+            if(JSON.parse(localStorage.localContactList).length === 0){
+                disabled =true;
+            }
+        }
+        else{
+            if(!localStorage.contactList){
+                localStorage.contactList = JSON.stringify([])
+            }
+            if(JSON.parse(localStorage.contactList).length === 0){
+                disabled =true;
+            }
+        }
+
+        this.state.disabled = disabled;
+    }
+
     render() {
         
         const { classes } = this.props;
@@ -86,8 +112,8 @@ class PanicButton extends React.Component {
                     />
                     : null}
                 {this.state.disabled ?
-                    <Typography variant="subtitle2">
-                        No Emergency Contacts
+                    <Typography  className={classes.noEm}>
+                        <b>No Emergency Contacts</b>
                     </Typography>
                     :
                     <img className={classes.siren} src='img/siren.png'></img>}

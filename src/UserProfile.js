@@ -53,8 +53,9 @@ const styles = theme => ({
     },
     backButton:{
         color: '#FFFFFF',
-        zIndex: 1210
 
+        position:'fixed',
+        left:'0',
     },
     buttons: {
         position: "fixed",
@@ -94,9 +95,6 @@ const styles = theme => ({
         color:'Red',
         textAlign: 'center',
     },
-    headerTitle:{
-        marginLeft: `calc( 100% - 80% )`,        
-    },
     paper: {
         position: 'fixed',
         width: '100%',
@@ -107,7 +105,10 @@ const styles = theme => ({
     },
     toolbar: {
         marginTop:"20px",
+        display:'flex',
+        justifyContent:"center"
     },
+
     textField: {
         width: "100%",
         marginTop:0,

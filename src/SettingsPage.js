@@ -49,9 +49,7 @@ const styles = theme => ({
         textAlign: 'justify'
     },
     
-    headerTitle:{
-        marginLeft: `calc( 100% - 80% )`,        
-    },
+
     menuItem: {
         display: 'flex',
         justifyContent: "space-between",
@@ -217,6 +215,7 @@ class SettingsPage extends React.Component{
                                 }}
                                 className={classes.selectAge}
                             >
+                                <MenuItem value={30000}>30 sec</MenuItem>
                                 <MenuItem value={60000}>1 min</MenuItem>
                                 <MenuItem value={600000}>10 min</MenuItem>
                                 <MenuItem value={1200000}>20 min</MenuItem>

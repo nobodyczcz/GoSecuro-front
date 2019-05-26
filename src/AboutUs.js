@@ -36,14 +36,15 @@ const styles = theme => ({
         left:0
     },
     content: {
-        justifyContent: 'center',
         marginTop:'100px',
+        height:'calc(100% - 100px)',
         paddingLeft: theme.spacing.unit * 3.5,
-        paddingRight: theme.spacing.unit * 3.5
+        paddingRight: theme.spacing.unit * 3.5,
+
     },
     contentText:{
         //color:'#FF7504',
-        textAlign: 'justify'
+        textAlign: 'justify',
     },
     emergencyText:{
         color:'Red',
@@ -53,7 +54,7 @@ const styles = theme => ({
     //     marginLeft: `calc( 100% - 80% )`,        
     // },
     paper: {
-        position: 'fixed',
+        position: 'absolute',
         width: '100%',
         height: '100%',
         top: '0',
@@ -73,7 +74,6 @@ class AboutUs extends React.Component{
             
             <Paper className={classes.paper}>
                 
-                <div>
                     <AppBar
                             position="fixed"
                             className={classes.appBar}
@@ -99,7 +99,6 @@ class AboutUs extends React.Component{
                     
                     </div>
                     
-                </div>
             </Paper>
             
         );

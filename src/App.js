@@ -665,7 +665,9 @@ class App extends Component {
             //if the one which is displaying clicked, cancel dispaly
             console.log("canceel display")
             this.clearFriendPath()
-
+            if (this.tempLinks[tempLink].emergency){
+                this.mapController.displayPerson(this.map,this.tempLinks[tempLink].emergency,tempLink)
+            }
             this.setState({
                 friendDisplay: null
             })
@@ -673,6 +675,10 @@ class App extends Component {
         else {
             //display the route of the one who are clicked
             this.clearFriendPath()
+
+            if(this.tempLinks[tempLink].emergency){
+                this.mapController.displayPerson(this.map,this.tempLinks[tempLink].emergency,tempLink)
+            }
 
             if (!this.tempLinks[tempLink].journey) {
                 setTimeout(function () { this.handleAvatar(e) }.bind(this), 1000);
@@ -767,7 +773,8 @@ class App extends Component {
     componentDidMount() { //start loading crime rate data when this page is rendered
         //var suburbs = ["CAULFIELD", "CAULFIELD EAST"];
         window.handleShowNoti = this.handleShowNoti.bind(this);
-        window.addErgentList = this.addErgentList.bind(this)
+        window.addErgentList = this.addErgentList.bind(this);
+        window.removeErgent = this.removeErgent.bind(this);
         if(window.cordova){
 
 
@@ -859,11 +866,11 @@ class App extends Component {
         }
     }
     exitAppPopup=()=>{
-        navigator.notification.confirm(
+        window.navigator.notification.confirm(
             "Do you really want to close this app?", 
             function(buttonIndex){
                 this.ConfirmExit(buttonIndex);
-            }, 
+            }.bind(this), 
             "Confirmation", 
             "Yes,No"
         ); 
@@ -873,7 +880,7 @@ class App extends Component {
     ConfirmExit = (stat)=>{
         alert("Inside ConfirmExit");
         if(stat == "1"){
-            navigator.app.exitApp();
+            window.navigator.app.exitApp();
         }else{
             return;
         };
@@ -1003,12 +1010,10 @@ class App extends Component {
                     this.mapController.displayAllCrime(this.map, newRateData);
                 }
 
-                if (this.crimeData.features.length > 415) {
                     localStorage.setItem("crimeTable", JSON.stringify(this.crimeTable));
                     if (window.cordova) {
                         this.saveCrimateRateJson();
                     }
-                }
 
                 
 
@@ -1020,11 +1025,12 @@ class App extends Component {
     }
 
     saveCrimateRateJson() {
+        console.log("Write to local file")
         window.requestFileSystem(window.LocalFileSystem.PERSISTENT, 0, function (fs) {
 
             console.log('file system open: ' + fs.name);
             fs.root.getFile("crimeRates.json", { create: true, exclusive: false }, function (fileEntry) {
-
+                console.log("Create file success")
                 this.writeFile(fileEntry, JSON.stringify(this.crimeData));
 
             }.bind(this), this.onErrorCreateFile);
@@ -1055,9 +1061,12 @@ class App extends Component {
     }
 
     onErrorCreateFile(error) {
+        console.log("create error")
         console.log(error.toString())
     }
     onErrorCreatePermission(error) {
+        console.log("create permission error")
+
         console.log(error.toString())
     }
 
@@ -1236,11 +1245,42 @@ class App extends Component {
      * 
      * 
      */
+    removeErgent(index){
+        var ergentListIndex = this.state.ergentList.indexOf(index)
+        if(this.mapController.personList[index]){
+            this.mapController.personList[index].setMap();
+            this.mapController.personList[index]=null;
+        }
+        if (ergentListIndex>0){
+            var list = this.state.ergentList
+            delete(list[ergentListIndex])
+            this.setState({ergentList:list})
+        }
+        else{
+            if(this.tempLinks[index]){
+                delete(this.tempLinks[index]['emergency'])
+                this.setState({tempLinks:this.state.tempLinks})
+            }
 
+        }
+    }
      addErgentList(data){
          var list =this.state.ergentList
-         list.push(data)
-         this.setState({ergentList: list})
+         var linkId = data.TempLinkId
+         var haveId = false;
+         for (var id of this.state.tempLinks){
+             if(linkId === id){
+                 this.tempLinks[linkId]["emergency"] = data 
+                 haveId=true;
+                 this.setState({tempLinks:this.state.tempLinks})
+             }
+             
+         }
+         if(!haveId){
+            list.push(data)
+            this.setState({ergentList: list})
+         }
+
      }
 
     
@@ -1791,7 +1831,7 @@ class App extends Component {
                                         color="secondary"
                                     />
                                 </MenuItem>
-                                <MenuItem className={classes.menuItem}>
+                                <MenuItem className={classes.menuItem} disabled={!this.state.crimeSwitch}>
                                     Full Heat Map
                                     <Radio
                                         checked={this.state.allCrime}
@@ -1800,7 +1840,7 @@ class App extends Component {
                                         color="secondary"
                                     />
                                 </MenuItem>
-                                <MenuItem className={classes.menuItem}>
+                                <MenuItem className={classes.menuItem} disabled={!this.state.crimeSwitch}>
                                     High only
                                     <Radio
                                         checked={this.state.highCrime}
@@ -1810,7 +1850,7 @@ class App extends Component {
                                     />
                                 </MenuItem>
 
-                                <MenuItem className={classes.menuItem}>
+                                <MenuItem className={classes.menuItem} disabled={!this.state.crimeSwitch}>
                                     Medium-High
                                     <Radio
                                         checked={this.state.midiumCrime}
@@ -1900,7 +1940,7 @@ class App extends Component {
                         }
 
                         return (
-                            <Fab className={classes.avatar} color={this.state.friendDisplay == item ? "secondary" : "primary"} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
+                            <Fab className={this.tempLinks[item]["emergency"]? classes.ergentAvatar: classes.avatar} color={(this.tempLinks[item]["emergency"])? null:(this.state.friendDisplay === item ? "secondary" : "primary")} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
                             } > { displayName }</Fab>
                             )
                         }.bind(this))
@@ -2148,6 +2188,7 @@ class App extends Component {
         var userName;
         if(localStorage.profile){
             var profile = JSON.parse(localStorage.profile)
+            if(profile)
             userName = profile.FirstName.slice(0,1).toUpperCase() + (profile.LastName?profile.LastName.slice(0,1).toUpperCase():'');
         }
         else{
@@ -2172,7 +2213,7 @@ class App extends Component {
                             to='/aboutUs'
                         >
                             <ListItem button key='Navigation' className={classes.listItem}>
-                            <InfoIcon></InfoIcon>
+                            {/* <InfoIcon></InfoIcon> */}
 
                             About Us
                             </ListItem>
@@ -2186,7 +2227,7 @@ class App extends Component {
                         >
 
                             <ListItem button key='Navigation1' className={classes.listItem}>
-                            <SettingsIcon></SettingsIcon>
+                            {/* <SettingsIcon></SettingsIcon> */}
 
                             Settings
                             </ListItem>
@@ -2199,7 +2240,7 @@ class App extends Component {
                                 to='/showPins'
                             >
                                 <ListItem button key='Navigation2' className={classes.listItem}>
-                                    <Pin></Pin>
+                                    {/* <Pin></Pin> */}
                                 My Pins
                                 </ListItem>
 
@@ -2216,7 +2257,7 @@ class App extends Component {
                                 to='/buddy'
                             >
                                 <ListItem button key='Navigation3' className={classes.listItem}>
-                                <PeopleIcon></PeopleIcon>
+                                {/* <PeopleIcon></PeopleIcon> */}
 
                                 Buddies
                                 </ListItem>
@@ -2233,7 +2274,7 @@ class App extends Component {
                                 to='/userProfile'
                             >
                                 <ListItem button key='Navigation4' className={classes.listItem}>
-                                <AccountBoxIcon></AccountBoxIcon>
+                                {/* <AccountBoxIcon></AccountBoxIcon> */}
 
                                 User Profile
                                 </ListItem>

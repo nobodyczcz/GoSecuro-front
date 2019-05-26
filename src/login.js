@@ -27,14 +27,14 @@ const styles = theme => ({
         marginTop: 0,
     },
     logoarea: {
-        width: '100%',
         display: 'flex',
-
+        height:"30%",
+        marginTop:'20%',
         justifyContent: 'center',
     },
     logo: {
-        marginTop:'20%',
-        maxHeight:'300px'
+        width:'auto',
+        height:'100%',
     },
     content: {
         padding: "5%",
@@ -89,8 +89,8 @@ class LoginPage extends React.Component {
     loginSuccess(data) {
         console.log("Success")
         //this.apis.setToken(data.access_token);
-        this.props.history.goBack();
         this.props.handleLogin();
+        this.props.history.goBack();
         
         //jump to next page
     }
@@ -129,7 +129,7 @@ class LoginPage extends React.Component {
             <Paper className={classes.paper}>
 
                 <div className={classes.logoarea}>
-                    <img className={classes.logo} src="img/SafeTrip-logo.png"/>
+                    <img className={classes.logo} src="img/icon.png"/>
                 </div>
                 <ValidatorForm
                     ref="theForm"

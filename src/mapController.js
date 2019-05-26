@@ -104,7 +104,7 @@ class MapController {
             <p>
                 Surviliance cameras: ${details.CCTV}
             </p>
-                Experience: ${details.ExperienceType}
+                ${details.ExperienceType==='Not Sure'?'':'Experience: '+details.ExperienceType}
             </div>
             `
             marker = new window.google.maps.Marker({
@@ -220,8 +220,15 @@ class MapController {
         else{
             var lat = parseFloat(item.lat)
             var lng = parseFloat(item.lng)
-            var content = `Name: ${item.Name}
-            Mobile: ${item.Phone}`
+            var content = 
+            `Emergency Location
+            <br>
+            Name: ${item.Name}
+            <br>
+            Mobile: ${item.Phone}
+            <br>
+            <button onclick='window.removeErgent("${index}")'> Clear </button>
+            `
             var newPo = new window.google.maps.LatLng(lat, lng)
             var marker
             marker = new window.google.maps.Marker({

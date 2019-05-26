@@ -15,26 +15,26 @@ const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 const styles = theme => ({
     root: {
-        position: 'fixed',
         left: 0,
         top:0,
         flexGrow: 1,
-        padding: '5%',
-        width:'90%',
+        width:'100%',
         zIndex: 100,
-        height:'100%',
+        height:'calc(100% - 68px)',
+
+
     },
     content: {
         backgroundImage: "url('img/background1.jpg')",
         backgroundSize: "cover",
-        marginTop: theme.spacing.unit * 10,
-        height: '73%',
         overflow:"hidden",
+        height:"100%",
         // overflowY: 'hidden',
     },
     body: {
-        height: '100%',
-        overflowY: 'hidden',
+        overflowX: 'hidden',
+        height:"100%",
+
     },
     header: {
         display: 'flex',
@@ -52,13 +52,22 @@ const styles = theme => ({
         justifyContent: 'center',
     },
     pages: {
-         overflow:'hidden',
+         overflowX:'hidden',
     },
     contentText:{
         //color:'#FF7504',
         textAlign: 'justify',
         margin:'10px',
     },
+    privacy:{
+        height:'100%'
+    },
+    pages4:{
+        overflowX:'hidden',
+        height:'100%'
+
+
+    }
 
 });
 
@@ -95,7 +104,7 @@ class HomePageStepper extends Component {
     render() {
         const { classes, theme } = this.props;
         const { activeStep } = this.state;
-        const maxSteps = 4;
+        const maxSteps = 5;
 
         return (
             <Paper className={classes.root}>
@@ -153,6 +162,10 @@ class HomePageStepper extends Component {
                         GoSecuro acts as an additional safety measure when you’re navigating Melbourne, crime and incidents.
                     </Typography>
                         </div>
+                        <div key='4' className={classes.pages4}>
+                        <iframe className={classes.privacy} src="https://docs.google.com/document/d/e/2PACX-1vRxZ0bspFXirBwHxI_1NWsAbS6u2xy8ss9FDM_qFLL_CNqIlgChGhWtHVXIaEg4Mz8g7Bhm1jnBkmJm/pub?embedded=false"></iframe>
+                        </div>
+
  
                     </AutoPlaySwipeableViews>
                     
