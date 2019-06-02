@@ -212,6 +212,11 @@ class ContactsPage extends React.Component {
         this.setState({ open: false });
     };
 
+    /**
+     * Function to open the edit contact dialog window
+     * 
+     * Start
+     */
     handleEditOpen = (index,item) => {
         console.log(item)
         this.setState({ isOpen: true,
@@ -222,7 +227,17 @@ class ContactsPage extends React.Component {
                         mobile:item.EmergencyContactPhone,
         });
     };
+    /**
+     * Function to open the edit contact dialog window
+     * 
+     * Finish
+     */
 
+    /**
+ * Function to close the edit contact dialog window
+ * 
+ * Start
+ */
     handleEditClose = () => {
         this.setState({ isOpen: false,
             activeItemName: '',
@@ -230,13 +245,23 @@ class ContactsPage extends React.Component {
             activeIndex:'',
             name:'',
             mobile: '',
-});
+        });
     };
+    /**
+    * Function to close the edit contact dialog window
+    * 
+    * Finish
+    */
 
     componentWillMount() {
         this.retrieveEmergencies(); 
     }
 
+    /**
+     * Function that handles change of contact name or mobile input field
+     * 
+     * Start
+     */
     handleChange = name => event => {
         if (name == "mobile" && event.target.value.length > 10) {
             console.log("Mobile number: Max limit 10 reached")
@@ -248,10 +273,18 @@ class ContactsPage extends React.Component {
             this.setState({ [name]: event.target.value });
 
         }
-
-
     };
+    /**
+     * Function that handles change of contact name or mobile input field
+     * 
+     * Finish
+     */
 
+    /**
+     * Function that adds new contact
+     * 
+     * Start
+     */
     handleAddNew = () => {
         this.setState({ loading: true });
         if (this.state.name.length === 0 || this.state.mobile.length === 0) {
@@ -291,7 +324,20 @@ class ContactsPage extends React.Component {
         //close the popup
         this.handleClose();
     };
+    /**
+     * Function that adds new contact
+     * 
+     * Finish
+     */
 
+    /**
+     * Function that handles when contact is successffully added to the server
+     * Retrieves emergencies again from server
+     * Turns off adding contact dialog
+     * Sets noContacts set to false
+     * 
+     * Start
+     */
     addSuccess(data) {
         console.log("Emergency Contact successfully added")
         this.retrieveEmergencies();
@@ -299,7 +345,17 @@ class ContactsPage extends React.Component {
         this.setState({ loading: false, addSuccessNotification: true, noContacts: false,name: '', mobile: '' });
         //jump to next page
     }
+    /**
+     * Function that handles when contact is successffully added to the server
+     * 
+     * Finish
+     */
 
+    /**
+     * Function that updates local contactlist
+     * 
+     * Start
+     */
     updateContactList() {
         this.setState({ loading: true });
 
@@ -312,9 +368,19 @@ class ContactsPage extends React.Component {
         }
         
         this.setState({ loading: false });
-        
     }
+    /**
+     * Function that updates local contactlist
+     * 
+     * Start
+     */
 
+    /**
+     * Function that handles edit contact action
+     * Sends data to server to update the contact
+     * 
+     * Start
+     */
     handleEdit(index) {
 
         if(this.props.isLogin){
@@ -344,10 +410,25 @@ class ContactsPage extends React.Component {
         //close the popup
         this.handleEditClose();
     }
+    /**
+     * Function that handles edit contact action
+     * 
+     * Finish
+     */
 
+    /**
+     * Opens the confirmation dialog box to delete contact
+     * 
+     * Start
+     */
     handleClickDelete(){
         this.setState({ showDialog: true})
     }
+    /**
+     * Opens the confirmation dialog box to delete contact
+     * 
+     * Finish
+     */
 
     /* Function that handles cancel of delete contact
     *
@@ -361,6 +442,16 @@ class ContactsPage extends React.Component {
     * Finish
     * */
 
+    /**
+     * Function that handles deleting of contact
+     * Sends request to server to delete contact
+     * 
+     * Input: index - index of the contacts in the local storage's contactlist
+     *        mobileNumber - mobile number of the contact to be deleted
+     * Return: call to success or error function 
+     * 
+     * Start
+     */
     handleDelete(index,mobileNumber) {
         this.setState({showDialog: false})
         console.log(window.serverUrl);
@@ -380,9 +471,19 @@ class ContactsPage extends React.Component {
             localStorage.contactList = JSON.stringify(list);
             this.updateContactList();
         }
-
     }
+    /**
+     * Function that handles deleting of contact
+     * 
+     * Finish
+    */
 
+    /**
+     * Function that handles after successfully deleting a contact
+     * Input: data - repsonse from the delete request to server
+     * 
+     * Start
+    */
     deleteSuccess(data) {
         console.log("Emergency Contact successfully deleted")
         this.retrieveEmergencies();
@@ -391,6 +492,11 @@ class ContactsPage extends React.Component {
         this.setState({ name: '', mobile: '' });
         //jump to next page
     }
+    /**
+     * Function that handles after successfully deleting a contact
+     * 
+     * Finish
+    */
 
     retrieveEmergencies() {
         this.setState({ loading: true });
