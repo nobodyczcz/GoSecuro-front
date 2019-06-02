@@ -1923,7 +1923,8 @@ class App extends Component {
                         this.state.tempLinks.map(function (item, index) {
 
                         var journey = this.tempLinks[item];
-                        var fullName = (journey.firstName ? journey.firstName : "") + (journey.lastName ? journey.lastName : "")
+                        if (journey){
+                            var fullName = (journey.firstName ? journey.firstName : "") + (journey.lastName ? journey.lastName : "")
                         var displayName = "";
                         if (fullName.length <= 5) {
                             displayName = fullName;
@@ -1943,7 +1944,9 @@ class App extends Component {
                             <Fab className={this.tempLinks[item]["emergency"]? classes.ergentAvatar: classes.avatar} color={(this.tempLinks[item]["emergency"])? null:(this.state.friendDisplay === item ? "secondary" : "primary")} key = { item } onClick = { function() { this.handleAvatar(item) }.bind(this)
                             } > { displayName }</Fab>
                             )
-                        }.bind(this))
+                        
+                        }
+                    }.bind(this))
                     }
                 </div>
 
