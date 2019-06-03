@@ -11,33 +11,30 @@ import Paper from '@material-ui/core/Paper';
 import { Grid } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 
-
-
-
-
 const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
 
 const styles = theme => ({
     root: {
-        position: 'fixed',
         left: 0,
         top:0,
         flexGrow: 1,
-        padding: '5%',
-        width:'90%',
+        width:'100%',
         zIndex: 100,
-        height:'100%',
+        height:'calc(100% - 68px)',
+
+
     },
     content: {
         backgroundImage: "url('img/background1.jpg')",
         backgroundSize: "cover",
-        marginTop: theme.spacing.unit * 15,
-        height: '73%',
-        overflow:"hidden"
+        overflow:"hidden",
+        height:"100%",
+        // overflowY: 'hidden',
     },
     body: {
-        height: '100%',
-        
+        overflowX: 'hidden',
+        height:"100%",
+
     },
     header: {
         display: 'flex',
@@ -48,14 +45,28 @@ const styles = theme => ({
     },
     mobileStepper: {
         alignItem: 'center',
-        backgroundColor: theme.palette.background.paper,
+        backgroundColor: theme.palette.secondary.main,
     },
     mainText:{
         color:'#FF7504',
         justifyContent: 'center',
     },
     pages: {
-        overflow:'hidden',
+         overflowX:'hidden',
+    },
+    contentText:{
+        //color:'#FF7504',
+        textAlign: 'justify',
+        margin:'10px',
+    },
+    privacy:{
+        height:'100%'
+    },
+    pages4:{
+        overflowX:'hidden',
+        height:'100%'
+
+
     }
 
 });
@@ -93,7 +104,7 @@ class HomePageStepper extends Component {
     render() {
         const { classes, theme } = this.props;
         const { activeStep } = this.state;
-        const maxSteps = 3;
+        const maxSteps = 5;
 
         return (
             <Paper className={classes.root}>
@@ -113,7 +124,7 @@ class HomePageStepper extends Component {
                     >
                         <div key='1' className={classes.pages}>
                             <div className='screenPicture'>
-                                <img src='img/screen3v3.png' alt='Background' className='screen3'/>  
+                                <img src='img/GoSecuro-home.png' alt='Background' className='screen3'/>  
                             </div>                            
                         </div>
 
@@ -121,8 +132,13 @@ class HomePageStepper extends Component {
                             <Typography id='headerText' className={classes.mainText} gutterBottom align='center' variant='h5'>
                                 Top 5 Suburbs with Highest Crime Rate
                             </Typography> 
-                            <img id='highCrimeRateChart' src='img/top5suburbsWithHighCrime.png' alt='Top 5 Suburbs with High Crime rate' width ='100%' height='70%' align='center'/>
-                                                       
+                            <img id='highCrimeRateChart' src='img/crimeStatistics-transparent.png' alt='Top 5 Suburbs with High Crime rate' width ='100%' height='70%' align='center'/>
+                            <Typography className={classes.mainText} variant='h6'>
+                                <br/>
+                                Your safe journey Home is important.
+                                <br/>
+                                Find your safe way home.
+                            </Typography>                           
                         </div>
 
                         <div key='3' className={classes.pages}>
@@ -135,24 +151,39 @@ class HomePageStepper extends Component {
                                 <img src='img/statisticsChart.png' alt='Statistics based on Survey with 400 Women' className='statisticsImage'/>
                             </div>
                         </div>
+                        <div key='3' className={classes.pages}>
+                        <Typography className={classes.contentText} variant='h6'>
+                        Crime and offences in public spaces have continued to threaten the safety of women, discouraging them to travel alone confidently.
+                        <br/><br/>
+                        This situation is particularly intimidating to female students who are new and unfamiliar to Melbourne. It is a social responsibility to ensure the safety of women and encourage them to travel confidently. 
+                        <br/><br/>
+                        GoSecuro is a safety app targeted towards new students in Melbourne. The application is developed with your safety in mind. 
+                        <br/><br/>
+                        GoSecuro acts as an additional safety measure when you’re navigating Melbourne, crime and incidents.
+                    </Typography>
+                        </div>
+                        <div key='4' className={classes.pages4}>
+                        <iframe className={classes.privacy} src="https://docs.google.com/document/d/e/2PACX-1vRxZ0bspFXirBwHxI_1NWsAbS6u2xy8ss9FDM_qFLL_CNqIlgChGhWtHVXIaEg4Mz8g7Bhm1jnBkmJm/pub?embedded=false"></iframe>
+                        </div>
+
  
                     </AutoPlaySwipeableViews>
                     
                 </Card>
                 <MobileStepper
                     steps={maxSteps}
-                    position="static"
+                    variant="dots"
+                    position="bottom"
                     activeStep={activeStep}
                     className={classes.mobileStepper}
-                    color='secondary'
                     nextButton={
-                        <Button size="small" onClick={this.handleNext} disabled={activeStep === maxSteps - 1}>
+                        <Button color="primary" size="small" onClick={this.handleNext} disabled={activeStep === maxSteps - 1}>
                             Next
                               {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
                         </Button>
                     }
                     backButton={
-                        <Button size="small" onClick={this.handleBack} disabled={activeStep === 0}>
+                        <Button color="primary" size="small" onClick={this.handleBack} disabled={activeStep === 0}>
                             {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
                             Back
                           </Button>
@@ -162,5 +193,6 @@ class HomePageStepper extends Component {
         );
     }
 }
+
 
 export default withStyles(styles, { withTheme: true })(HomePageStepper);

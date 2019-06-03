@@ -4,6 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
+.vs
 
 # testing
 /coverage
@@ -24,3 +25,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.vs/*
+
+.vs/gosafe-front/v15/.suo
+.vs/gosafe-front/v15/Browse.VC.db
+.vs/slnx.sqlite

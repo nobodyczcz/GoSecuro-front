@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.fitech.gosafefront" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>gosafe-front</name>
+    <name>GoSecuro</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
     </description>
@@ -18,13 +18,15 @@
     <allow-intent href="geo:*" />
     <platform name="android">
         <allow-intent href="market:*" />
-      <icon src="public/img/icon.png"/>
+        <resource-file src="google-services.json" target="app/google-services.json" />
+        <icon src="public/img/icon.png" />
+        <preference name="android-windowSoftInputMode" value="adjustResize" />
+        <preference name="fullscreen" value="false" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
     <preference name="StatusBarBackgroundColor" value="#b23c17" />
-  <preference name="KeyboardResizeMode" value="false" />
-  
+    <preference name="KeyboardResizeMode" value="false" />
 </widget>

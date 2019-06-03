@@ -4,8 +4,8 @@
     "\\public",
     "\\public\\img",
     "\\src",
-    "\\src\\img"
+    "\\src\\svg"
   ],
-  "SelectedNode": "\\public\\img\\legend.png",
+  "SelectedNode": "\\src\\App.js",
   "PreviewInSolutionExplorer": false
 }

@@ -21,17 +21,41 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import HomeIcon from '@material-ui/icons/Home';
 import MapIcon from '@material-ui/icons/Map';
+import ClearIcon from '@material-ui/icons/Clear';
+
 import ContactsIcon from '@material-ui/icons/Contacts';
 import BusIcon from '@material-ui/icons/DirectionsBus';
 import WalkIcon from '@material-ui/icons/DirectionsWalk';
 import DriveIcon from '@material-ui/icons/DriveEta';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
-
-
+import Paper from '@material-ui/core/Paper';
 
 
 const styles = theme => ({
+    mainBar:{
+        position:'fixed',
+        height: `calc(5% + 100px)`,
+        //height: '129px',
+        width:'100%',
+        left:0,
+        top:0,
+        zIndex:900,
+        //backgroundColor: '#616161'
+        backgroundColor: "#4f6c98"
+    },
+    mainBarMap: {
+        position:'fixed',
+        height:`calc(5% + 100px)`,
+        //height: '129px',
+        width:'100%',
+        left:0,
+        top:0,
+        zIndex:900,
+        //backgroundColor:"#424242",
+        backgroundColor:"#074A8F",
+        opacity:0.7,
+
+    },
     root: {
         position: 'fixed',
         left: '3%',
@@ -40,17 +64,18 @@ const styles = theme => ({
         width: '94%',
         height:theme.spacing.unit * 6,
     },
+    
     tabsRoot: {
         height: theme.spacing.unit * 1,
 
     },
     tabs: {
-        position: 'absolute',
+        position: 'fixed',
         left: '3%',
         top: '5%',
         zIndex: 1000,
         width: '94%',
-        backgroundColor: 'secdonary',
+        backgroundColor: 'secondary',
         marginTop: theme.spacing.unit * 6
     },
     toolbarRoot: {
@@ -66,7 +91,6 @@ const styles = theme => ({
     menuButton: {
         verticalAlign: 'middle',
     marginLeft: -12,
-    marginRight: 20,
   },
   title: {
     display: 'none',
@@ -90,14 +114,17 @@ const styles = theme => ({
     },
   },
   searchIcon: {
-    width: theme.spacing.unit * 5,
+    width: theme.spacing.unit * 4,
     height: '100%',
     display: 'flex',
     alignItems: 'center',
-    },
-    progress: {
-        position: 'fixed',
-    },
+    paddingRight:'0px',
+    paddingLeft:'0px'
+
+  },
+  progress: {
+      position: 'fixed',
+  },
   inputRoot: {
     color: 'secondary',
     width: '100%',
@@ -127,7 +154,7 @@ const styles = theme => ({
   },
 });
 
-class MainBar extends React.Component {
+class MainBar extends React.Component {  
     constructor(props) {
         super(props);
         if (window.cordova) {
@@ -144,39 +171,91 @@ class MainBar extends React.Component {
             navValue: this.props.navValue ? this.props.navValue : 0,
             searching: null,
             searchCoord: [0, 0],
-            searchPlaceHolder:"Search a location..."
+            searchPlaceHolder:"Search a destination...",
+            showClear:false
         };
   
     }
+    
     handleTabChange = (event, value) => {
+        console.log("tab value:" + value)
         this.setState({ tabValue:value });
+        
     };
     handleNavChange = (event, value) => {
         this.setState({ navValue: value });
     };
 
-    setupAutoComplete() {
+    setupAutoComplete(location=null) {
+      console.log('setUp auto complete')
         var input = document.getElementById('searchInput');
-        navigator.geolocation.getCurrentPosition(function (position) {
+        if(location){
+          var circle = new window.google.maps.Circle(
+              { center: location, radius: 1000 });
+          var options = {
+              bounds: circle.getBounds(),
+              types: ['establishment']
+          };
+          this.autocomplete = new window.google.maps.places.Autocomplete(input, options);
+          window.google.maps.event.addListener(this.autocomplete, 'place_changed', function() {
+            var input = document.getElementById('searchIcon');
+            input.click();
+        });
+        }
+        else{
+          navigator.geolocation.getCurrentPosition(function (position) {
             var geolocation = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
             var circle = new window.google.maps.Circle(
-                { center: geolocation, radius: '1000' });
+                { center: geolocation, radius: 1000 });
             var options = {
                 bounds: circle.getBounds(),
                 types: ['establishment']
             };
-            var autocomplete = new window.google.maps.places.Autocomplete(input, options);
-        });
+            this.autocomplete = new window.google.maps.places.Autocomplete(input, options);
+            window.google.maps.event.addListener(this.autocomplete, 'place_changed', function() {
+              var input = document.getElementById('searchIcon');
+              input.click();
+          });
+        }.bind(this));
+        }
+
     };
 
     componentDidMount() {
         if (window.google) {
-            this.setupAutoComplete();
+            this.setupAutoComplete(this.props.getLocation());
         }
 
+    }
+    componentWillMount(){
+      var currentRoute = this.props.history.location.pathname
+
+      if (currentRoute==='/'){
+        this.state.tabValue=0
+      }
+      // else if(currentRoute==='/map'){
+      //   this.state.tabValue=1
+      // }
+      else if(currentRoute==='/contactsPage'){
+        this.state.tabValue=1
+      }
+    }
+
+    checkTab(){
+      var currentRoute = this.props.history.location.pathname
+
+      if (currentRoute==='/'){
+        this.setState({tabValue:0});
+      }
+      // else if(currentRoute==='/map'){
+      //   this.state.tabValue=1
+      // }
+      else if(currentRoute==='/contactsPage'){
+        this.setState({tabValue:1});
+      }
     }
 
 
@@ -208,77 +287,52 @@ class MainBar extends React.Component {
             var searchIconPosition = event.currentTarget.getBoundingClientRect()
             this.props.handleInputSearch(text);
             this.setState({ searching: true, searchCoord: [searchIconPosition.left, searchIconPosition.top] });
-            if (this.state.tabValue != 1) {
+            if (this.state.tabValue != 0) {
                 document.getElementById('mapIcon').click();
-
+                this.props.history.go(window.homeIndex());
             }
         }
         else {
-            this.setState({searchPlaceHolder:"You must input something for search..."})
+            this.setState({searchPlaceHolder:"Search a destination.."})
         }
 
+    }
+    handleInputChange = event => {
+        if (event.key === 'Enter') {
+          var search = document.getElementById('searchIcon');
+            search.click();
+        }
+        
+    }
+    handleInputClear=event=>{
+      if(event.target.value && !this.state.showClear){
+        this.setState({showClear:true});
+      }
+      else if(!event.target.value){
+        this.setState({showClear:false});
+      }
     }
 
     handleClickAway = () => {
         document.getElementById('searchInput').blur();
     }
+    handleClear=()=>{
+      var input = document.getElementById('searchInput');
+      input.value='';
+      this.setState({showClear:false});
+
+    }
 
     render() {
-        this.state.navValue = this.props.navValue;
-    const { anchorEl, mobileMoreAnchorEl } = this.state;
-    const { classes } = this.props;
-    const isMenuOpen = Boolean(anchorEl);
-    const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
-    const renderMenu = (
-      <Menu
-        anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onClick={this.handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={this.handleMenuClose}>My account</MenuItem>
-      </Menu>
-    );
+      this.state.navValue = this.props.navValue;
+      const { classes } = this.props;
 
-    const renderMobileMenu = (
-      <Menu
-        anchorEl={mobileMoreAnchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        open={isMobileMenuOpen}
-        onClose={this.handleMenuClose}
-      >
-        <MenuItem onClick={this.handleMobileMenuClose}>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <p>Messages</p>
-        </MenuItem>
-        <MenuItem onClick={this.handleMobileMenuClose}>
-          <IconButton color="inherit">
-            <Badge badgeContent={11} color="secondary">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <p>Notifications</p>
-        </MenuItem>
-        <MenuItem onClick={this.handleProfileMenuOpen}>
-          <IconButton color="inherit">
-            <AccountCircle />
-          </IconButton>
-          <p>Profile</p>
-        </MenuItem>
-      </Menu>
-    );
 
         return (
-          
           <div>
+                    <div className={this.state.tabValue == 0? classes.mainBarMap :classes.mainBar}>
+                    </div>
               <AppBar position="static" className={classes.root}>
                   <Toolbar className={classes.toolbarRoot}>
                       {this.props.displayBack ? 
@@ -292,69 +346,48 @@ class MainBar extends React.Component {
                       }
                     
                     <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-                      GoSafe
+                      GoSecuro
                     </Typography>
-                      <div className={classes.search}>
-                              <InputBase
-                                placeholder={this.state.searchPlaceHolder}
-                                inputProps={{ maxlength: "10" }}
-                                id="searchInput"
-                                  classes={{
-                                      root: classes.inputRoot,
-                                      input: classes.inputInput,
-                                  }}
-                          />
-                         
-                      </div>
-                        {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
-                      <IconButton onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
-                          <SearchIcon />
-                    </IconButton>
+                    <div className={classes.search}>
+                          <InputBase
+                            placeholder={this.state.searchPlaceHolder}
+                              id="searchInput"
+                              onKeyPress={this.handleInputChange.bind(this)}
+                              onChange={this.handleInputClear.bind(this)}
+                              classes={{
+                                  root: classes.inputRoot,
+                                  input: classes.inputInput,
+                              }}
+                        />
+                        
+                    </div>
+                    {this.state.showClear?<IconButton id="clearIcon" onClick={this.handleClear.bind(this)} className={classes.searchIcon} color="inherit">
+                          <ClearIcon />
+                    </IconButton>:null}
                     
-                    <div className={classes.sectionDesktop}>
-                      <IconButton color="inherit">
-                        <Badge badgeContent={4} color="secondary">
-                          <MailIcon />
-                        </Badge>
-                      </IconButton>
-                      <IconButton color="inherit">
-                        <Badge badgeContent={17} color="secondary">
-                          <NotificationsIcon />
-                        </Badge>
-                      </IconButton>
-                      <IconButton
-                        aria-owns={isMenuOpen ? 'material-appbar' : undefined}
-                        aria-haspopup="true"
-                        onClick={this.handleProfileMenuOpen}
-                        color="inherit"
-                      >
-                        <AccountCircle />
-                      </IconButton>
-                    </div>
-                    <div className={classes.sectionMobile}>
-                      <IconButton aria-haspopup="true" onClick={this.handleMobileMenuOpen} color="inherit">
-                        <MoreIcon />
-                      </IconButton>
-                    </div>
+                        {this.state.searching ? <CircularProgress style={{ left: this.state.searchCoord[0], top:this.state.searchCoord[1]+3}} className={classes.progress} color="secondary" /> : null}
+                        <IconButton id="searchIcon" onClick={this.handleSearch.bind(this)} className={classes.searchIcon} color="inherit">
+                          <SearchIcon />
+                    </IconButton> 
                   </Toolbar>
               </AppBar>
               {this.props.displayNavRoutes ?
                   <Tabs
                       variant="fullWidth"
                       value={this.state.navValue}
-                      indicatorColor="secondary"
-                      textColor="inherit"
+                      indicatorColor="primary"
+                      textColor="primary"
                       onChange={this.handleNavChange}
                       className={classes.tabs}
                   >
 
-                      <Tab icon={<WalkIcon />} onClick={() => {
+                      <Tab icon={<WalkIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('walking')
                       }} />
-                      <Tab icon={<BusIcon />} onClick={() => {
+                        <Tab icon={<BusIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('transit')
                       }} />
-                      <Tab icon={<DriveIcon />} onClick={() => {
+                        <Tab icon={<DriveIcon color="primary" />} onClick={() => {
                           this.props.setNavMode('driving')
                       }}/>
                   </Tabs>
@@ -362,27 +395,26 @@ class MainBar extends React.Component {
                   <Tabs
                       variant="fullWidth"
                       value={this.state.tabValue}
-                      indicatorColor="secondary"
-                      textColor="inherit"
+                      indicatorColor="primary"
+                      textColor="primary"
                       onChange={this.handleTabChange}
                       className={classes.tabs}
 
                   >
-                      <Tab icon={<HomeIcon />} onClick={() => {
-                          this.props.history.push('/')
+                      <Tab icon={<HomeIcon color="primary"/>} id='mapIcon' onClick={() => {
+                        if(this.props.history.location.pathname!=='/')
+                          this.props.history.goBack();
                       }} />
-                      <Tab icon={<MapIcon />} id='mapIcon' onClick={() => {
+                      {/* <Tab icon={<MapIcon color="primary"/>} id='mapIcon' onClick={() => {
                           this.props.history.push('/map')
-                      }} />
-                      <Tab icon={<ContactsIcon />} onClick={() => {
-                          this.props.history.push('/contacts')
+                      }} /> */}
+                      <Tab icon={<ContactsIcon color="primary"/>} onClick={() => {
+                          this.props.history.push('/contactsPage')
                       }} />
                   </Tabs>
               }
 
               
-        {renderMenu}
-        {renderMobileMenu}
       </div>
     );
   }
@@ -391,5 +423,6 @@ class MainBar extends React.Component {
 MainBar.propTypes = {
   classes: PropTypes.object.isRequired,
 };
+
 
 export default withStyles(styles)(MainBar);
